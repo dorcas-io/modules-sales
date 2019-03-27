@@ -23,7 +23,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Dorcas\\ModulesSales\\ServiceProvider"
+                "Dorcas\\ModulesSales\\ModulesSalesServiceProvider"
             ]
         }
     }
