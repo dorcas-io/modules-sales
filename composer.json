@@ -19,5 +19,12 @@
         "psr-4": {
             "Dorcas\\ModulesSales\\": "src/"
         }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Dorcas\\ModulesSales\\ServiceProvider"
+            ]
+        }
     }
 }
