@@ -1,6 +1,6 @@
 <?php
 
-namespace MyVendor\Contactform\Http\Controllers;
+namespace Dorcas\ModulesSales\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Dorcas\Contactform\Models\ModulesSales;

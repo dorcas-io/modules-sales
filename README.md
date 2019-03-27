@@ -13,7 +13,7 @@ To get started, you can either [sign-up](https://dorcas.io/hub/) for the **cloud
 > Step 2: Click on the **Sales** menu
 
 ## getting help
-If you need help using the module, visit the [documentation](https://docs.dorcas.io:5001)
+If you need help using the module, visit the [documentation](https://docs.dorcas.io)
 
 ## whats new
 Version: 1.0.0
