@@ -19,7 +19,11 @@ class ModulesSalesServiceProvider extends ServiceProvider {
 
 	public function register()
 	{
-
+		//add menu config
+		$this->mergeConfigFrom(
+	        __DIR__.'/config/menu.php',
+	       'services.mailgun'
+	     );
 	}
 
 }

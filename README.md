@@ -26,4 +26,4 @@ Version: 1.0.0
 **Donate**: If you would like to make a donation, please [click here](#) or send an email to hello@dorcas.io
 
 ## license
-The Dorcas Platform is open-sourced software licensed under the [**GNU GPLv3**](https://opensource.org/licenses/GPL-3.0)
+The Dorcas Hub is open-sourced software licensed under the [**GNU GPLv3**](https://opensource.org/licenses/GPL-3.0)
