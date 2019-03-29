@@ -17,7 +17,7 @@ class ModulesSalesController extends Controller {
         parent::__construct();
         $this->data = [
             'page' => ['title' => 'Sales Module'],
-            'header' => ['title' => 'Sales Module Title'],
+            'header' => ['title' => 'Sales Module'],
             'selectedMenu' => 'sales'
         ];
     }
@@ -25,7 +25,7 @@ class ModulesSalesController extends Controller {
     public function index()
     {
     	$this->data['availableModules'] = HomeController::SETUP_UI_COMPONENTS;
-    	return view('modules-sales::index');
+    	return view('modules-sales::index', $this->data);
     }
 
 

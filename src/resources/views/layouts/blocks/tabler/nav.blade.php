@@ -8,14 +8,14 @@
                 <ul class="nav nav-tabs border-0 flex-column flex-lg-row">
                     <li class="nav-item">
                         <a href="{{ route('home') }}" class="nav-link" v-bind:class="{'active': selectedMenu === 'home'}">
-                            <i class="fe fe-home"></i> Dashboard
+                            <i class="fe fe-home"></i> Dashboard2
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('sales') }}" class="nav-link" v-bind:class="{'active': selectedMenu === 'sales'}"><i class="fe fe-unlock"></i> Sales</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('access-grants') }}" class="nav-link" v-bind:class="{'active': selectedMenu === 'access-grants'}"><i class="fe fe-unlock"></i> Access Grants</a>
+                        <a href="{{ route('access-grants') }}" class="nav-link" v-bind:class="{'active': selectedMenu === 'access-grants'}"><i class="fe fe-unlock"></i> Access Grants2</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a href="javascript:void(0)" class="nav-link" v-bind:class="{'active': selectedMenu === 'settings'}" data-toggle="dropdown">
