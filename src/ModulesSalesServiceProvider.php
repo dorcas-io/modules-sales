@@ -21,8 +21,7 @@ class ModulesSalesServiceProvider extends ServiceProvider {
 	{
 		//add menu config
 		$this->mergeConfigFrom(
-	        __DIR__.'/config/menu.php',
-	       'services.mailgun'
+	        __DIR__.'/config/navigation-menu.php', 'navigation-menu.sales'
 	     );
 	}
 

@@ -12,6 +12,9 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="{{ route('sales') }}" class="nav-link" v-bind:class="{'active': selectedMenu === 'sales'}"><i class="fe fe-unlock"></i> Sales</a>
+                    </li>
+                    <li class="nav-item">
                         <a href="{{ route('access-grants') }}" class="nav-link" v-bind:class="{'active': selectedMenu === 'access-grants'}"><i class="fe fe-unlock"></i> Access Grants</a>
                     </li>
                     <li class="nav-item dropdown">
