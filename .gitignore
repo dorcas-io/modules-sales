@@ -24,3 +24,5 @@ Homestead.json
 /src/Http/.DS_Store
 /src/database/.DS_Store
 /src/resources/.DS_Store
+
+/src/resources/views/.DS_Store

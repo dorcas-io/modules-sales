@@ -21,7 +21,7 @@ class ModulesSalesServiceProvider extends ServiceProvider {
 	{
 		//add menu config
 		$this->mergeConfigFrom(
-	        __DIR__.'/config/navigation-menu.php', 'navigation-menu.sales.menu'
+	        __DIR__.'/config/navigation-menu.php', 'navigation-menu.sales.sub-menu'
 	     );
 	}
 

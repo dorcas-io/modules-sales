@@ -1,6 +1,7 @@
 <?php
 return [
-    'Item 1' => [
-
+    'invoices' => [
+    	'title' => 'Invoices',
+    	'routes' => 'sales.invoices'
     ]
 ];
