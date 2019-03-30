@@ -2,6 +2,6 @@
 return [
     'invoices' => [
     	'title' => 'Invoices',
-    	'routes' => 'sales.invoices'
+    	'route' => 'sales.invoices'
     ]
 ];
