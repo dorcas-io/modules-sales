@@ -12,16 +12,16 @@ class ModulesSalesServiceProvider extends ServiceProvider {
 		$this->publishes([
 			__DIR__.'/config/modules-sales.php' => config_path('modules-sales.php'),
 		], 'config');
-		$this->publishes([
+		/*$this->publishes([
 			__DIR__.'/assets' => public_path('vendor/modules-sales')
-		], 'public');
+		], 'public');*/
 	}
 
 	public function register()
 	{
 		//add menu config
 		$this->mergeConfigFrom(
-	        __DIR__.'/config/navigation-menu.php', 'navigation-menu.sales.sub-menu'
+	        __DIR__.'/config/navigation-menu.php', 'navigation-menu.modules-sales.sub-menu'
 	     );
 	}
 
