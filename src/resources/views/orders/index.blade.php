@@ -5,7 +5,7 @@
 @section('body_content_main')
 @include('layouts.blocks.tabler.alert')
 
-Hey im products!
+Hey im orders!
     
 @endsection
 @section('body_js')
