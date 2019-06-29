@@ -1,23 +1,18 @@
 <?php
 return [
     'sales-categories' => [
-    	'title' => 'Manage Categories',
+    	'title' => 'Categories',
     	'route' => 'sales-categories',
-        'icon' => 'fe fe-user-plus',
+        'icon' => 'fe fe-bookmark',
     ],
     'sales-products' => [
-        'title' => 'Manage Products',
+        'title' => 'Products',
         'route' => 'sales-products',
-        'icon' => 'fe fe-users',
-    ],
-    'sales-invoices' => [
-    	'title' => 'Manage Invoices',
-    	'route' => 'sales-invoices',
-        'icon' => 'fe fe-check-square',
+        'icon' => 'fe fe-box',
     ],
     'sales-orders' => [
-    	'title' => 'Manage Orders',
+    	'title' => 'Orders &amp; Invoices',
     	'route' => 'sales-orders',
-        'icon' => 'fe fe-user-check',
+        'icon' => 'fe fe-shopping-bag',
     ]
 ];
