@@ -57,6 +57,11 @@ Route::group(['namespace' => 'Dorcas\ModulesSales\Http\Controllers', 'prefix' =>
     Route::get('/sales-orders-new', 'ModulesSalesController@order_new')->name('sales-orders-new');
     Route::post('/sales-orders-new', 'ModulesSalesController@order_create');
     Route::get('/sales-order/{id}', 'ModulesSalesController@order_index')->name('sales-orders-single');
+    Route::put('/sales-order/{id}', 'ModulesSalesController@order_update');
+    Route::delete('/sales-order/{id}', 'ModulesSalesController@order_delete');
+    Route::put('/sales-order/{id}/customers', 'ModulesSalesController@order_updateCustomerOrder');
+    Route::delete('/sales-order/{id}/customers', 'ModulesSalesController@order_deleteCustomer');
+
 
 });
 
@@ -92,10 +97,8 @@ Route::group(['namespace' => 'Dorcas\ModulesSales\Http\Controllers', 'prefix' =>
     Route::get('/inventory/products/{id}/stocks', 'Inventory\Products@stocks');
 
     
-    Route::delete('/inventory/orders/{id}', 'Inventory\Orders@delete');
-    Route::put('/inventory/orders/{id}', 'Inventory\Orders@update');
-    Route::delete('/inventory/orders/{id}/customers', 'Inventory\Orders@deleteCustomer');
-    Route::put('/inventory/orders/{id}/customers', 'Inventory\Orders@updateCustomerOrder');*/
+
+    */
 
 
 

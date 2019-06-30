@@ -82,14 +82,14 @@
 	    }).join(' ');
 	};
 
-        $(function() {
+        /*$(function() {
             $('input[type=checkbox].check-all').on('change', function () {
                 var className = $(this).parent('div').first().data('item-class') || '';
                 if (className.length > 0) {
                     $('input[type=checkbox].'+className).prop('checked', $(this).prop('checked'));
                 }
             });
-        });
+        });*/
         new Vue({
             el: '#orders-list',
             data: {
@@ -138,44 +138,48 @@
                         return false;
                     }
                     context = this;
-                    swal({
+                    Swal.fire({
                         title: "Are you sure?",
                         text: "You are about to delete product " + name + " from your inventory.",
                         type: "warning",
                         showCancelButton: true,
                         confirmButtonColor: "#DD6B55",
                         confirmButtonText: "Yes, delete it!",
-                        closeOnConfirm: false,
-                        showLoaderOnConfirm: true
-                    }, function() {
-                        axios.delete("/xhr/inventory/products/" + id)
-                            .then(function (response) {
-                                console.log(response);
-                                context.visible = false;
-                                context.contactsCount -= 1;
-                                $('#products-table').bootstrapTable('removeByUniqueId', response.data.id);
-                                return swal("Deleted!", "The product was successfully deleted.", "success");
-                            })
-                            .catch(function (error) {
-                                var message = '';
-                                console.log(error);
-                                if (error.response) {
-                                    // The request was made and the server responded with a status code
-                                    // that falls out of the range of 2xx
-                                    var e = error.response.data.errors[0];
-                                    message = e.title;
-                                } else if (error.request) {
-                                    // The request was made but no response was received
-                                    // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-                                    // http.ClientRequest in node.js
-                                    message = 'The request was made but no response was received';
-                                } else {
-                                    // Something happened in setting up the request that triggered an Error
-                                    message = error.message;
-                                }
-                                return swal("Delete Failed", message, "warning");
-                            });
-                    });
+		                showLoaderOnConfirm: true,
+		                preConfirm: (delete_order) => {
+	                        return axios.delete("/xhr/inventory/products/" + id)
+	                            .then(function (response) {
+	                                //console.log(response);
+	                                context.visible = false;
+	                                context.contactsCount -= 1;
+	                                $('#products-table').bootstrapTable('removeByUniqueId', response.data.id);
+	                                return swal("Deleted!", "The product was successfully deleted.", "success");
+	                            })
+	                            .catch(function (error) {
+	                                var message = '';
+	                                console.log(error);
+	                                if (error.response) {
+	                                    // The request was made and the server responded with a status code
+	                                    // that falls out of the range of 2xx
+	                                    //var e = error.response.data.errors[0];
+	                                    //message = e.title;
+				                            var e = error.response;
+				                            message = e.data.message;
+	                                } else if (error.request) {
+	                                    // The request was made but no response was received
+	                                    // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+	                                    // http.ClientRequest in node.js
+	                                    message = 'The request was made but no response was received';
+	                                } else {
+	                                    // Something happened in setting up the request that triggered an Error
+	                                    message = error.message;
+	                                }
+	                                return swal("Delete Failed", message, "warning");
+	                            });
+		                },
+		                allowOutsideClick: () => !Swal.isLoading()
+		            });
+
                 }
             }
         });
@@ -190,7 +194,7 @@
         row.reminder_on = '<div class="tag">' + (row.has_reminders ? 'Yes' : 'No') + '</div>';
         row.due_at = typeof row.due_at !== 'undefined' && row.due_at !== null ? moment(row.due_at).format('DD MMM, YYYY') : '';
         row.created_at = moment(row.created_at).format('DD MMM, YYYY');
-        row.buttons = '<a class="btn btn-success btn-sm" data-index="' + index + '" data-id="' + row.id + '" data-action="view" href="/apps/invoicing/orders/' + row.id + '">View</a>';
+        row.buttons = '<a class="btn btn-success btn-sm" data-index="' + index + '" data-id="' + row.id + '" data-action="view" href="/msl/sales-order/' + row.id + '">View</a>';
         return row;
     }
 </script>

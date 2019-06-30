@@ -660,7 +660,8 @@ class ModulesSalesController extends Controller {
         } catch (\Exception $e) {
             $response = (tabler_ui_html_response([$e->getMessage()]))->setType(UiResponse::TYPE_ERROR);
         }
-        return redirect(url()->current())->with('UiResponse', $response);
+        return redirect(route('sales-orders'))->with('UiResponse', $response);
+        //return redirect(url()->current())->with('UiResponse', $response);
     }
 
 
@@ -722,7 +723,7 @@ class ModulesSalesController extends Controller {
         $this->data['page']['title'] .= ' &rsaquo; Orders';
         $this->data['header']['title'] .= ' &rsaquo; Orders';
         $this->data['selectedSubMenu'] = 'sales-orders';
-        $this->data['submenuAction'] = '';
+
 
         $this->setViewUiResponse($request);
         $response = $sdk->createOrderResource($id)->addQueryArgument('include', 'customers:limit(10000|0)')
@@ -734,6 +735,15 @@ class ModulesSalesController extends Controller {
         $this->data['order'] = $order = $response->getData(true);
         $this->data['header']['title'] .= ' - Invoice #' . $order->invoice_number;
         $this->data['page']['title'] .= ' - Invoice #' . $order->invoice_number;
+
+        $this->data['submenuAction'] .= '
+            <div class="dropdown"><button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Actions</button>
+                <div class="dropdown-menu">
+                    <a href="'.route('sales-orders-new').'" class="dropdown-item">New Order</a>
+                    <a href="#!" v-on:click.prevent="deleteOrder(\''.$order->id.'\')" class="dropdown-item">Delete Order</a>
+                </div>
+            </div>
+        ';
         return view('modules-sales::order', $this->data);
     }
 
