@@ -368,6 +368,7 @@
                 if (typeof this.order.due_at !== 'undefined' && this.order.due_at !== null) {
                     this.order.due_at = moment(this.order.due_at).format('DD MMMM, YYYY');
                 }
+                //console.log(this.order)
             },
             computed: {
                 reminderIsOn: function () {
@@ -408,7 +409,7 @@
                     return moment(dateString).format(format);
                 },
                 showProduct: function (id) {
-                    window.location = '/sales-product/'+id;
+                    window.location = '/msl/sales-product/'+id;
                 },
                 updateDetails: function () {
                     var context = this;
