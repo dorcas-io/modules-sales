@@ -137,8 +137,7 @@
                                                 Reserve your Domain
                                             </a>
                                         @else
-                                            <a class="btn btn-primary btn-sm"
-                                               href="#add-product-image">
+                                            <a class="btn btn-primary btn-sm" href="#" data-toggle="modal" data-target="#product-image-modal">
                                                 Add an Image
                                             </a>
                                         @endif
