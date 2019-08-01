@@ -38,7 +38,7 @@
                     </div>
                     <div class="row">
                         <div class="form-group" v-bind:class="{'col-md-6': due_date !== null && due_date.length > 0}">
-                            <input type="text" class="custom-datepicker" width="276" name="due_at" id="due_at" v-model="due_date">
+                            <input type="text" class="custom-datepicker" name="due_at" id="due_at" v-model="due_date">
                             <label for="due_at">Due Date</label>
                         </div>
                         <div class="col-md-6 form-group" v-if="due_date !== null && due_date.length > 0">
@@ -177,26 +177,30 @@
 <script src="https://unpkg.com/gijgo@1.9.13/js/gijgo.min.js" type="text/javascript"></script>
 <script type="text/javascript">
     $(function() {
-        /*$('.custom-datepicker').pickadate({
-            today: 'Today',
-            clear: 'Clear',
-            close: 'Ok',
-            closeOnSelect: false,
-            onClose: function() {
-                console.log('onClose');
-                vm.due_date = this.get();
-            }
-        });*/
         $('.custom-datepicker').datepicker({
             uiLibrary: 'bootstrap4',
-            format: 'dd mmmm, yyyy'
+            format: 'dd mmmm, yyyy',
+            close: function (e) {
+                /*let target = e.target;
+                if (!target.hasAttribute('data-action')) {
+                    target = target.parentNode.hasAttribute('data-action') ? target.parentNode : target;
+                }
+                //console.log(target, target.getAttribute('data-action'));
+                let action = target.getAttribute('data-action').toLowerCase();
+                let name = target.getAttribute('data-name');
+                let id = target.getAttribute('data-id');
+                let index = parseInt(target.getAttribute('data-index'), 10);
+                console.log(target);
+                console.log($(target).val())*/
+                vm.due_date = e.target.value;
+            }
         });
     });
 
     var vm = new Vue({
         el: '#sales-order',
         data: {
-            products: {!! json_encode($products) !!},
+            products: {!! !empty($products) ? json_encode($products) : '[]' !!},
             currency: '{{ old('currency', '') }}',
             total_amount: {{ old('amount', 0) }},
             due_date: '{{ old('due_at', '') }}',
@@ -208,6 +212,9 @@
         },
         computed: {
 
+        },
+        mounted: function()  {
+            console.log(this.products)
         },
         methods: {
             checkCurrency: function () {
