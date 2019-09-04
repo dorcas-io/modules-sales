@@ -547,7 +547,7 @@ class ModulesSalesController extends Controller {
     public function order_new(Request $request, Sdk $sdk)
     {
         $this->data['page']['title'] .= ' &rsaquo; Add Order';
-        $this->data['header']['title'] = 'Add Order';
+        $this->data['header']['title'] .= ' &rsaquo; Add Order';
         $this->data['selectedSubMenu'] = 'sales-orders';
         $this->data['submenuAction'] = '';
 
