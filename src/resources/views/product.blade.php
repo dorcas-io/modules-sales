@@ -22,7 +22,7 @@
                             @{{ product.description }}
                         </p>
                         <div class="alert alert-primary" role="alert" v-if="isVariant">
-                            Variant of <strong>@{{ variantParent.name }}</strong>
+                            Variant of <a href="{{ route('sales-products-single', [$product->product_parent]) }}"><strong>@{{ variantParent.name }}</strong></a>
                         </div>
                         <div v-if="product.categories.data.length > 0">
                             <strong>Categories</strong>
