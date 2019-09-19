@@ -6,7 +6,6 @@
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
-
                 <form method="post" id="form-product-edit" action="">
                     {{ csrf_field() }}
                     <div class="row">
@@ -16,7 +15,7 @@
                         </div>
                         <div class="form-group col-md-12">
                             <textarea class="form-control" id="description" name="description" v-model="product.description">@{{ product.description }}</textarea>
-                            <label class="form-label" for="description">Description</label>
+                            <label class="form-label" for="description">Product Description</label>
                         </div>
                         <div class="form-group col-md-12" v-if="typeof product.prices.data !== 'undefined'">
                             <product-price-control v-for="(price, index) in product.prices.data" :key="price.id"

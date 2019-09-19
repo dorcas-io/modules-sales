@@ -14,5 +14,10 @@ return [
     	'title' => 'Orders &amp; Invoices',
     	'route' => 'sales-orders',
         'icon' => 'fe fe-shopping-bag',
+    ],
+    'sales-shipping-routes' => [
+        'title' => 'Shipping &amp; Routes',
+        'route' => 'sales-shipping-routes',
+        'icon' => 'fe fe-truck',
     ]
 ];

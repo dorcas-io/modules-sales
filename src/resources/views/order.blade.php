@@ -149,7 +149,7 @@
 		                </ul>
 
 		                <div class="tab-content">
-		                    <div class="tab-pane container active" id="order_customers">
+		                    <div class="tab-pane container active o-auto" id="order_customers">
 		                        <br/>
 
 		                        <div class="row section" id="images-list">
@@ -211,7 +211,7 @@
 
 
 		                    </div>
-		                    <div class="tab-pane container" id="order_transactions">
+		                    <div class="tab-pane container o-auto" id="order_transactions">
 		                        <br/>
 
 

@@ -43,6 +43,14 @@ Route::group(['namespace' => 'Dorcas\ModulesSales\Http\Controllers', 'prefix' =>
     Route::get('/sales-product/{id}/categories', 'ModulesSalesController@product_redirect');
     Route::delete('/sales-product/{id}/categories', 'ModulesSalesController@product_deleteCategory');
 
+    Route::post('/sales-variant-post', 'ModulesSalesController@variant_post')->name('sales-variant-post');
+    Route::get('/sales-variant-type', 'ModulesSalesController@variant_type_get')->name('sales-variant-type-get');
+    Route::post('/sales-variant-type', 'ModulesSalesController@variant_type_set')->name('sales-variant-type-set');
+    Route::post('/sales-variant-type-remove', 'ModulesSalesController@variant_type_remove')->name('sales-variant-type-remove');
+
+    Route::get('/sales-shipping-routes', 'ModulesSalesController@shipping_routes')->name('sales-shipping-routes');
+    Route::post('/sales-shipping-routes', 'ModulesSalesController@shipping_routes_post')->name('sales-shipping-routes-post');
+
 
 
 

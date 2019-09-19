@@ -128,6 +128,24 @@ class ModulesSalesController extends Controller {
         $this->data['submenuAction'] = '';
 
         $this->setViewUiResponse($request);
+
+        //create product variant types if not set
+        $company = $request->user()->company(true, true);
+        # get the company information
+        $configuration = !empty($company->extra_data) ? $company->extra_data : [];
+        $salesConfig = !empty($configuration['salesConfig']) ? $configuration['salesConfig'] : [];
+        if (count($salesConfig) <  1) {
+            // lets create sales config
+            $configuration['salesConfig'] = [];
+            $configuration['salesConfig']['variant_types'] = "Colour|Size";
+            $saveQuery = $sdk->createCompanyService()->addBodyParam('extra_data', $configuration)
+                                                ->send('post');
+            # send the request
+            if (!$saveQuery->isSuccessful()) {
+                throw new \RuntimeException('Failed while setting Sales Product Variant Types. Please try again.');
+            }
+        }
+
         $subdomain = get_dorcas_subdomain();
         if (!empty($subdomain)) {
             $this->data['header']['title'] .= ' (Store: '.$subdomain.'/store)';
@@ -173,12 +191,21 @@ class ModulesSalesController extends Controller {
         $order = $request->query('order', 'asc');
         $offset = (int) $request->query('offset', 0);
         $limit = (int) $request->query('limit', 10);
+        $type = $request->query('type', '');
+        $parent = $request->query('parent', '');
+
         # get the request parameters
         $query = $sdk->createProductResource();
         $query = $query->addQueryArgument('limit', $limit)
                         ->addQueryArgument('page', get_page_number($offset, $limit));
         if (!empty($search)) {
             $query = $query->addQueryArgument('search', $search);
+        }
+        if (!empty($type)) {
+            $query = $query->addQueryArgument('product_type', $type);
+        }
+        if (!empty($parent)) {
+            $query = $query->addQueryArgument('product_parent', $parent);
         }
         $response = $query->send('get');
         # make the request
@@ -192,7 +219,6 @@ class ModulesSalesController extends Controller {
         # set the data
         return response()->json($this->data);
     }
-
 
 
     public function product_create(Request $request, Sdk $sdk)
@@ -245,19 +271,69 @@ class ModulesSalesController extends Controller {
         $this->setViewUiResponse($request);
         $response = $sdk->createProductResource($id)->addQueryArgument('include', 'stocks:limit(1|0),orders:limit(1|0)')
                                                     ->send('get');
+        if (!$response->isSuccessful()) {
+            abort(404, 'Could not find the product at this URL.');
+        }
+
+        $product = $response->getData(true);
+
         $subdomain = get_dorcas_subdomain();
         if (!empty($subdomain)) {
             $this->data['header']['title'] .= ' (Store: '.$subdomain.'/store)';
         }
         $this->data['subdomains'] = $subdomains = $this->getSubDomains($sdk);
         # get the subdomains issued to this customer
-        if (!$response->isSuccessful()) {
-            abort(404, 'Could not find the product at this URL.');
+
+        $this->data['variantTypes'] = $this->variant_type_get($request,$sdk);
+
+        //check requests params
+        $search = $request->query('search', '');
+        $sort = $request->query('sort', '');
+        $order = $request->query('order', 'asc');
+        $offset = (int) $request->query('offset', 0);
+        $limit = (int) $request->query('limit', 10);
+        $type = $request->query('type', 'variant');
+        $parent = $request->query('parent', $id);
+
+        $isParent = $product->product_type=="default" ? true : false;
+        $isVariant = $product->product_type=="variant" ? true : false;
+
+        if ($isParent) {
+
+            $req = $sdk->createProductResource();
+            $req = $req->addQueryArgument('limit', $limit)
+                            ->addQueryArgument('page', get_page_number($offset, $limit));
+            if (!empty($type)) {
+                $req = $req->addQueryArgument('product_type', $type);
+            }
+            if (!empty($parent)) {
+                $req = $req->addQueryArgument('product_parent', $parent);
+            }
+            $variants = $req->send('get');
+            # make the request
+            if (!$variants->isSuccessful()) {
+                # it failed
+                $ms = $variants->errors[0]['title'] ?? '';
+                throw new \RuntimeException('Failed while adding the product. '.$ms);
+            }
+            $this->data['variantProducts'] = $variants->getData(true);
+
+        }  elseif ($isVariant) {
+            //get variant parent
+            $qparent = $sdk->createProductResource($product->product_parent)->addQueryArgument('include', 'stocks:limit(1|0),orders:limit(1|0)')
+                                                        ->send('get');
+            if (!$qparent->isSuccessful()) {
+                abort(404, 'Could not find the product at this URL.');
+            }
+            $this->data['variantParent'] = $qparent->getData(true);
         }
+
+
         $this->data['categories'] = $this->getProductCategories($sdk);
-        $this->data['product'] = $product = $response->getData(true);
-        $this->data['page']['title'] .= ' &rsaquo; ' . $product->name;
-        $this->data['header']['title'] .= ' &rsaquo; ' . $product->name;
+        $this->data['product'] = $product;
+        $v = ($product->product_type=="variant") ? '[V]' : '';
+        $this->data['page']['title'] .= ' &rsaquo; ' . $product->name . $v;
+        $this->data['header']['title'] .= ' &rsaquo; ' . $product->name . $v;
 
         $this->data['submenuAction'] .= '
             <div class="dropdown"><button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Actions</button>
@@ -265,7 +341,6 @@ class ModulesSalesController extends Controller {
         ';
         if ($subdomains->count() > 0) {
             $this->data['submenuAction'] .= '
-                <a href="#" data-toggle="modal" data-target="#product-image-modal" class="dropdown-item">Add Image</a>
                 <a href="'.$subdomain . '/store" target="_blank" class="dropdown-item">View Store Online</a>
                 <!--<a href="'.$subdomain . '/store" target="_blank" class="dropdown-item">View Product Online</a>-->
             ';
@@ -275,7 +350,16 @@ class ModulesSalesController extends Controller {
             ';
         }
         $this->data['submenuAction'] .= '
+                <a href="#" data-toggle="modal" data-target="#product-image-modal" class="dropdown-item">Add Image</a>
                 <a href="#" data-toggle="modal" data-target="#product-inventory-modal" class="dropdown-item">Manage Stock</a>
+        ';
+        if ($isParent) {
+            $this->data['submenuAction'] .= '
+                    <a href="#" data-toggle="modal" data-target="#product-variant-modal" class="dropdown-item">Add Variant</a>
+                    <a href="#" v-on:click.prevent="newVariantType" class="dropdown-item">Add Variant Type</a>
+            ';
+        }
+        $this->data['submenuAction'] .= '
                 </div>
             </div>
         ';
@@ -829,6 +913,174 @@ class ModulesSalesController extends Controller {
         }
         $this->data = $response->getData();
         return response()->json($this->data);
+    }
+
+
+    public function variant_type_get(Request $request, Sdk $sdk)
+    {
+
+        $company = $request->user()->company(true, true);
+        # get the company information
+        $salesConfig = !empty($company->extra_data['salesConfig']) ? $company->extra_data['salesConfig'] : [];
+        $variantTypes = !empty($salesConfig) ? $salesConfig['variant_types'] : [];
+        return $variantTypes;
+        //return response()->json($variantTypes);
+    }
+
+    public function variant_type_set(Request $request, Sdk $sdk)
+    {
+
+        $company = $request->user()->company(true, true);
+        # get the company information
+        $configuration = !empty($company->extra_data) ? $company->extra_data : [];
+        $salesConfig = !empty($configuration['salesConfig']) ? $configuration['salesConfig'] : [];
+
+        // lets update sales config
+        $variantTypes = !empty($salesConfig['variant_types']) ? $salesConfig['variant_types'] : [];
+        array_push($variantTypes, $request->input('variant_type'));
+        $configuration['salesConfig']['variant_types'] = $variantTypes;
+        $saveQuery = $sdk->createCompanyService()->addBodyParam('extra_data', $configuration)
+                                            ->send('post');
+        # send the request
+        if (!$saveQuery->isSuccessful()) {
+            throw new \RuntimeException('Failed while updating Sales Product Variant Types. Please try again.');
+        }
+
+        //$newTypes = $saveQuery->getData();
+        return response()->json($variantTypes);
+    }
+
+    public function variant_type_remove(Request $request, Sdk $sdk)
+    {
+        $company = $request->user()->company(true, true);
+        # get the company information
+        $configuration = !empty($company->extra_data) ? $company->extra_data : [];
+        $salesConfig = !empty($configuration['salesConfig']) ? $configuration['salesConfig'] : [];
+
+        // lets update sales config
+        $variantTypes = !empty($salesConfig['variant_types']) ? $salesConfig['variant_types'] : [];
+
+        if (false !== $key = array_search($request->input('variant_name'), $variantTypes)) {
+          unset($variantTypes[$key]);
+        }
+
+        $configuration['salesConfig']['variant_types'] = $variantTypes;
+        $saveQuery = $sdk->createCompanyService()->addBodyParam('extra_data', $configuration)
+                                            ->send('post');
+        # send the request
+        if (!$saveQuery->isSuccessful()) {
+            throw new \RuntimeException('Failed while updating Sales Product Variant Types. Please try again.');
+        }
+
+        //$newTypes = $saveQuery->getData();
+        return response()->json($variantTypes);
+    }
+
+    public function variant_post(Request $request, Sdk $sdk)
+    {
+        $this->validate($request, [
+            'name' => 'required|string|max:80',
+            'product_variant' => 'required|string|max:15',
+            'product_variant_type' => 'required|string',
+            'product_parent' => 'required|string',
+            'product_type' => 'required|string',
+            'currency' => 'required|string|size:3',
+            'price' => 'required|numeric',
+            'description' => 'nullable'
+        ]);
+        # validate the request
+        try {
+            $price = ['currency' => $request->currency, 'price' => $request->price];
+            # create the price payload
+            $resource = $sdk->createProductResource();
+            $resource = $resource->addBodyParam('name', $request->name)
+                                    ->addBodyParam('description', $request->description)
+                                    ->addBodyParam('prices', [$price])
+                                    ->addBodyParam('product_parent', $request->product_parent)
+                                    ->addBodyParam('product_type', $request->product_type)
+                                    ->addBodyParam('product_variant', $request->product_variant)
+                                    ->addBodyParam('product_variant_type', $request->product_variant_type);
+            # the resource
+            $response = $resource->send('post');
+            # send the request
+            if (!$response->isSuccessful()) {
+                # it failed
+                $message = $response->errors[0]['title'] ?? '';
+                throw new \RuntimeException('Failed while adding the product variant. '.$message);
+            }
+            $response = (tabler_ui_html_response(['Successfully added Product Variant: '. $request->name .' ('. $request->product_variant .')']))->setType(UiResponse::TYPE_SUCCESS);
+        } catch (\Exception $e) {
+            $response = (tabler_ui_html_response([$e->getMessage()]))->setType(UiResponse::TYPE_ERROR);
+        }
+        return redirect(route('sales-products-single',[$request->product_parent]))->with('UiResponse', $response);
+
+    }
+
+    public function shipping_routes(Request $request, Sdk $sdk)
+    {
+        $this->data['page']['title'] .= ' &rsaquo; Shipping Routes';
+        $this->data['header']['title'] .= ' &rsaquo; Shipping Routes';
+        $this->data['selectedSubMenu'] = 'sales-shipping-routes';
+        $this->data['submenuAction'] = '';
+
+        $this->setViewUiResponse($request);
+        $productCount = 0;
+        $query = $sdk->createProductResource()->addQueryArgument('limit', 1)->addQueryArgument('product_type', 'shipping')->send('get');
+        if ($query->isSuccessful()) {
+            $productCount = $query->meta['pagination']['total'] ?? 0;
+        }
+        $this->data['productsCount'] = $productCount;
+
+        $this->data['shippingRoutes'] = $query->getData();
+
+        $this->data['submenuAction'] .= '
+            <div class="dropdown"><button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Actions</button>
+                <div class="dropdown-menu">
+                <a href="#" v-on:click.prevent="newRoute" class="dropdown-item">Add Route</a>
+        ';
+        $this->data['submenuAction'] .= '
+                </div>
+            </div>
+        ';
+        return view('modules-sales::shipping-routes', $this->data);
+    }
+
+    public function shipping_routes_post(Request $request, Sdk $sdk)
+    {
+        $this->validate($request, [
+            'name' => 'required|string|max:80',
+            'product_type' => 'required|string',
+            'currency' => 'required|string|size:3',
+            'price' => 'required|numeric',
+            'description' => 'nullable'
+        ]);
+        # validate the request
+        try {
+            $price = ['currency' => $request->currency, 'price' => $request->price];
+            # create the price payload
+            $productID = $request->product_id;
+            $resource = empty($productID) ? $sdk->createProductResource() : $sdk->createProductResource($productID);
+            $resource = $resource->addBodyParam('name', $request->name)
+                                    ->addBodyParam('description', $request->description)
+                                    ->addBodyParam('prices', [$price])
+                                    ->addBodyParam('product_type', $request->product_type);
+            # the resource
+            $response = $resource->send('post');
+
+            $action = empty($productID) ? 'add' : 'updat';
+
+            # send the request
+            if (!$response->isSuccessful()) {
+                # it failed
+                $message = $response->errors[0]['title'] ?? '';
+                throw new \RuntimeException('Failed while '.$action.'ing the shipping route.'.$message);
+            }
+            $response = (tabler_ui_html_response(['Successfully '.$action.'ed the Shipping Route: '. $request->name]))->setType(UiResponse::TYPE_SUCCESS);
+        } catch (\Exception $e) {
+            $response = (tabler_ui_html_response([$e->getMessage()]))->setType(UiResponse::TYPE_ERROR);
+        }
+        return redirect(route('sales-shipping-routes'))->with('UiResponse', $response);
+
     }
 
 
