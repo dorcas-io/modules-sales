@@ -77,7 +77,7 @@
                         <div class="tag" v-for="variantType in variantTypes" :key="variantType">
                             @{{ variantType }}
                             <a href="#" v-on:click.prevent="deleteVariantType(variantType)" class="tag-addon tag-danger">
-                                <i class="fe fe-trash-2" data-ignore-click="true"></i>\
+                                <i class="fe fe-trash-2" data-ignore-click="true"></i>
                             </a>
                         </div>
                     </div>

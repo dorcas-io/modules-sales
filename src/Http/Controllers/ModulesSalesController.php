@@ -314,7 +314,7 @@ class ModulesSalesController extends Controller {
             if (!$variants->isSuccessful()) {
                 # it failed
                 $ms = $variants->errors[0]['title'] ?? '';
-                throw new \RuntimeException('Failed while adding the product. '.$ms);
+                throw new \RuntimeException('Failed while locating the parent product. '.$ms);
             }
             $this->data['variantProducts'] = $variants->getData(true);
 
