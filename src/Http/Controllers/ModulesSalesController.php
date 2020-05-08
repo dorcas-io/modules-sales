@@ -137,7 +137,7 @@ class ModulesSalesController extends Controller {
         if (count($salesConfig) <  1) {
             // lets create sales config
             $configuration['salesConfig'] = [];
-            $configuration['salesConfig']['variant_types'] = "Colour|Size";
+            $configuration['salesConfig']['variant_types'] = ["Colour", "Size"];
             $saveQuery = $sdk->createCompanyService()->addBodyParam('extra_data', $configuration)
                                                 ->send('post');
             # send the request

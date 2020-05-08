@@ -141,8 +141,8 @@
                                     // that falls out of the range of 2xx
                                     //var e = error.response.data.errors[0];
                                     //message = e.title;
-                                var e = error.response;
-                                message = e.data.message;
+                                    var e = error.response;
+                                    message = e.data.message;
                                 } else if (error.request) {
                                     // The request was made but no response was received
                                     // `error.request` is an instance of XMLHttpRequest in the browser and an instance of

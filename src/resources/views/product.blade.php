@@ -655,7 +655,6 @@
                 });
             }
 
-
         },
         mounted: function () {
             var context = this;
