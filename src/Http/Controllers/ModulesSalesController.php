@@ -38,7 +38,7 @@ class ModulesSalesController extends Controller {
 
     public function categories_index(Request $request, Sdk $sdk)
     {
-        $this->data['page']['title'] .= ' &rsaquo; Product Categories';
+        $this->data['page']['title'] .= " &rsaquo; Product Categories";
         $this->data['header']['title'] .= ' &rsaquo; Product Categories';
         $this->data['selectedSubMenu'] = 'sales-categories';
         $this->data['submenuAction'] = '<a href="#" v-on:click.prevent="newField" class="btn btn-primary btn-block">Add Product Category</a>';
@@ -122,8 +122,8 @@ class ModulesSalesController extends Controller {
 
     public function products_index(Request $request, Sdk $sdk)
     {
-        $this->data['page']['title'] .= ' &rsaquo; Products';
-        $this->data['header']['title'] .= ' &rsaquo; Products';
+        $this->data['page']['title'] .= " &rsaquo; Products";
+        $this->data['header']['title'] .= " &rsaquo; Products";
         $this->data['selectedSubMenu'] = 'sales-products';
         $this->data['submenuAction'] = '';
 
@@ -147,8 +147,12 @@ class ModulesSalesController extends Controller {
         }
 
         $subdomain = get_dorcas_subdomain();
+
+        $storeURL = "https://store.".$subdomain;
+
         if (!empty($subdomain)) {
-            $this->data['header']['title'] .= ' (Store: '.$subdomain.'/store)';
+            //$this->data['header']['title'] .= " (<a target='_blank' href='".$subdomain."/store'>Open Store URL</a>)";
+            $this->data['header']['title'] .= " (<a target='_blank' href='$storeURL'>Open Online Store</a>)";
         }
         $productCount = 0;
         $query = $sdk->createProductResource()->addQueryArgument('limit', 1)->send('get');
@@ -167,7 +171,7 @@ class ModulesSalesController extends Controller {
         ';
         if (!empty($subdomain)) {
             $this->data['submenuAction'] .= '
-                <a href="'.$subdomain . '/store" target="_blank" class="dropdown-item">Online Store</a>
+                <a href="'.$storeURL.'" target="_blank" class="dropdown-item">Open Online Store</a>
             ';
         }
         $this->data['submenuAction'] .= '
