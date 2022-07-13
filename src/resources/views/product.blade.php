@@ -9,6 +9,10 @@
     @include('layouts.blocks.tabler.sub-menu')
 
     <div class="col-md-9 col-xl-9" id="product_profile">
+        <div class="mb-4" style="display:flex; justify-content: flex-end">
+            <button class="btn btn-primary">Add Barcode</button>
+        </div>
+       
 
         <div class="row">
 
@@ -21,6 +25,11 @@
                         <p class="mb-4">
                             @{{ product.description }}
                         </p>
+
+                        {{--  <div style="text-align:center;">
+                            {!! $product->barcode !!}
+                        </div>  --}}
+
                         <div class="alert alert-primary" role="alert" v-if="isVariant">
                             Variant of <a href="{{ route('sales-products-single', [$product->product_parent]) }}"><strong>@{{ variantParent.name }}</strong></a>
                         </div>
@@ -32,11 +41,18 @@
                             </div>
                         </div>
                         <div>&nbsp;</div>
-                        <button v-on:click.prevent="editProduct" class="btn btn-outline-primary btn-sm text-center">
+                        <div class="mb-4">
+                            <button class="btn btn-primary"
+                            v-on:click.prevent="addBarCodeToProduct"
+                            >Add Barcode</button>
+                        </div>
+                        <button v-on:click.prevent="editProduct" 
+                        class="btn btn-outline-primary btn-sm text-center">
                             <span class="fa fa-sliders"></span> Edit Product
                         </button>
                     </div>
                     @include('modules-sales::modals.product-edit')
+                    @include('modules-sales::modals.barcode-modal')
                 </div>
 
                 <div class="card">
@@ -55,7 +71,7 @@
                                             <option disabled="">Select one or more Categories</option>
                                             <option v-for="category in categories" :key="category.id"
                                                     v-if="productCategories.indexOf(category.id) === -1"
-                                                    v-bind:value="category.id">@{{ category.name }}</option>
+                                                    v-bind:value="category.id">@{{ category.name }} </option>
                                         </select>
                                     </div>
                                     <div class="col-md-12">
@@ -293,8 +309,6 @@
                                         @endcomponent
                                     </div>
                                 </div>
-
-
                             </div>
                         </div>
                     </div>
@@ -322,7 +336,7 @@
             productImage: { file: '' },
             variantTypes: {!! json_encode($variantTypes ?: []) !!},
             variantType: '',
-            variant: { name:'', description:'', product_type:'', product_parent:'', prices: '', currency: '', product_variant_type: '' },
+            variant: { name:'', description:'', product_type:'', product_parent:'', prices: '', currency: '', product_variant_type: '', barcode: '' },
             variantProducts: {!! json_encode(!empty($variantProducts) ? $variantProducts : []) !!},
             variantParent: {!! json_encode(!empty($variantParent) ? $variantParent : []) !!}
         },
@@ -365,7 +379,11 @@
             editProduct: function (index) {
                 $('#product-edit-modal').modal('show');
             },
+            addBarCodeToProduct: function (index) {
+                $('#product-add-barcode-modal').modal('show');
+            },
             clickAction: function (event) {
+                console.log(event)
                 //console.log(event.target);
                 let target = event.target;
                 if (!target.hasAttribute('data-action')) {
@@ -658,8 +676,7 @@
         },
         mounted: function () {
             var context = this;
-            //console.log(this.variantProducts)
-            
+            //console.log(this.variantProducts)    
         }
     });
 

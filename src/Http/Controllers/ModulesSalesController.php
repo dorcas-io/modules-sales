@@ -275,11 +275,13 @@ class ModulesSalesController extends Controller {
         $this->setViewUiResponse($request);
         $response = $sdk->createProductResource($id)->addQueryArgument('include', 'stocks:limit(1|0),orders:limit(1|0)')
                                                     ->send('get');
+
         if (!$response->isSuccessful()) {
             abort(404, 'Could not find the product at this URL.');
         }
 
         $product = $response->getData(true);
+
 
         $subdomain = get_dorcas_subdomain();
         if (!empty($subdomain)) {
@@ -381,18 +383,29 @@ class ModulesSalesController extends Controller {
     public function product_update(Request $request, Sdk $sdk, string $id)
     {
         try {
-            $prices = [];
-            if ($request->has('prices')) {
-                foreach ($request->currencies as $index => $currency) {
-                    $price = (float) $request->prices[$index] ?? 0;
-                    $prices[] = ['currency' => $currency, 'price' => $price];
+           
+
+            if(empty($request->barcode))
+            {
+               
+                $prices = [];
+                if ($request->has('prices')) {
+                    foreach ($request->currencies as $index => $currency) {
+                        $price = (float) $request->prices[$index] ?? 0;
+                        $prices[] = ['currency' => $currency, 'price' => $price];
+                    }
                 }
+    
+                $query = $sdk->createProductResource($id)->addBodyParam('name', $request->name)
+                                                        ->addBodyParam('description', $request->description)
+                                                        ->addBodyParam('default_price', $request->default_price)
+                                                        ->addBodyParam('prices', $prices)
+                                                        ->send('post');
+            }else{
+
+                $query = $sdk->createProductResource($id)->addBodyParam('barcode', $request->barcode)->send('post');
             }
-            $query = $sdk->createProductResource($id)->addBodyParam('name', $request->name)
-                                                    ->addBodyParam('description', $request->description)
-                                                    ->addBodyParam('default_price', $request->default_price)
-                                                    ->addBodyParam('prices', $prices)
-                                                    ->send('post');
+        
             # send the request
             if (!$query->isSuccessful()) {
                 # it failed
@@ -405,6 +418,7 @@ class ModulesSalesController extends Controller {
         }
         return redirect(url()->current())->with('UiResponse', $response);
     }
+
 
     /**
      * @param string $id
