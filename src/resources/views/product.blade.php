@@ -8,9 +8,22 @@
 <div class="row">
     @include('layouts.blocks.tabler.sub-menu')
 
+
     <div class="col-md-9 col-xl-9" id="product_profile">
+    
+        @if(env('STOCK_LEVEL_ALERT') > $product->inventory)
+            <div class="alert alert-danger" role="alert">
+                Product Stock Level is Low
+            </div>
+        @endif
+
         <div class="mb-4" style="display:flex; justify-content: flex-end">
-            <button class="btn btn-primary">Add Barcode</button>
+            <button class="btn btn-primary"
+            v-on:click.prevent="addInventory">Inventory
+           </button> &nbsp; 
+            <button class="btn btn-primary"
+            v-on:click.prevent="mapToParentCategory">Map Category
+           </button>
         </div>
        
 
@@ -43,8 +56,9 @@
                         <div>&nbsp;</div>
                         <div class="mb-4">
                             <button class="btn btn-primary"
-                            v-on:click.prevent="addBarCodeToProduct"
-                            >Add Barcode</button>
+                            v-on:click.prevent="addBarCodeToProduct">Add Barcode
+                            </button>
+                            
                         </div>
                         <button v-on:click.prevent="editProduct" 
                         class="btn btn-outline-primary btn-sm text-center">
@@ -53,6 +67,7 @@
                     </div>
                     @include('modules-sales::modals.product-edit')
                     @include('modules-sales::modals.barcode-modal')
+                    @include('modules-sales::modals.map-parent-category')
                 </div>
 
                 <div class="card">
@@ -335,6 +350,7 @@
             backgroundImage: "{{ cdn('images/gallery/imani-clovis-547617-unsplash.jpg') }}",
             productImage: { file: '' },
             variantTypes: {!! json_encode($variantTypes ?: []) !!},
+            // parentCategories : [],
             variantType: '',
             variant: { name:'', description:'', product_type:'', product_parent:'', prices: '', currency: '', product_variant_type: '', barcode: '' },
             variantProducts: {!! json_encode(!empty($variantProducts) ? $variantProducts : []) !!},
@@ -361,6 +377,9 @@
             isVariant: function () {
                 return this.product.product_type === 'variant';
             },
+            // loadParentCategories : function(){
+            //     return this.parentCategories;
+            // }
         },
         methods: {
             productImageCheck: function() {
@@ -381,6 +400,12 @@
             },
             addBarCodeToProduct: function (index) {
                 $('#product-add-barcode-modal').modal('show');
+            },
+            mapToParentCategory: function (index) {
+                $('#product-category-mapping-modal').modal('show');
+            },
+            addInventory : function(index){
+                $('#product-inventory-modal').modal('show');
             },
             clickAction: function (event) {
                 console.log(event)

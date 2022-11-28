@@ -12,6 +12,7 @@ class ModulesSalesServiceProvider extends ServiceProvider {
 		$this->publishes([
 			__DIR__.'/config/modules-sales.php' => config_path('modules-sales.php'),
 		], 'dorcas-modules');
+	
 		/*$this->publishes([
 			__DIR__.'/assets' => public_path('vendor/modules-sales')
 		], 'dorcas-modules');*/
@@ -23,6 +24,7 @@ class ModulesSalesServiceProvider extends ServiceProvider {
 		$this->mergeConfigFrom(
 	        __DIR__.'/config/navigation-menu.php', 'navigation-menu.modules-sales.sub-menu'
 	     );
+		
 	}
 
 }

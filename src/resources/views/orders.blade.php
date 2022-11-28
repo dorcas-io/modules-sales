@@ -59,6 +59,7 @@
                             @slot('buttons')
                                 <a href="{{ route('sales-orders-new') }}" class="btn btn-primary btn-sm">New Orders</a>
                             @endslot
+                           
                         @endcomponent
 		            </div>
                 </div>

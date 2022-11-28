@@ -52,8 +52,9 @@ Route::group(['namespace' => 'Dorcas\ModulesSales\Http\Controllers', 'prefix' =>
     Route::get('/sales-shipping-routes', 'ModulesSalesController@shipping_routes')->name('sales-shipping-routes');
     Route::post('/sales-shipping-routes', 'ModulesSalesController@shipping_routes_post')->name('sales-shipping-routes-post');
 
-
-
+    Route::get('/sales-report-routes', 'ModulesSalesController@salesReport')->name('sales-report-routes');
+    Route::post('/sales-report-generate', 'ModulesSalesController@generateSalesReport')->name('sales-report-generate');
+    
 
 	//Invoices
 	Route::get('/sales-invoices', 'ModulesSalesController@invoices_index')->name('sales-invoices');
@@ -72,6 +73,7 @@ Route::group(['namespace' => 'Dorcas\ModulesSales\Http\Controllers', 'prefix' =>
     Route::delete('/sales-order/{id}/customers', 'ModulesSalesController@order_deleteCustomer');
 
 
+    Route::post('/map-category','ModulesSalesController@mapCategory');
 });
 
 

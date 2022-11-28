@@ -33,6 +33,7 @@
                         <tr>
                             <th data-field="name">Product</th>
                             <th data-field="inventory">Stock</th>
+                            {{-- <th data-field="updated_at">Stock Level</th> --}}
                             <th data-field="barcode_img">Barcode</th>
                             <th data-field="unit_prices">Unit Price(s)</th>
                             <th data-field="created_at">Added On</th>
