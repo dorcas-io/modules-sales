@@ -190,7 +190,10 @@
 				                                    </td>
 				                                    <td>
 				                                        <a class="btn btn-secondary btn-sm" data-action="view" target="_blank"
-				                                           href="{{ (string) $dorcasUrlGenerator->getUrl('invoices/' . $order->id, ['query' => ['customer' => $customer['id']]]) }}">View Invoice</a>
+																	 
+																	 {{-- (string) $dorcasUrlGenerator->getUrl --}}
+																	 {{-- {{ url('invoices/' . $order->id .'?customer_id='.$customer['id']) }} --}}
+				                                           href="{{ (string) $dorcasUrlGenerator->getUrl('invoices/' . $order->id ,['query' => ['customer' => $customer['id']]]) }}">View Invoice</a>
 				                                        @if (!empty($customer['customer_order']['data']) && !$customer['customer_order']['data']['is_paid'])
 				                                            <a class="btn btn-success btn-sm" href="#" data-action="mark-paid" data-id="{{ $customer['id'] }}" 
 				                                               data-name="{{ implode(' ', [$customer['firstname'], $customer['lastname']]) }}" data-index="{{ $loop->index }}">Mark Paid</a>

@@ -678,7 +678,34 @@ class ModulesSalesController extends Controller {
             $ordersCount = $query->meta['pagination']['total'] ?? 0;
         }
         $this->data['ordersCount'] = $ordersCount;
+        
         return view('modules-sales::orders', $this->data);
+    }
+
+
+    public function invoices_generate(Request $request, Sdk $sdk , $id){
+
+        $this->data['page']['title'] .= ' &rsaquo; Invoices';
+        $this->data['header']['title'] .= ' &rsaquo; Invoices';
+        $this->data['selectedSubMenu'] = 'sales-orders';
+        $this->data['submenuAction'] = '<a href="'.route('sales-orders-new').'" class="btn btn-primary btn-block">Add Invoice</a>';
+
+        $this->setViewUiResponse($request);
+        $ordersCount = 0;
+        $query = $sdk->createOrderResource()
+                    ->addBodyParam('customer', $request->customer_id)
+                    ->send('post',['invoices',$id]);
+
+        
+        if ($query->isSuccessful()) {
+           
+            // $ordersCount = $query->meta['pagination']['total'] ?? 0;
+            return back();
+        }
+       
+        return back();
+        // $this->data['ordersCount'] = $ordersCount;
+        // return view('modules-sales::orders', $this->data);
     }
 
     /**

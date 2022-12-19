@@ -58,7 +58,8 @@ Route::group(['namespace' => 'Dorcas\ModulesSales\Http\Controllers', 'prefix' =>
 
 	//Invoices
 	Route::get('/sales-invoices', 'ModulesSalesController@invoices_index')->name('sales-invoices');
-	//Route::get('/orders', 'Orders@index')->name('apps.invoicing.orders');
+    Route::get('/invoices/{id}', 'ModulesSalesController@invoices_generate')->name('invoice-generate');
+	// Route::get('/orders', 'Orders@index')->name('apps.invoicing.orders');
 
 
 	//orders

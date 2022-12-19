@@ -35,6 +35,7 @@
 
 		                    <th data-field="invoice_number">Invoice #</th>
 		                    <th data-field="title">Title</th>
+                            <th data-field="customer">Customer</th>
 		                    <th data-field="description">Description</th>
 		                    <th data-field="currency">Currency</th>
 		                    <th data-field="amount.formatted">Amount</th>
