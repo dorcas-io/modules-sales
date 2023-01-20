@@ -33,7 +33,8 @@ class ModulesSalesController extends Controller {
             'header' => ['title' => config('modules-sales.title')],
             'selectedMenu' => 'modules-sales',
             'submenuConfig' => 'navigation-menu.modules-sales.sub-menu',
-            'submenuAction' => ''
+            'submenuAction' => '',
+            'variant_inventory' =>  'Inventory'
         ];
     }
 
@@ -200,6 +201,7 @@ class ModulesSalesController extends Controller {
      */
     public function products_search(Request $request, Sdk $sdk)
     {
+        
         $search = $request->query('search', '');
         $sort = $request->query('sort', '');
         $order = $request->query('order', 'asc');
@@ -221,6 +223,8 @@ class ModulesSalesController extends Controller {
         if (!empty($parent)) {
             $query = $query->addQueryArgument('product_parent', $parent);
         }
+       
+        
         $response = $query->send('get');
         # make the request
         if (!$response->isSuccessful()) {
@@ -843,12 +847,14 @@ class ModulesSalesController extends Controller {
      */
     public function orders_search(Request $request, Sdk $sdk)
     {
+        // dd($request);
         $search = $request->query('search', '');
         $sort = $request->query('sort', '');
         $order = $request->query('order', 'asc');
         $offset = (int) $request->query('offset', 0);
         $limit = (int) $request->query('limit', 10);
         $product = $request->query('product');
+        
         # get the request parameters
         if (!empty($product)) {
             $query = $sdk->createProductResource($product)->addQueryArgument('include', 'orders:limit(10000|0)')
@@ -877,6 +883,7 @@ class ModulesSalesController extends Controller {
             $this->data['rows'] = $response->data;
             # set the data
         }
+        
         return response()->json($this->data);
     }
 
@@ -1008,7 +1015,15 @@ class ModulesSalesController extends Controller {
         $company = $request->user()->company(true, true);
         # get the company information
         $salesConfig = !empty($company->extra_data['salesConfig']) ? $company->extra_data['salesConfig'] : [];
-        $variantTypes = !empty($salesConfig) ? $salesConfig['variant_types'] : [];
+
+        if(!empty($salesConfig['variant_types'] && !is_null($this->data['variant_inventory']))){
+            $variantTypes= array_push($salesConfig['variant_types'] ,$this->data['variant_inventory']);
+            return $salesConfig['variant_types'] ;
+        }else{
+            $variantTypes = !empty($salesConfig) ? $salesConfig['variant_types'] : [];
+        }
+       
+        
         return $variantTypes;
         //return response()->json($variantTypes);
     }
@@ -1072,7 +1087,8 @@ class ModulesSalesController extends Controller {
             'product_type' => 'required|string',
             'currency' => 'required|string|size:3',
             'price' => 'required|numeric',
-            'description' => 'nullable'
+            'description' => 'nullable',
+            'quantity' => 'sometimes'
         ]);
         # validate the request
         try {
@@ -1085,6 +1101,7 @@ class ModulesSalesController extends Controller {
                                     ->addBodyParam('product_parent', $request->product_parent)
                                     ->addBodyParam('product_type', $request->product_type)
                                     ->addBodyParam('product_variant', $request->product_variant)
+                                    ->addBodyParam('inventory', $request->quantity)
                                     ->addBodyParam('product_variant_type', $request->product_variant_type);
             # the resource
             $response = $resource->send('post');

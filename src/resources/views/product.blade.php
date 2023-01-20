@@ -1,6 +1,10 @@
 @extends('layouts.tabler')
 @section('body_content_header_extras')
-
+<style>
+	#variant_quantity{
+		 display: none;
+	}
+</style>
 @endsection
 @section('body_content_main')
 @include('layouts.blocks.tabler.alert')
@@ -10,11 +14,12 @@
 
 
     <div class="col-md-9 col-xl-9" id="product_profile">
-    
-        @if(env('STOCK_LEVEL_ALERT') > $product->inventory)
-            <div class="alert alert-danger" role="alert">
-                Product Stock Level is Low
-            </div>
+      @if(env('ALLOW_VARIANT_INVENTORY') === false)
+            @if(env('STOCK_LEVEL_ALERT') > $product->inventory)
+                <div class="alert alert-danger" role="alert">
+                    Product Stock Level is Low
+                </div>
+            @endif
         @endif
 
         <div class="mb-4" style="display:flex; justify-content: flex-end">
@@ -757,6 +762,18 @@
         row.activity = row.action.title_case() + 'ed'; // converts add => Added; subtract => Subtracted
         row.date = moment(row.created_at).format('DD MMM, YYYY HH:mm');
         return row;
+    }
+
+    function checkVaraiant(){
+       let val = document.getElementById("product_variant_type").value
+     
+       
+       if(val === 'Inventory'){
+            document.getElementById("variant_quantity").style.display = 'block'; 
+            
+       }else{
+        document.getElementById("variant_quantity").style.display = 'none'; 
+       }
     }
 
 </script>

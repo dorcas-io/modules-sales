@@ -17,7 +17,7 @@
                 <div class="table-responsive">
                     <table class="table card-table table-vcenter bootstrap-table"
                            data-pagination="true"
-                           data-search="false"
+                           data-search="true"
                            data-side-pagination="server"
                            data-show-refresh="true"
                            data-unique-id="id"
