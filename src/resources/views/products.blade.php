@@ -9,10 +9,19 @@
 
 <div class="row">
     @include('layouts.blocks.tabler.sub-menu')
-
+   
     <div class="col-md-9 col-xl-9">
+       
         <div class="row row-cards row-deck" id="products-list">
+            <div v-if="productsCount > 0">
+             <button type="submit" onclick="masDeleteFunc()" class="btn btn-danger">
+                Bulk Delete
+              </button>
+            </div>
+            
             <div class="col-sm-12">
+                
+                
                 <div class="table-responsive">
                     <table class="table card-table table-vcenter text-nowrap bootstrap-table"
                            data-pagination="true"
@@ -31,6 +40,7 @@
                         v-on:click="clickAction($event)">
                         <thead>
                         <tr>
+                            <th data-field="checkbox">#</th>
                             <th data-field="name">Product</th>
                             <th data-field="inventory">Stock</th>
                             {{-- <th data-field="updated_at">Stock Level</th> --}}
@@ -80,33 +90,50 @@
     new Vue({
         el: '#products-list',
         data: {
-            productsCount: {{ $productsCount }}
+            productsCount: {{ $productsCount }},
+            productIds : [],
         },
+        computed: {
+             // a computed getter
+            //  console.log(this.productIds)
+            count: function() {
+                return 'The shop number is ' + this.productIds
+         }
+         },
+        
         methods: {
-
             clickAction: function (event) {
                 //console.log(event.target);
 
                 let target = event.target;
                 if (!target.hasAttribute('data-action')) {
                     target = target.parentNode.hasAttribute('data-action') ? target.parentNode : target;
+                   
                 }
                 //console.log(target, target.getAttribute('data-action'));
-                let action = target.getAttribute('data-action').toLowerCase();
-                let name = target.getAttribute('data-name');
-                let id = target.getAttribute('data-id');
-                let index = parseInt(target.getAttribute('data-index'), 10);
-                if (isNaN(index)) {
-                    console.log('Index is not set.');
-                    return;
+                if(target.getAttribute('data-action') !== null){
+
+                    let action = target.getAttribute('data-action').toLowerCase();
+
+                    let name = target.getAttribute('data-name');
+
+                    let id = target.getAttribute('data-id');
+
+                    let index = parseInt(target.getAttribute('data-index'), 10);
+
+                    if (isNaN(index)) {
+                        console.log('Index is not set.');
+                        return;
+                    }
+                    if (action === 'view') {
+                        return true;
+                    } else if (action === 'delete') {
+                        this.deleteItem(id,index,name);
+                    } else {
+                        return true;
+                    }
                 }
-                if (action === 'view') {
-                    return true;
-                } else if (action === 'delete') {
-                    this.deleteItem(id,index,name);
-                } else {
-                    return true;
-                }
+              
 
             },
             deleteItem: function (id,index,name) {
@@ -165,6 +192,11 @@
     });
 
     function formatProducts(row,index) {
+        
+        row.checkbox = "<input type=\"checkbox\" data-index=" + index +" onChange=\"massDelete()\" class=\"productId\" value=" + row.id +" >";
+      
+        // onChange=\"massDelete()\" 
+
         row.description_info = '<span class="truncate">'+row.description+'</span>';
         var unit_prices = [];
         if (typeof row.prices !== 'undefined') {
@@ -184,5 +216,78 @@
             '<a class="btn btn-danger btn-sm" data-index="'+index+'" data-action="delete" data-id="'+row.id+'" href="#" data-name="'+row.name+'">Delete</a>';
         return row;
     }
+</script>
+
+
+<script type="text/javascript">
+
+ let productIds = [];
+ var uniqueIds = []
+
+ function massDelete(){
+   
+    var select = document.getElementsByClassName('productId');
+     
+    for (var i = 0; i < select.length; i++) {
+            if (select[i].checked) {
+                productIds.push(select[i].value)
+            }
+        }
+        uniqueIds = [...new Set(productIds)];
+     
+        sessionStorage.setItem("unique_ids", uniqueIds.length);
+        sessionStorage.getItem("unique_ids")
+     
+
+ }
+
+ function masDeleteFunc(){
+
+        if(uniqueIds.length < 1){
+            message = "No item to delete"
+            return swal("Delete Failed", message, "warning");
+        }
+
+        var result = confirm("Want to delete?");
+        if (result) {
+                for(var i = 0;  i < uniqueIds.length ; i++){
+                        var context = this;
+                        let res = axios.delete("/msl/sales-product/" + uniqueIds[i])
+                        .then(function (response) {
+                            //console.log(response);
+                            context.visible = false;
+                            context.contactsCount -= 1;
+                            sessionStorage.removeItem('unique_ids');
+                            $('#products-table').bootstrapTable('removeByUniqueId', response.data.id);
+                            return swal("Deleted!", "The product was successfully deleted.", "success");
+                        })
+                    .catch(function (error) {
+                        var message = '';
+                        console.log(error);
+                        if (error.response) {
+                            // The request was made and the server responded with a status code
+                            // that falls out of the range of 2xx
+                            //var e = error.response.data.errors[0];
+                            //message = e.title;
+                            var e = error.response;
+                            message = e.data.message;
+                        } else if (error.request) {
+                            // The request was made but no response was received
+                            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+                            // http.ClientRequest in node.js
+                            message = 'The request was made but no response was received';
+                        } else {
+                            // Something happened in setting up the request that triggered an Error
+                            message = error.message;
+                        }
+                    return swal("Delete Failed", message, "warning");
+                });
+            }
+        }
+    }
+
+ 
+
+
 </script>
 @endsection

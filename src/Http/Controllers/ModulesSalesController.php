@@ -302,12 +302,15 @@ class ModulesSalesController extends Controller {
       
        
         $childCategories = $product->categories['data'];
+    
        
       
 
         $subdomain = get_dorcas_subdomain();
+       
         
         $this->data['subdomains'] = $subdomains = $this->getSubDomains($sdk);
+       
 
         if (!empty($subdomain)) {
             $this->data['header']['title'] .= ' (Store: '.$subdomain.'/store)';
@@ -339,10 +342,11 @@ class ModulesSalesController extends Controller {
             $res =  Http::get($apiUrl);
             $data = json_decode($res);
             $this->data['parent_categories'] = $data->extra_data->marketplaceConfig->sales_categories ?? [];
+           
         }else{
             $this->data['parent_categories']  = [];
         }
-
+      
        
         $isParent = $product->product_type=="default" ? true : false;
         $isVariant = $product->product_type=="variant" ? true : false;
@@ -1194,6 +1198,7 @@ class ModulesSalesController extends Controller {
                         ->addBodyParam('business_category', $request->business_category)
                         ->addBodyParam('product_id', $request->product_id)
                         ->send('POST');
+                       
                         
         # send the request
         if (!$response->isSuccessful()) {
