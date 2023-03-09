@@ -82,8 +82,12 @@
 		                <button v-on:click.prevent="editOrder" class="btn btn-outline-primary btn-sm text-center">
 		                    <span class="fa fa-sliders"></span> Edit Order
 		                </button>
+							 <button v-on:click.prevent="updateStatus" class="btn btn-outline-primary btn-sm text-center">
+								<span class="fa fa-sliders"></span> Update Status
+						  </button>
 		            </div>
 		            @include('modules-sales::modals.order-edit')
+						@include('modules-sales::modals.order-status')
 		        </div>
 
 		        <div class="card">
@@ -407,7 +411,10 @@
 	            },
 	            editOrder: function (index) {
 	                $('#order-edit-modal').modal('show');
-	            },            	
+	            },   
+					updateStatus: function (index) {
+	                $('#order-status-modal').modal('show');
+	            },           	
                 moment: function (dateString, format) {
                     return moment(dateString).format(format);
                 },
