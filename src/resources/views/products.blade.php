@@ -34,7 +34,7 @@
                            data-url="{{ route('sales-product-search') }}"
                            data-page-list="[10,25,50,100,200,300,500]"
                            data-sort-class="sortable"
-                           data-search-on-enter-key="true"
+                           data-search-on-enter-key="false"
                            v-if="productsCount > 0"
                             id="products-table"
                         v-on:click="clickAction($event)">
@@ -79,14 +79,14 @@
 
 @section('body_js')
 <script type="text/javascript">
-    /*$(function() {
-        $('input[type=checkbox].check-all').on('change', function () {
-            var className = $(this).parent('div').first().data('item-class') || '';
-            if (className.length > 0) {
-                $('input[type=checkbox].'+className).prop('checked', $(this).prop('checked'));
-            }
-        });
-    });*/
+    // $(function() {
+    //     $('input[type=checkbox].check-all').on('change', function () {
+    //         var className = $(this).parent('div').first().data('item-class') || '';
+    //         if (className.length > 0) {
+    //             $('input[type=checkbox].'+className).prop('checked', $(this).prop('checked'));
+    //         }
+    //     });
+    // });
     new Vue({
         el: '#products-list',
         data: {

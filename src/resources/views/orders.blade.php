@@ -40,6 +40,7 @@
 		                    <th data-field="currency">Currency</th>
 		                    <th data-field="amount.formatted">Amount</th>
 		                    <th data-field="cart_content">Product(s)</th>
+                            <th data-field="status">Status</th>
 		                    <th data-field="reminder_on">Reminder?</th>
 		                    <th data-field="due_at">Due At</th>
 		                    <th data-field="created_at">Created</th>

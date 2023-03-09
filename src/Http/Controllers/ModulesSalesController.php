@@ -203,6 +203,7 @@ class ModulesSalesController extends Controller {
     {
         
         $search = $request->query('search', '');
+    
         $sort = $request->query('sort', '');
         $order = $request->query('order', 'asc');
         $offset = (int) $request->query('offset', 0);
@@ -674,6 +675,7 @@ class ModulesSalesController extends Controller {
      */
     public function orders_index(Request $request, Sdk $sdk)
     {
+
         $this->data['page']['title'] .= ' &rsaquo; Invoices';
         $this->data['header']['title'] .= ' &rsaquo; Invoices';
         $this->data['selectedSubMenu'] = 'sales-orders';
@@ -686,6 +688,7 @@ class ModulesSalesController extends Controller {
             $ordersCount = $query->meta['pagination']['total'] ?? 0;
         }
         $this->data['ordersCount'] = $ordersCount;
+   
         
         return view('modules-sales::orders', $this->data);
     }
@@ -878,6 +881,7 @@ class ModulesSalesController extends Controller {
                 $query = $query->addQueryArgument('search', $search);
             }
             $response = $query->send('get');
+            
             if (!$response->isSuccessful()) {
                 // do something here
                 throw new RecordNotFoundException($response->errors[0]['title'] ?? 'Could not find any matching orders.');
