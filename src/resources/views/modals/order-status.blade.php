@@ -7,16 +7,17 @@
 			</div>
 			<div class="modal-body">
 
-                <form method="post" id="form-order-edit" action="">
+                <form method="post" id="form-order-update-status" action="">
                     {{ csrf_field() }}
                     <div class="row">
                         <div class="form-group col-md-12">
+                            <label class="form-label" for="status">Status</label>
                             <select class="form-control" name="status" > 
                               <option value="pending">Pending</option>
                               <option value="delivered">Delivered</option>
                               <option value="completed">Completed</option>
                             </select>
-                            <label class="form-label" for="status">Status</label>
+                          
                         </div>
                        
                        
@@ -26,7 +27,7 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-				<button type="submit" form="form-order-edit" class="btn btn-primary" :class="{'btn-loading':updating}" name="action" v-on:click.prevent="updateDetails">Save Changes</button>
+				<button type="submit" form="form-order-update-status" class="btn btn-primary" :class="{'btn-loading':updating}" name="action" v-on:click.prevent="updateOrderStatus">Save Changes</button>
 			</div>
 		</div>
 	</div>

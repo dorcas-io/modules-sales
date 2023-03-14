@@ -13,11 +13,11 @@
     <div class="col-md-9 col-xl-9">
        
         <div class="row row-cards row-deck" id="products-list">
-            <div v-if="productsCount > 0">
+            {{-- <div v-if="productsCount > 0">
              <button type="submit" onclick="masDeleteFunc()" class="btn btn-danger">
                 Bulk Delete
               </button>
-            </div>
+            </div> --}}
             
             <div class="col-sm-12">
                 
@@ -25,9 +25,9 @@
                 <div class="table-responsive">
                     <table class="table card-table table-vcenter text-nowrap bootstrap-table"
                            data-pagination="true"
-                           data-search="true"
+                           data-search="false"
                            data-side-pagination="server"
-                           data-show-refresh="true"
+                           data-show-refresh="false"
                            data-unique-id="id"
                            data-id-field="id"
                            data-row-attributes="formatProducts"
@@ -40,7 +40,7 @@
                         v-on:click="clickAction($event)">
                         <thead>
                         <tr>
-                            <th data-field="checkbox">#</th>
+                            {{-- <th data-field="checkbox">#</th> --}}
                             <th data-field="name">Product</th>
                             <th data-field="inventory">Stock</th>
                             {{-- <th data-field="updated_at">Stock Level</th> --}}
@@ -193,7 +193,7 @@
 
     function formatProducts(row,index) {
         
-        row.checkbox = "<input type=\"checkbox\" data-index=" + index +" onChange=\"massDelete()\" class=\"productId\" value=" + row.id +" >";
+        // row.checkbox = "<input type=\"checkbox\" data-index=" + index +" onChange=\"massDelete()\" class=\"productId\" value=" + row.id +" >";
       
         // onChange=\"massDelete()\" 
 

@@ -977,6 +977,29 @@ class ModulesSalesController extends Controller {
         return response()->json($this->data);
     }
 
+
+    /**
+     * @param Request $request
+     * @param Sdk     $sdk
+     * @param string  $id
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function order_status_update(Request $request , Sdk $sdk , string $id){
+
+        $response = $sdk->createOrderResource()->addBodyParam('status', $request->status)
+                              ->send('put',['/orders/status/', $id]);
+ 
+
+        if (!$response->isSuccessful()) {
+            // do something here
+            throw new \RuntimeException($response->errors[0]['title'] ?? 'Failed while updating the order.');
+        }
+        $this->data = $response->getData();
+        return response()->json($this->data);
+
+    }
+
     /**
      * @param Request $request
      * @param Sdk     $sdk

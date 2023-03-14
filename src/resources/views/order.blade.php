@@ -80,7 +80,7 @@
 		                </p>
 		                <div>&nbsp;</div>
 		                <button v-on:click.prevent="editOrder" class="btn btn-outline-primary btn-sm text-center">
-		                    <span class="fa fa-sliders"></span> Edit Order
+		                    <span class="fa fa-sliders"></span> Edit Orders
 		                </button>
 							 <button v-on:click.prevent="updateStatus" class="btn btn-outline-primary btn-sm text-center">
 								<span class="fa fa-sliders"></span> Update Status
@@ -220,7 +220,6 @@
 		                    </div>
 		                    <div class="tab-pane container o-auto" id="order_transactions">
 		                        <br/>
-
 
 		                        <div class="card col-md-12" v-if="selectedCustomer !== null">
 		                        	<div class="card-status card-status-left bg-blue"></div>
@@ -435,6 +434,42 @@
                         //Materialize.toast("Your changes were successfully saved.", 4000);
                         swal("Success", "Your changes were successfully saved.", "success");
                         $('#order-edit-modal').modal('hide');
+                        //window.location = "/msl/sales-order/"+context.order.id;
+
+                    }).catch(function (error) {
+                        var message = '';
+                        if (error.response) {
+                            // The request was made and the server responded with a status code
+                            // that falls out of the range of 2xx
+                            //var e = error.response.data.errors[0];
+                            //message = e.title;
+			                            var e = error.response;
+			                            message = e.data.message;
+                        } else if (error.request) {
+                            // The request was made but no response was received
+                            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+                            // http.ClientRequest in node.js
+                            message = 'The request was made but no response was received';
+                        } else {
+                            // Something happened in setting up the request that triggered an Error
+                            message = error.message;
+                        }
+                        context.updating = false;
+                        return swal("Oops!", message, "warning");
+                    });
+                },
+					 updateOrderStatus: function () {
+                    var context = this;
+                    context.updating = true;
+						  console.log(context.order.id)
+                    axios.put("/msl/sales-order-status/" + context.order.id, {
+                        status: context.order.status,
+                    }).then(function (response) {
+                        //console.log(response);
+                        context.updating = false;
+                        //Materialize.toast("Your changes were successfully saved.", 4000);
+                        swal("Success", "Your changes were successfully saved.", "success");
+                        $('#order-status-modal').modal('hide');
                         //window.location = "/msl/sales-order/"+context.order.id;
 
                     }).catch(function (error) {
