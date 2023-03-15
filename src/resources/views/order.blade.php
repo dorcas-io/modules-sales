@@ -82,9 +82,9 @@
 		                <button v-on:click.prevent="editOrder" class="btn btn-outline-primary btn-sm text-center">
 		                    <span class="fa fa-sliders"></span> Edit Orders
 		                </button>
-							 <button v-on:click.prevent="updateStatus" class="btn btn-outline-primary btn-sm text-center">
+							 {{-- <button v-on:click.prevent="updateStatus" class="btn btn-outline-primary btn-sm text-center">
 								<span class="fa fa-sliders"></span> Update Status
-						  </button>
+						  </button> --}}
 		            </div>
 		            @include('modules-sales::modals.order-edit')
 						@include('modules-sales::modals.order-status')

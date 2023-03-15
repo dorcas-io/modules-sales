@@ -17,9 +17,9 @@
                 <div class="table-responsive">
                     <table class="table card-table table-vcenter bootstrap-table"
                            data-pagination="true"
-                           data-search="true"
+                           data-search="false"
                            data-side-pagination="server"
-                           data-show-refresh="true"
+                           data-show-refresh="false"
                            data-unique-id="id"
                            data-id-field="id"
                            data-row-attributes="formatOrders"
@@ -40,7 +40,7 @@
 		                    <th data-field="currency">Currency</th>
 		                    <th data-field="amount.formatted">Amount</th>
 		                    <th data-field="cart_content">Product(s)</th>
-                            <th data-field="status">Status</th>
+                            {{-- <th data-field="status">Status</th> --}}
 		                    <th data-field="reminder_on">Reminder?</th>
 		                    <th data-field="due_at">Due At</th>
 		                    <th data-field="created_at">Created</th>
