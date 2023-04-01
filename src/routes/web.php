@@ -1,22 +1,5 @@
 <?php
 
-/*use GuzzleHttp\Psr7\Uri;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
-
-$request = app()->make('request');
-$currentHost = $request->header('host');
-$defaultUri = new Uri(config('app.url'));
-try {
-    $domainInfo = (new App\Http\Middleware\ResolveCustomSubdomain())->splitHost($currentHost);
-} catch (RuntimeException $e) {
-    $domainInfo = null;
-}
-$storeSubDomain = !empty($domainInfo) && $domainInfo->getService() === 'store' ?
-    $currentHost : 'store' . $defaultUri->getHost();
-*/
-
-
 Route::group(['namespace' => 'Dorcas\ModulesSales\Http\Controllers', 'prefix' => 'msl', 'middleware' => ['web','auth']], function() {
 
 	//categories

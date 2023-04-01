@@ -452,7 +452,7 @@
             editVariant: function (id,index,name) {
                 let variant = typeof this.variantProducts[index] !== 'undefined' ? this.variantProducts[index] : null;
                 this.variant = variant;
-                console.log(variant)
+                //console.log(variant)
                 $('#product-variant-modal').modal('show');
             },
             deleteVariant: function (id,index,name) {
