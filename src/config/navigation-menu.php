@@ -19,5 +19,11 @@ return [
         'title' => 'Shipping &amp; Routes',
         'route' => 'sales-shipping-routes',
         'icon' => 'fe fe-truck',
+    ],
+    'sales-report-routes' => [
+        'title' => 'Generate Sales Report',
+        'route' => 'sales-report-routes',
+        'icon' => 'fe fe-truck',
     ]
+
 ];

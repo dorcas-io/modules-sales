@@ -1,6 +1,10 @@
 @extends('layouts.tabler')
 @section('body_content_header_extras')
-
+<style>
+	#variant_quantity{
+		 display: none;
+	}
+</style>
 @endsection
 @section('body_content_main')
 @include('layouts.blocks.tabler.alert')
@@ -8,7 +12,25 @@
 <div class="row">
     @include('layouts.blocks.tabler.sub-menu')
 
+
     <div class="col-md-9 col-xl-9" id="product_profile">
+      @if(env('ALLOW_VARIANT_INVENTORY') === false)
+            @if(env('STOCK_LEVEL_ALERT') > $product->inventory)
+                <div class="alert alert-danger" role="alert">
+                    Product Stock Level is Low
+                </div>
+            @endif
+        @endif
+
+        <div class="mb-4" style="display:flex; justify-content: flex-end">
+            <button class="btn btn-primary"
+            v-on:click.prevent="addInventory">Inventory
+           </button> &nbsp; 
+            <button class="btn btn-primary"
+            v-on:click.prevent="mapToParentCategory">Map Category
+           </button>
+        </div>
+       
 
         <div class="row">
 
@@ -21,6 +43,11 @@
                         <p class="mb-4">
                             @{{ product.description }}
                         </p>
+
+                        {{--  <div style="text-align:center;">
+                            {!! $product->barcode !!}
+                        </div>  --}}
+
                         <div class="alert alert-primary" role="alert" v-if="isVariant">
                             Variant of <a href="{{ route('sales-products-single', [$product->product_parent]) }}"><strong>@{{ variantParent.name }}</strong></a>
                         </div>
@@ -32,11 +59,20 @@
                             </div>
                         </div>
                         <div>&nbsp;</div>
-                        <button v-on:click.prevent="editProduct" class="btn btn-outline-primary btn-sm text-center">
+                        <div class="mb-4">
+                            <button class="btn btn-primary"
+                            v-on:click.prevent="addBarCodeToProduct">Add Barcode
+                            </button>
+                            
+                        </div>
+                        <button v-on:click.prevent="editProduct" 
+                        class="btn btn-outline-primary btn-sm text-center">
                             <span class="fa fa-sliders"></span> Edit Product
                         </button>
                     </div>
                     @include('modules-sales::modals.product-edit')
+                    @include('modules-sales::modals.barcode-modal')
+                    @include('modules-sales::modals.map-parent-category')
                 </div>
 
                 <div class="card">
@@ -55,7 +91,7 @@
                                             <option disabled="">Select one or more Categories</option>
                                             <option v-for="category in categories" :key="category.id"
                                                     v-if="productCategories.indexOf(category.id) === -1"
-                                                    v-bind:value="category.id">@{{ category.name }}</option>
+                                                    v-bind:value="category.id">@{{ category.name }} </option>
                                         </select>
                                     </div>
                                     <div class="col-md-12">
@@ -293,8 +329,6 @@
                                         @endcomponent
                                     </div>
                                 </div>
-
-
                             </div>
                         </div>
                     </div>
@@ -321,8 +355,9 @@
             backgroundImage: "{{ cdn('images/gallery/imani-clovis-547617-unsplash.jpg') }}",
             productImage: { file: '' },
             variantTypes: {!! json_encode($variantTypes ?: []) !!},
+            // parentCategories : [],
             variantType: '',
-            variant: { name:'', description:'', product_type:'', product_parent:'', prices: '', currency: '', product_variant_type: '' },
+            variant: { name:'', description:'', product_type:'', product_parent:'', prices: '', currency: '', product_variant_type: '', barcode: '' },
             variantProducts: {!! json_encode(!empty($variantProducts) ? $variantProducts : []) !!},
             variantParent: {!! json_encode(!empty($variantParent) ? $variantParent : []) !!}
         },
@@ -347,6 +382,9 @@
             isVariant: function () {
                 return this.product.product_type === 'variant';
             },
+            // loadParentCategories : function(){
+            //     return this.parentCategories;
+            // }
         },
         methods: {
             productImageCheck: function() {
@@ -365,7 +403,17 @@
             editProduct: function (index) {
                 $('#product-edit-modal').modal('show');
             },
+            addBarCodeToProduct: function (index) {
+                $('#product-add-barcode-modal').modal('show');
+            },
+            mapToParentCategory: function (index) {
+                $('#product-category-mapping-modal').modal('show');
+            },
+            addInventory : function(index){
+                $('#product-inventory-modal').modal('show');
+            },
             clickAction: function (event) {
+                console.log(event)
                 //console.log(event.target);
                 let target = event.target;
                 if (!target.hasAttribute('data-action')) {
@@ -658,8 +706,7 @@
         },
         mounted: function () {
             var context = this;
-            //console.log(this.variantProducts)
-            
+            //console.log(this.variantProducts)    
         }
     });
 
@@ -715,6 +762,18 @@
         row.activity = row.action.title_case() + 'ed'; // converts add => Added; subtract => Subtracted
         row.date = moment(row.created_at).format('DD MMM, YYYY HH:mm');
         return row;
+    }
+
+    function checkVaraiant(){
+       let val = document.getElementById("product_variant_type").value
+     
+       
+       if(val === 'Inventory'){
+            document.getElementById("variant_quantity").style.display = 'block'; 
+            
+       }else{
+        document.getElementById("variant_quantity").style.display = 'none'; 
+       }
     }
 
 </script>

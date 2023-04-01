@@ -1,3 +1,5 @@
+
+
 <div class="modal fade" id="product-variant-modal" tabindex="-1" role="dialog" aria-labelledby="product-variant-modalLabel" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
 		<div class="modal-content">
@@ -15,7 +17,8 @@
 		                        <label class="form-label" for="product_variant">Variant Title (e.g. Blue)</label>
 		                    </div>
 		                    <div class="form-group col-md-6">
-								<select class="form-control" id="product_variant_type" name="product_variant_type" v-model="variant.product_variant_type" required>
+									
+								<select class="form-control" id="product_variant_type" name="product_variant_type" v-model="variant.product_variant_type" onChange="checkVaraiant()" required>
 									<option value="">Select Variant Type</option>
 								  	<option v-for="variantType in variantTypes" v-bind:value="variantType">
 								    	@{{ variantType }}
@@ -36,6 +39,12 @@
 		                        <label class="form-label" for="price">Unit Price</label>
 		                    </div>
 		                </div>
+							 <div class="row" id="variant_quantity">
+								<div class="form-group col-md-12">
+									 <input class="form-control" id="quantity" type="number" name="quantity" maxlength="10" min="0" ><!-- v-if="typeof variant.prices !== 'undefined'" v-model="variant.prices.data[0].unit_price.raw"-->
+									 <label class="form-label" for="price">Quantity</label>
+								</div>
+						  </div>
 						<div class="row">
 		                    <div class="form-group col-md-12">
 		                        <textarea class="form-control" id="description" name="description" v-model="variant.description"></textarea>

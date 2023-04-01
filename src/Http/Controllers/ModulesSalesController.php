@@ -8,12 +8,20 @@ use Dorcas\Contactform\Models\ModulesSales;
 use App\Dorcas\Hub\Utilities\UiResponse\UiResponse;
 use App\Http\Controllers\HomeController;
 use Hostville\Dorcas\Sdk;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Exceptions\RecordNotFoundException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Collection;
 use Illuminate\Auth\Access\AuthorizationException;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Reader\Exception;
+use PhpOffice\PhpSpreadsheet\Writer\Xls;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
+use function PHPSTORM_META\elementType;
 
 class ModulesSalesController extends Controller {
 
@@ -25,7 +33,8 @@ class ModulesSalesController extends Controller {
             'header' => ['title' => config('modules-sales.title')],
             'selectedMenu' => 'modules-sales',
             'submenuConfig' => 'navigation-menu.modules-sales.sub-menu',
-            'submenuAction' => ''
+            'submenuAction' => '',
+            'variant_inventory' =>  'Inventory'
         ];
     }
 
@@ -134,9 +143,11 @@ class ModulesSalesController extends Controller {
         # get the company information
         $configuration = !empty($company->extra_data) ? $company->extra_data : [];
         $salesConfig = !empty($configuration['salesConfig']) ? $configuration['salesConfig'] : [];
+      
         if (count($salesConfig) <  1) {
             // lets create sales config
             $configuration['salesConfig'] = [];
+          
             $configuration['salesConfig']['variant_types'] = ["Colour", "Size"];
             $saveQuery = $sdk->createCompanyService()->addBodyParam('extra_data', $configuration)
                                                 ->send('post');
@@ -190,7 +201,9 @@ class ModulesSalesController extends Controller {
      */
     public function products_search(Request $request, Sdk $sdk)
     {
+        
         $search = $request->query('search', '');
+    
         $sort = $request->query('sort', '');
         $order = $request->query('order', 'asc');
         $offset = (int) $request->query('offset', 0);
@@ -211,6 +224,8 @@ class ModulesSalesController extends Controller {
         if (!empty($parent)) {
             $query = $query->addQueryArgument('product_parent', $parent);
         }
+       
+        
         $response = $query->send('get');
         # make the request
         if (!$response->isSuccessful()) {
@@ -267,26 +282,49 @@ class ModulesSalesController extends Controller {
      */
     public function product_index(Request $request, Sdk $sdk, string $id)
     {
+       
+    
         $this->data['page']['title'] .= ' &rsaquo; Products';
         $this->data['header']['title'] = 'Products';
         $this->data['selectedSubMenu'] = 'sales-products';
         $this->data['submenuAction'] = '';
+       
 
         $this->setViewUiResponse($request);
         $response = $sdk->createProductResource($id)->addQueryArgument('include', 'stocks:limit(1|0),orders:limit(1|0)')
                                                     ->send('get');
+                                                 
+
         if (!$response->isSuccessful()) {
             abort(404, 'Could not find the product at this URL.');
         }
 
         $product = $response->getData(true);
+      
+       
+        $childCategories = $product->categories['data'];
+    
+       
+      
 
         $subdomain = get_dorcas_subdomain();
+       
+        
+        $this->data['subdomains'] = $subdomains = $this->getSubDomains($sdk);
+       
+
         if (!empty($subdomain)) {
             $this->data['header']['title'] .= ' (Store: '.$subdomain.'/store)';
+
+            // $this->data['subdomains'] = $subdomains = $this->getSubDomains($sdk);
+            // dd( $this->data['subdomains']);
+        
+            # get the subdomains issued to this customer
+            $this->data['http_protocol'] = "http://". $this->data['subdomains'][0]->domain['data']['domain'] ?? [];
         }
-        $this->data['subdomains'] = $subdomains = $this->getSubDomains($sdk);
-        # get the subdomains issued to this customer
+       
+
+     
 
         $this->data['variantTypes'] = $this->variant_type_get($request,$sdk);
 
@@ -299,6 +337,18 @@ class ModulesSalesController extends Controller {
         $type = $request->query('type', 'variant');
         $parent = $request->query('parent', $id);
 
+    
+        if (!empty($subdomain)){
+            $apiUrl =  $this->data['http_protocol'] . '/api/is_partner';
+            $res =  Http::get($apiUrl);
+            $data = json_decode($res);
+            $this->data['parent_categories'] = $data->extra_data->marketplaceConfig->sales_categories ?? [];
+           
+        }else{
+            $this->data['parent_categories']  = [];
+        }
+      
+       
         $isParent = $product->product_type=="default" ? true : false;
         $isVariant = $product->product_type=="variant" ? true : false;
 
@@ -338,6 +388,8 @@ class ModulesSalesController extends Controller {
         $v = ($product->product_type=="variant") ? '[V]' : '';
         $this->data['page']['title'] .= ' &rsaquo; ' . $product->name . $v;
         $this->data['header']['title'] .= ' &rsaquo; ' . $product->name . $v;
+        $this->data['parentCategories'] = ['some cta', 'catc2'];
+
 
         $this->data['submenuAction'] .= '
             <div class="dropdown"><button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Actions</button>
@@ -368,7 +420,7 @@ class ModulesSalesController extends Controller {
             </div>
         ';
 
-        return view('modules-sales::product', $this->data);
+        return view('modules-sales::product', $this->data );
     }
 
     /**
@@ -381,18 +433,29 @@ class ModulesSalesController extends Controller {
     public function product_update(Request $request, Sdk $sdk, string $id)
     {
         try {
-            $prices = [];
-            if ($request->has('prices')) {
-                foreach ($request->currencies as $index => $currency) {
-                    $price = (float) $request->prices[$index] ?? 0;
-                    $prices[] = ['currency' => $currency, 'price' => $price];
+           
+
+            if(empty($request->barcode))
+            {
+               
+                $prices = [];
+                if ($request->has('prices')) {
+                    foreach ($request->currencies as $index => $currency) {
+                        $price = (float) $request->prices[$index] ?? 0;
+                        $prices[] = ['currency' => $currency, 'price' => $price];
+                    }
                 }
+    
+                $query = $sdk->createProductResource($id)->addBodyParam('name', $request->name)
+                                                        ->addBodyParam('description', $request->description)
+                                                        ->addBodyParam('default_price', $request->default_price)
+                                                        ->addBodyParam('prices', $prices)
+                                                        ->send('post');
+            }else{
+
+                $query = $sdk->createProductResource($id)->addBodyParam('barcode', $request->barcode)->send('post');
             }
-            $query = $sdk->createProductResource($id)->addBodyParam('name', $request->name)
-                                                    ->addBodyParam('description', $request->description)
-                                                    ->addBodyParam('default_price', $request->default_price)
-                                                    ->addBodyParam('prices', $prices)
-                                                    ->send('post');
+        
             # send the request
             if (!$query->isSuccessful()) {
                 # it failed
@@ -405,6 +468,7 @@ class ModulesSalesController extends Controller {
         }
         return redirect(url()->current())->with('UiResponse', $response);
     }
+
 
     /**
      * @param string $id
@@ -611,6 +675,7 @@ class ModulesSalesController extends Controller {
      */
     public function orders_index(Request $request, Sdk $sdk)
     {
+
         $this->data['page']['title'] .= ' &rsaquo; Invoices';
         $this->data['header']['title'] .= ' &rsaquo; Invoices';
         $this->data['selectedSubMenu'] = 'sales-orders';
@@ -623,7 +688,35 @@ class ModulesSalesController extends Controller {
             $ordersCount = $query->meta['pagination']['total'] ?? 0;
         }
         $this->data['ordersCount'] = $ordersCount;
+   
+        
         return view('modules-sales::orders', $this->data);
+    }
+
+
+    public function invoices_generate(Request $request, Sdk $sdk , $id){
+
+        $this->data['page']['title'] .= ' &rsaquo; Invoices';
+        $this->data['header']['title'] .= ' &rsaquo; Invoices';
+        $this->data['selectedSubMenu'] = 'sales-orders';
+        $this->data['submenuAction'] = '<a href="'.route('sales-orders-new').'" class="btn btn-primary btn-block">Add Invoice</a>';
+
+        $this->setViewUiResponse($request);
+        $ordersCount = 0;
+        $query = $sdk->createOrderResource()
+                    ->addBodyParam('customer', $request->customer_id)
+                    ->send('post',['invoices',$id]);
+
+        
+        if ($query->isSuccessful()) {
+           
+            // $ordersCount = $query->meta['pagination']['total'] ?? 0;
+            return back();
+        }
+       
+        return back();
+        // $this->data['ordersCount'] = $ordersCount;
+        // return view('modules-sales::orders', $this->data);
     }
 
     /**
@@ -761,12 +854,14 @@ class ModulesSalesController extends Controller {
      */
     public function orders_search(Request $request, Sdk $sdk)
     {
+        // dd($request);
         $search = $request->query('search', '');
         $sort = $request->query('sort', '');
         $order = $request->query('order', 'asc');
         $offset = (int) $request->query('offset', 0);
         $limit = (int) $request->query('limit', 10);
         $product = $request->query('product');
+        
         # get the request parameters
         if (!empty($product)) {
             $query = $sdk->createProductResource($product)->addQueryArgument('include', 'orders:limit(10000|0)')
@@ -786,6 +881,7 @@ class ModulesSalesController extends Controller {
                 $query = $query->addQueryArgument('search', $search);
             }
             $response = $query->send('get');
+            
             if (!$response->isSuccessful()) {
                 // do something here
                 throw new RecordNotFoundException($response->errors[0]['title'] ?? 'Could not find any matching orders.');
@@ -795,6 +891,7 @@ class ModulesSalesController extends Controller {
             $this->data['rows'] = $response->data;
             # set the data
         }
+        
         return response()->json($this->data);
     }
 
@@ -880,6 +977,29 @@ class ModulesSalesController extends Controller {
         return response()->json($this->data);
     }
 
+
+    /**
+     * @param Request $request
+     * @param Sdk     $sdk
+     * @param string  $id
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function order_status_update(Request $request , Sdk $sdk , string $id){
+
+        $response = $sdk->createOrderResource()->addBodyParam('status', $request->status)
+                              ->send('put',['/orders/status/', $id]);
+ 
+
+        if (!$response->isSuccessful()) {
+            // do something here
+            throw new \RuntimeException($response->errors[0]['title'] ?? 'Failed while updating the order.');
+        }
+        $this->data = $response->getData();
+        return response()->json($this->data);
+
+    }
+
     /**
      * @param Request $request
      * @param Sdk     $sdk
@@ -926,7 +1046,15 @@ class ModulesSalesController extends Controller {
         $company = $request->user()->company(true, true);
         # get the company information
         $salesConfig = !empty($company->extra_data['salesConfig']) ? $company->extra_data['salesConfig'] : [];
-        $variantTypes = !empty($salesConfig) ? $salesConfig['variant_types'] : [];
+
+        if(!empty($salesConfig['variant_types'] && !is_null($this->data['variant_inventory']))){
+            $variantTypes= array_push($salesConfig['variant_types'] ,$this->data['variant_inventory']);
+            return $salesConfig['variant_types'] ;
+        }else{
+            $variantTypes = !empty($salesConfig) ? $salesConfig['variant_types'] : [];
+        }
+       
+        
         return $variantTypes;
         //return response()->json($variantTypes);
     }
@@ -990,7 +1118,8 @@ class ModulesSalesController extends Controller {
             'product_type' => 'required|string',
             'currency' => 'required|string|size:3',
             'price' => 'required|numeric',
-            'description' => 'nullable'
+            'description' => 'nullable',
+            'quantity' => 'sometimes'
         ]);
         # validate the request
         try {
@@ -1003,6 +1132,7 @@ class ModulesSalesController extends Controller {
                                     ->addBodyParam('product_parent', $request->product_parent)
                                     ->addBodyParam('product_type', $request->product_type)
                                     ->addBodyParam('product_variant', $request->product_variant)
+                                    ->addBodyParam('inventory', $request->quantity)
                                     ->addBodyParam('product_variant_type', $request->product_variant_type);
             # the resource
             $response = $resource->send('post');
@@ -1085,6 +1215,101 @@ class ModulesSalesController extends Controller {
         }
         return redirect(route('sales-shipping-routes'))->with('UiResponse', $response);
 
+    }
+
+
+    public function mapCategory(Request $request ,Sdk $sdk)
+    {
+        $response = $sdk->createCategoryMappingService()
+                        ->addBodyParam('parent_category', $request->parent_category)
+                        ->addBodyParam('business_category', $request->business_category)
+                        ->addBodyParam('product_id', $request->product_id)
+                        ->send('POST');
+                       
+                        
+        # send the request
+        if (!$response->isSuccessful()) {
+            # it failed
+            $message = $response->errors[0]['title'] ?? '';
+            throw new \RuntimeException('Failed while rting to map to parent Category.'.$message);
+        }
+        $response = (tabler_ui_html_response(['Successfully mapped to Parent Category: '. $request->parent_category]))->setType(UiResponse::TYPE_SUCCESS);
+
+        return redirect(route('sales-shipping-routes'))->with('UiResponse', $response);
+    }
+
+
+    public function salesReport(Request $request, Sdk $sdk)
+    {
+        
+        $this->data['page']['title'] .= ' &rsaquo; Generate Report';
+        $this->data['header']['title'] .= ' &rsaquo; Generate Report';
+        $this->data['selectedSubMenu'] = 'sales-report-routes';
+        $this->data['submenuAction'] = '';
+
+       
+        return view('modules-sales::generate-report',$this->data);
+    }
+
+    
+    public function generateSalesReport(Request $request, Sdk $sdk)
+    {
+        $query = $sdk->createFinanceResource();
+        $query = $query->addBodyParam('start_date', $request->start_date)
+                        ->addBodyParam('end_date', $request->end_date)
+                        ->send('post',['transactions/generate-report']);
+                       
+
+        $transactions = $query->getData();
+        // dd($transactions[0]['order']['title']);
+       
+    
+       if($query->isSuccessful() && $query->data !== '[]')
+        {
+            $data_array [] = array("Reference","Amount","Currency","Customer","Customer Email","Product Name","Quantity");
+            foreach($transactions as $data)
+            {
+            
+                $data_array[] = array(
+                    'Reference'      => $data['reference'],
+                    'Amount'         => $data['amount'],
+                    'Currency'       => $data['currency'],
+                    'Customer'       => $data['customer']['firstname'].' '. $data['customer']['lastname'] ,
+                    'Customer Email' => $data['customer']['email'] ,
+                    'Product Name'   => $data['order']['title'],
+                    'Quantity'       => $data['order']['quantity'],
+                );
+            }
+      
+            ini_set('max_execution_time', 0);
+            ini_set('memory_limit', '4000M');
+            try {
+                $spreadSheet = new Spreadsheet();
+                $spreadSheet->getActiveSheet()->getDefaultColumnDimension()->setWidth(20);
+                foreach($transactions as $tran){
+                    $spreadSheet->getActiveSheet()->fromArray($data_array);
+                }
+                $fileName = $data['reference'].' Transaction Report';
+            
+                $Excel_writer = new Xls($spreadSheet);
+                header('Content-Type: application/vnd.ms-excel');
+                header('Content-Disposition: attachment;filename='.$fileName.'.xls');
+                header('Cache-Control: max-age=0');
+                ob_end_clean();
+                $Excel_writer->save('php://output');
+                exit();
+            } catch (Exception $e) {
+                return;
+            }
+          
+        }else{
+        
+            $response = (tabler_ui_html_response(['No data is available between the dates selected '. $request->parent_category]))->setType(UiResponse::TYPE_SUCCESS);
+
+            return back()->with('UiResponse', $response);
+        }
+    
+                      
     }
 
 

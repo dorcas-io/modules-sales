@@ -15,6 +15,7 @@ Route::group(['namespace' => 'Dorcas\ModulesSales\Http\Controllers', 'prefix' =>
 
 	Route::get('/sales-product/{id}', 'ModulesSalesController@product_index')->name('sales-products-single');
     Route::put('/sales-product/{id}', 'ModulesSalesController@product_update');
+    Route::put('/sales-product-barcode/{id}', 'ModulesSalesController@product_update_barcode');
     Route::delete('/sales-product/{id}', 'ModulesSalesController@product_delete');
     Route::post('/sales-product/{id}/images', 'ModulesSalesController@product_addImage')->name('sales-product-single-images');
     Route::get('/sales-product/{id}/images', 'ModulesSalesController@product_redirect');
@@ -34,12 +35,14 @@ Route::group(['namespace' => 'Dorcas\ModulesSales\Http\Controllers', 'prefix' =>
     Route::get('/sales-shipping-routes', 'ModulesSalesController@shipping_routes')->name('sales-shipping-routes');
     Route::post('/sales-shipping-routes', 'ModulesSalesController@shipping_routes_post')->name('sales-shipping-routes-post');
 
-
-
+    Route::get('/sales-report-routes', 'ModulesSalesController@salesReport')->name('sales-report-routes');
+    Route::post('/sales-report-generate', 'ModulesSalesController@generateSalesReport')->name('sales-report-generate');
+    
 
 	//Invoices
 	Route::get('/sales-invoices', 'ModulesSalesController@invoices_index')->name('sales-invoices');
-	//Route::get('/orders', 'Orders@index')->name('apps.invoicing.orders');
+    Route::get('/invoices/{id}', 'ModulesSalesController@invoices_generate')->name('invoice-generate');
+	// Route::get('/orders', 'Orders@index')->name('apps.invoicing.orders');
 
 
 	//orders
@@ -49,11 +52,13 @@ Route::group(['namespace' => 'Dorcas\ModulesSales\Http\Controllers', 'prefix' =>
     Route::post('/sales-orders-new', 'ModulesSalesController@order_create');
     Route::get('/sales-order/{id}', 'ModulesSalesController@order_index')->name('sales-orders-single');
     Route::put('/sales-order/{id}', 'ModulesSalesController@order_update');
+    Route::put('/sales-order-status/{id}', 'ModulesSalesController@order_status_update');
     Route::delete('/sales-order/{id}', 'ModulesSalesController@order_delete');
     Route::put('/sales-order/{id}/customers', 'ModulesSalesController@order_updateCustomerOrder');
     Route::delete('/sales-order/{id}/customers', 'ModulesSalesController@order_deleteCustomer');
 
 
+    Route::post('/map-category','ModulesSalesController@mapCategory');
 });
 
 

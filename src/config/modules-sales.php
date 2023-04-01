@@ -1,5 +1,6 @@
 <?php
 
 return [
-    'title' => 'Sales'
+    'title' => 'Sales',
+     'allow_variant_inventory' => "sss"
 ];

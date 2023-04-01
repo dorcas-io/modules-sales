@@ -19,7 +19,7 @@
                            data-pagination="true"
                            data-search="false"
                            data-side-pagination="server"
-                           data-show-refresh="true"
+                           data-show-refresh="false"
                            data-unique-id="id"
                            data-id-field="id"
                            data-row-attributes="formatOrders"
@@ -35,10 +35,12 @@
 
 		                    <th data-field="invoice_number">Invoice #</th>
 		                    <th data-field="title">Title</th>
+                            <th data-field="customer">Customer</th>
 		                    <th data-field="description">Description</th>
 		                    <th data-field="currency">Currency</th>
 		                    <th data-field="amount.formatted">Amount</th>
 		                    <th data-field="cart_content">Product(s)</th>
+                            {{-- <th data-field="status">Status</th> --}}
 		                    <th data-field="reminder_on">Reminder?</th>
 		                    <th data-field="due_at">Due At</th>
 		                    <th data-field="created_at">Created</th>
@@ -59,6 +61,7 @@
                             @slot('buttons')
                                 <a href="{{ route('sales-orders-new') }}" class="btn btn-primary btn-sm">New Orders</a>
                             @endslot
+                           
                         @endcomponent
 		            </div>
                 </div>
