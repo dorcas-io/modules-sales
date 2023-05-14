@@ -36,9 +36,9 @@
 
             <div class="col-md-4">
                 <div class="card card-profile">
-                    <div class="card-header" v-bind:style="{ 'background-image': 'url(' + backgroundImage + ')' }"></div>
+{{--                    <div class="card-header" v-bind:style="{ 'background-image': 'url(' + backgroundImage + ')' }"></div>--}}
                     <div class="card-body text-center">
-                        <img class="card-profile-img" v-bind:src="photo">
+{{--                        <img class="card-profile-img" v-bind:src="photo">--}}
                         <h3 class="mb-3">@{{ product.name }}</h3>
                         <p class="mb-4">
                             @{{ product.description }}
