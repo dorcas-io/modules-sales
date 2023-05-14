@@ -340,7 +340,7 @@ class ModulesSalesController extends Controller {
     
         if (!empty($subdomain)){
             $apiUrl =  $this->data['http_protocol'] . '/api/is_partner';
-            $res =  Http::withoutVerifying()->get($apiUrl);
+            $res =  Http::get($apiUrl);
             $data = json_decode($res);
             $this->data['parent_categories'] = $data->extra_data->marketplaceConfig->sales_categories ?? [];
            
