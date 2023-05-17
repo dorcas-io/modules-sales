@@ -161,7 +161,7 @@ class ModulesSalesController extends Controller {
         $subdomain = get_dorcas_subdomain();
 
         $base_domain = new Uri(config('app.url'));
-        $base_domain_host = $uri->getHost();
+        $base_domain_host = $base_domain->getHost();
         
         if (env("DORCAS_EDITION","business") === "business") {
             $multiTenant = false;
