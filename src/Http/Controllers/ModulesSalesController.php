@@ -21,6 +21,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Reader\Exception;
 use PhpOffice\PhpSpreadsheet\Writer\Xls;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use GuzzleHttp\Psr7\Uri;
 
 
 
@@ -167,7 +168,19 @@ class ModulesSalesController extends Controller {
 
         $subdomain = get_dorcas_subdomain();
 
-        $storeURL = "https://store.".$subdomain;
+        $base_domain = new Uri(config('app.url'));
+        $base_domain_host = $base_domain->getHost();
+        
+        if (env("DORCAS_EDITION","business") === "business") {
+            $multiTenant = false;
+            $dorcas_store_url = "https://store.".$subdomain;
+        } elseif ( env("DORCAS_EDITION","business") === "community" || env("DORCAS_EDITION","business") === "enterprise" ) {
+            $multiTenant = true;
+            $parts = explode('.', str_replace("." . $base_domain_host, "", $subdomain) );
+            $dorcas_store_url = "https://" .  $parts[0] . ".store." . $base_domain_host;
+        }
+
+        $storeURL = $dorcas_store_url;
 
         if (!empty($subdomain)) {
             //$this->data['header']['title'] .= " (<a target='_blank' href='".$subdomain."/store'>Open Store URL</a>)";
