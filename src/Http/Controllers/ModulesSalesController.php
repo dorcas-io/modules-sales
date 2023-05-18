@@ -16,14 +16,19 @@ use Illuminate\Support\Collection;
 use Illuminate\Auth\Access\AuthorizationException;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Intervention\Image\ImageManager;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Reader\Exception;
 use PhpOffice\PhpSpreadsheet\Writer\Xls;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
-use function PHPSTORM_META\elementType;
+
+
+//use function PHPSTORM_META\elementType;
 
 class ModulesSalesController extends Controller {
+
+
 
     public function __construct()
     {
@@ -36,6 +41,9 @@ class ModulesSalesController extends Controller {
             'submenuAction' => '',
             'variant_inventory' =>  'Inventory'
         ];
+
+
+
     }
 
     public function index()
@@ -526,8 +534,13 @@ class ModulesSalesController extends Controller {
             if ($request->action === 'add_product_image') {
                 # update the business information
                 $file = $request->file('image');
+//                dd(file_get_contents($file->getRealPath()));
+//                dd( $file->getClientOriginalName());
+
                 $query = $sdk->createProductResource($id)->addMultipartParam('image', file_get_contents($file->getRealPath()), $file->getClientOriginalName())
                                                             ->send('post', ['images']);
+
+
                 # send the request
                 if (!$query->isSuccessful()) {
                     throw new \RuntimeException('Failed while uploading the product image. Please try again.');
@@ -775,16 +788,20 @@ class ModulesSalesController extends Controller {
         # validate the request
         try {
             $customerId = $request->customer;
+
             # the default customer ID
             if (strtolower($customerId) === 'add_new') {
                 # check the customer entry mode
                 $storeService = $sdk->createStoreService();
+
                 # create the store service
                 $customer = (clone $storeService)->addBodyParam('firstname', $request->customer_firstname)
                                                 ->addBodyParam('lastname', $request->customer_lastname)
                                                 ->addBodyParam('email', $request->customer_email)
                                                 ->addBodyParam('phone', $request->customer_phone)
                                                 ->send('POST', [$company->id, 'customers']);
+
+
                 # we put step 1 & 2 in one call
                 if (!$customer->isSuccessful()) {
                     throw new \RuntimeException('Failed while creating the new customer account...Please try again later.');
@@ -832,6 +849,7 @@ class ModulesSalesController extends Controller {
                 $query = $query->addBodyParam('product', $product);
             }
             $query = $query->send('post');
+
             # send the request
             if (!$query->isSuccessful()) {
                 $message = $query->errors[0]['title'] ?? '';
@@ -1311,6 +1329,8 @@ class ModulesSalesController extends Controller {
     
                       
     }
+
+
 
 
 
