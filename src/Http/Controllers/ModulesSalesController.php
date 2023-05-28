@@ -345,14 +345,16 @@ class ModulesSalesController extends Controller {
         $type = $request->query('type', 'variant');
         $parent = $request->query('parent', $id);
 
-    
+
         if (!empty($subdomain)){
             $apiUrl =  $this->data['http_protocol'] . '/api/is_partner';
             $res =  Http::withoutVerifying()->get($apiUrl);
             $data = json_decode($res);
+
             $this->data['parent_categories'] = $data->extra_data->marketplaceConfig->sales_categories ?? [];
            
         }else{
+
             $this->data['parent_categories']  = [];
         }
       
@@ -1178,6 +1180,7 @@ class ModulesSalesController extends Controller {
         $this->setViewUiResponse($request);
         $productCount = 0;
         $query = $sdk->createProductResource()->addQueryArgument('limit', 1)->addQueryArgument('product_type', 'shipping')->send('get');
+
         if ($query->isSuccessful()) {
             $productCount = $query->meta['pagination']['total'] ?? 0;
         }
@@ -1253,7 +1256,7 @@ class ModulesSalesController extends Controller {
         }
         $response = (tabler_ui_html_response(['Successfully mapped to Parent Category: '. $request->parent_category]))->setType(UiResponse::TYPE_SUCCESS);
 
-        return redirect(route('sales-shipping-routes'))->with('UiResponse', $response);
+        return redirect(route('sales-products'))->with('UiResponse', $response);
     }
 
 
