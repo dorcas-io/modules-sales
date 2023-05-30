@@ -18,7 +18,7 @@ return [
     'sales-report-routes' => [
         'title' => 'Generate Sales Report',
         'route' => 'sales-report-routes',
-        'icon' => 'fe fe-file-analytics',
+        'icon' => 'fe fe-file',
     ],
     'sales-logistics' => [
         'title' => 'Logistics',
