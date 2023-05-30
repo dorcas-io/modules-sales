@@ -35,11 +35,11 @@
 
 		                    <th data-field="invoice_number">Invoice #</th>
 		                    <th data-field="title">Title</th>
-                            <th data-field="customer">Customer</th>
-		                    <th data-field="description">Description</th>
+{{--                            <th data-field="customer">Customer</th>--}}
+{{--		                    <th data-field="description">Description</th>--}}
 		                    <th data-field="currency">Currency</th>
 		                    <th data-field="amount.formatted">Amount</th>
-		                    <th data-field="cart_content">Product(s)</th>
+		                    <th data-field="quantity">Quantity(s)</th>
                             <th data-field="status">Status</th>
 		                    <th data-field="reminder_on">Reminder?</th>
 		                    <th data-field="due_at">Due At</th>
@@ -187,6 +187,8 @@
             }
         });
     function formatOrders (row, index) {
+		row.customers[0];
+
         if (typeof row.products !== 'undefined' && typeof row.products.data !== 'undefined' && row.products.data.length > 0) {
             row.cart_content = row.products.data.length;
 
@@ -194,7 +196,10 @@
             // should be an inline product
             row.cart_content = 1;
         }
-        row.reminder_on = '<div class="tag">' + (row.has_reminders ? 'Yes' : 'No') + '</div>';
+
+
+
+		row.reminder_on = '<div class="tag">' + (row.has_reminders ? 'Yes' : 'No') + '</div>';
         row.due_at = typeof row.due_at !== 'undefined' && row.due_at !== null ? moment(row.due_at).format('DD MMM, YYYY') : '';
         row.created_at = moment(row.created_at).format('DD MMM, YYYY');
         row.buttons = '<a class="btn btn-success btn-sm" data-index="' + index + '" data-id="' + row.id + '" data-action="view" href="/msl/sales-order/' + row.id + '">View</a>';
