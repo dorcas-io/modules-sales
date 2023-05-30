@@ -34,7 +34,7 @@
 					<div class="card-header">
 						<h3 class="card-title">Provider Shipping</h3>
 						<div class="card-options">
-							<a href="#" class="btn btn-primary btn-sm">Edit</a>
+							<a href="#" class="btn btn-success btn-sm">Edit</a>
 						</div>
 					</div>
 					<div class="card-body">
@@ -49,7 +49,7 @@
 					<div class="card-header">
 						<h3 class="card-title">Fulfilment</h3>
 						<div class="card-options">
-							<a href="#" class="btn btn-primary btn-sm">Edit</a>
+							<a href="#" class="btn btn-danger btn-sm">Edit</a>
 						</div>
 					</div>
 					<div class="card-body">
