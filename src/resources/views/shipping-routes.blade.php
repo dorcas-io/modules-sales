@@ -154,7 +154,7 @@
                 this.shippingRoute = shippingRoute;
                 this.shippingRoute.index = index;
                 $('#shipping-route-modal').modal('show');
-                console.log(shippingRoute)
+                //console.log(shippingRoute)
             },
             deleteRoute: function (id,index,name) {
                 var context = this;
