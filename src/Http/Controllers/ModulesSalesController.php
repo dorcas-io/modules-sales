@@ -1217,8 +1217,8 @@ class ModulesSalesController extends Controller {
 
     public function shipping_routes(Request $request, Sdk $sdk)
     {
-        $this->data['page']['title'] .= ' &rsaquo; Shipping Routes';
-        $this->data['header']['title'] .= ' &rsaquo; Shipping Routes';
+        $this->data['page']['title'] .= ' &rsaquo; Manual Shipping Routes';
+        $this->data['header']['title'] .= ' &rsaquo; Manual Shipping Routes';
         $this->data['selectedSubMenu'] = 'sales-logistics';
         $this->data['submenuAction'] = '';
 

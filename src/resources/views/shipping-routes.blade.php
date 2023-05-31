@@ -80,32 +80,17 @@
             productsCount: {{ $productsCount }},
             shippingRoutes: {!! json_encode(!empty($shippingRoutes) ? $shippingRoutes : []) !!},
             shippingRoute: { index: '', name:'', description:'', prices: '', currency: '' },
-            //routeName: '',
-            // routeType: '',
-            // routeCurrency: '',
-            // routePrice: ''
         },
         mounted: function() {
             //console.log(this.productsCount)
             //console.log(this.shippingRoutes)
         },
         computed: {
-            routeName: {
-                get: function () {
-                    let original = this.shippingRoute.name;
-                    let ind = this.shippingRoute.name.indexOf("(");
-                    return ind === -1 ? this.shippingRoute.name : this.shippingRoute.name.split(' (')[0];
-                },
-                set: function (newValue) {
-                    this.routeName = newValue;
-                    // do some action
-                }
+            routeName: function() {
+                let original = this.shippingRoute.name;
+                let ind = this.shippingRoute.name.indexOf("(");
+                return ind === -1 ? this.shippingRoute.name : this.shippingRoute.name.split(' (')[0];
             },
-            // routeName: function() {
-            //     let original = this.shippingRoute.name;
-            //     let ind = this.shippingRoute.name.indexOf("(");
-            //     return ind === -1 ? this.shippingRoute.name : this.shippingRoute.name.split(' (')[0];
-            // },
             routeType: function() {
                 let original = this.shippingRoute.name;
                 let ind = this.shippingRoute.name.indexOf("(");
@@ -175,10 +160,10 @@
                 $('#shipping-route-modal').modal('show');
             },
             editRoute: function(id,index,name) {
-                console.log(index)
-                console.log(this.shippingRoutes)
+                //console.log(index)
+                //console.log(this.shippingRoutes)
                 let shippingRoute = typeof this.shippingRoutes[index] !== 'undefined' ? this.shippingRoutes[index] : null;
-                console.log(shippingRoute)
+                //console.log(shippingRoute)
                 this.shippingRoute = shippingRoute;
                 this.shippingRoute.index = index;
                 $('#shipping-route-modal').modal('show');
