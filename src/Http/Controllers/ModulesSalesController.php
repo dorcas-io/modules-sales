@@ -1276,7 +1276,7 @@ class ModulesSalesController extends Controller {
                 $message = $response->errors[0]['title'] ?? '';
                 throw new \RuntimeException('Failed while '.$action.'ing the shipping route.'.$message);
             }
-            $response = (tabler_ui_html_response(['Successfully '.$action.'ed the Shipping Route: '. $request->name]))->setType(UiResponse::TYPE_SUCCESS);
+            $response = (tabler_ui_html_response(['Successfully '.$action.'ed the Shipping Route: '. $productName]))->setType(UiResponse::TYPE_SUCCESS);
         } catch (\Exception $e) {
             $response = (tabler_ui_html_response([$e->getMessage()]))->setType(UiResponse::TYPE_ERROR);
         }
