@@ -176,9 +176,9 @@
             },
             editRoute: function(id,index,name) {
                 console.log(index)
-                console.log(this.shippingRoute)
+                console.log(this.shippingRoutes)
                 let shippingRoute = typeof this.shippingRoutes[index] !== 'undefined' ? this.shippingRoutes[index] : null;
-                //console.log(shippingRoute)
+                console.log(shippingRoute)
                 this.shippingRoute = shippingRoute;
                 this.shippingRoute.index = index;
                 $('#shipping-route-modal').modal('show');
