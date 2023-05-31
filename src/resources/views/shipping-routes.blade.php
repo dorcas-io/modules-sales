@@ -80,7 +80,7 @@
             productsCount: {{ $productsCount }},
             shippingRoutes: {!! json_encode(!empty($shippingRoutes) ? $shippingRoutes : []) !!},
             shippingRoute: { index: '', name:'', description:'', prices: '', currency: '' },
-            // routeName: '',
+            routeName: '',
             // routeType: '',
             // routeCurrency: '',
             // routePrice: ''
@@ -98,25 +98,20 @@
                 },
                 set: function (newValue) {
                     this.routeName = newValue;
+                    // do some action
                 }
             },
-            routeType: {
-                get: function () {
-                    let original = this.shippingRoute.name;
-                    let ind = this.shippingRoute.name.indexOf("(");
-                    let rtype = ind === -1 ? "Inter-State)" : this.shippingRoute.name.split(' (')[1];
-                    return rtype.substring(0, rtype.length - 1);
-                },
-                set: function (newValue) {
-                    this.routeType = newValue;
-                }
-            },
-            // routeType: function() {
+            // routeName: function() {
             //     let original = this.shippingRoute.name;
             //     let ind = this.shippingRoute.name.indexOf("(");
-            //     let rtype = ind === -1 ? "Inter-State)" : this.shippingRoute.name.split(' (')[1];
-            //     return rtype.substring(0, rtype.length - 1);
+            //     return ind === -1 ? this.shippingRoute.name : this.shippingRoute.name.split(' (')[0];
             // },
+            routeType: function() {
+                let original = this.shippingRoute.name;
+                let ind = this.shippingRoute.name.indexOf("(");
+                let rtype = ind === -1 ? "Inter-State)" : this.shippingRoute.name.split(' (')[1];
+                return rtype.substring(0, rtype.length - 1);
+            },
             routeCurrency: function() {
                 let index = this.shippingRoute.index;
                 let shippingRoute = this.shippingRoute.index !== '' ? this.shippingRoute : null;
@@ -181,10 +176,10 @@
             },
             editRoute: function(id,index,name) {
                 console.log(index)
+                console.log(this.shippingRoute)
                 let shippingRoute = typeof this.shippingRoutes[index] !== 'undefined' ? this.shippingRoutes[index] : null;
                 //console.log(shippingRoute)
                 this.shippingRoute = shippingRoute;
-                console.log(this.shippingRoutes)
                 this.shippingRoute.index = index;
                 $('#shipping-route-modal').modal('show');
                 //console.log(shippingRoute)
