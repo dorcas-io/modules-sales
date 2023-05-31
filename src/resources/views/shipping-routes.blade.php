@@ -87,7 +87,7 @@
         },
         mounted: function() {
             //console.log(this.productsCount)
-            //console.log(this.shippingRoutes)
+            console.log(this.shippingRoutes)
         },
         computed: {
             routeName: {
