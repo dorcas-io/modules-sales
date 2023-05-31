@@ -1259,8 +1259,9 @@ class ModulesSalesController extends Controller {
             $price = ['currency' => $request->currency, 'price' => $request->price];
             # create the price payload
             $productID = $request->product_id;
+            $productName = $request->name . "(" . $request->route_type . ")";
             $resource = empty($productID) ? $sdk->createProductResource() : $sdk->createProductResource($productID);
-            $resource = $resource->addBodyParam('name', $request->name)
+            $resource = $resource->addBodyParam('name', $productName)
                                     ->addBodyParam('description', $request->description)
                                     ->addBodyParam('prices', [$price])
                                     ->addBodyParam('product_type', $request->product_type);

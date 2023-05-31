@@ -11,10 +11,20 @@
 					<fieldset class="form-fieldset">
 						<div class="row">
 		                    <div class="form-group col-md-6">
-		                        <input class="form-control" id="name" type="text" name="name" maxlength="80" v-model="shippingRoute.name" required>
+		                        <input class="form-control" id="name" type="text" name="name" maxlength="80" v-model="routeName" required>
 		                        <label class="form-label" for="name">Route Title (e.g. InterCity)</label>
 		                    </div>
 		                    <div class="form-group col-md-6">
+		                        <select class="form-control" id="route_type" name="route_type" v-model="routeType" required>
+		                            <option value="Intra-State">Intra-State</option>
+									<option value="Inter-State">Inter-State</option>
+									<option value="Interational">Interational</option>
+		                        </select>
+		                        <label class="form-label" for="currency">Route Type</label>
+		                    </div>
+		                </div>
+						<div class="row">
+		                    <div class="form-group col-md-12">
 		                        <textarea class="form-control" id="description" name="description" v-model="shippingRoute.description"></textarea>
 		                        <label class="form-label" for="description">Route Description</label>
 		                    </div>

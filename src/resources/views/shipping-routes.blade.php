@@ -86,6 +86,17 @@
             //console.log(this.shippingRoutes)
         },
         computed: {
+            routeName: function() {
+                let original = this.shippingRoute.name;
+                let ind = shippingRoute.name.indexOf("(");
+                return ind === -1 ? shippingRoute.name : shippingRoute.name.split(' (')[0];
+            },
+            routeType: function() {
+                let original = this.shippingRoute.name;
+                let ind = shippingRoute.name.indexOf("(");
+                let rtype = ind === -1 ? "Inter-State)" : shippingRoute.name.split(' (')[1];
+                return rtype.substring(0, rtype.length - 1);
+            },
             routeCurrency: function() {
                 let index = this.shippingRoute.index;
                 let shippingRoute = this.shippingRoute.index !== '' ? this.shippingRoute : null;
