@@ -81,20 +81,31 @@
             shippingRoutes: {!! json_encode(!empty($shippingRoutes) ? $shippingRoutes : []) !!},
             shippingRoute: { index: '', name:'', description:'', prices: '', currency: '' },
             routeName: '',
-            routeType: '',
-            routeCurrency: '',
-            routePrice: ''
+            // routeType: '',
+            // routeCurrency: '',
+            // routePrice: ''
         },
         mounted: function() {
             //console.log(this.productsCount)
             //console.log(this.shippingRoutes)
         },
         computed: {
-            routeName: function() {
-                let original = this.shippingRoute.name;
-                let ind = this.shippingRoute.name.indexOf("(");
-                return ind === -1 ? this.shippingRoute.name : this.shippingRoute.name.split(' (')[0];
+            routeName: {
+                get: function () {
+                    let original = this.shippingRoute.name;
+                    let ind = this.shippingRoute.name.indexOf("(");
+                    return ind === -1 ? this.shippingRoute.name : this.shippingRoute.name.split(' (')[0];
+                },
+                set: function (newValue) {
+                    this.routeName = newValue;
+                    // do some action
+                }
             },
+            // routeName: function() {
+            //     let original = this.shippingRoute.name;
+            //     let ind = this.shippingRoute.name.indexOf("(");
+            //     return ind === -1 ? this.shippingRoute.name : this.shippingRoute.name.split(' (')[0];
+            // },
             routeType: function() {
                 let original = this.shippingRoute.name;
                 let ind = this.shippingRoute.name.indexOf("(");
@@ -120,18 +131,18 @@
             }
         },
         methods: {
-            updateRouteName: function (newValue) {
-                this.routeName = newValue;
-            },
-            updateRouteType: function (newValue) {
-                this.routeType = newValue;
-            },
-            updateRouteCurrency: function (newValue) {
-                this.routeCurrency = newValue;
-            },
-            updateRoutePrice: function (newValue) {
-                this.routePrice = newValue;
-            },
+            // updateRouteName: function (newValue) {
+            //     this.routeName = newValue;
+            // },
+            // updateRouteType: function (newValue) {
+            //     this.routeType = newValue;
+            // },
+            // updateRouteCurrency: function (newValue) {
+            //     this.routeCurrency = newValue;
+            // },
+            // updateRoutePrice: function (newValue) {
+            //     this.routePrice = newValue;
+            // },
             clickAction: function (event) {
                 //console.log(event.target);
 
