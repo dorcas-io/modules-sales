@@ -23,7 +23,7 @@
 						</div>
 					</div>
 					<div class="card-body">
-						If you wish to handle shipping & delivery by yourself, set the <strong>Routes</strong> &amp; <strong>Pricing</strong> here
+						If you wish to handle shipping by yourself (deliver goods to customers), set your <strong>Routes</strong> &amp; <strong>Pricing</strong> here
 					</div>
 				</div>
 			</div>
@@ -34,7 +34,7 @@
 					<div class="card-header">
 						<h3 class="card-title">Provider Shipping</h3>
 						<div class="card-options">
-							<a href="#" class="btn btn-success btn-sm">Edit</a>
+							<a href="{{ route('sales-logistics-provider') }}" class="btn btn-success btn-sm">Manage</a>
 						</div>
 					</div>
 					<div class="card-body">
@@ -49,7 +49,7 @@
 					<div class="card-header">
 						<h3 class="card-title">Fulfilment</h3>
 						<div class="card-options">
-							<a href="#" class="btn btn-danger btn-sm">Edit</a>
+							<a href="{{ route('sales-logistics-fulfilmentr') }}" class="btn btn-danger btn-sm">Manage</a>
 						</div>
 					</div>
 					<div class="card-body">

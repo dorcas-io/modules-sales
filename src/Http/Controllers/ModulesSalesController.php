@@ -1186,8 +1186,8 @@ class ModulesSalesController extends Controller {
 
     public function logistics(Request $request, Sdk $sdk)
     {
-        $this->data['page']['title'] .= " &rsaquo; Sales Logistics";
-        $this->data['header']['title'] .= ' &rsaquo; Sales Logistics';
+        $this->data['page']['title'] .= " &rsaquo; Logistics";
+        $this->data['header']['title'] .= ' &rsaquo; Logistics';
         $this->data['selectedSubMenu'] = 'sales-logistics';
 
         $this->setViewUiResponse($request);
@@ -1196,8 +1196,8 @@ class ModulesSalesController extends Controller {
 
     public function logistics_provider(Request $request, Sdk $sdk)
     {
-        $this->data['page']['title'] .= " &rsaquo; Sales Logistics Provider";
-        $this->data['header']['title'] .= ' &rsaquo; Sales Logistics Provider';
+        $this->data['page']['title'] .= " &rsaquo; Logistics Provider";
+        $this->data['header']['title'] .= ' &rsaquo; Logistics Provider';
         $this->data['selectedSubMenu'] = 'sales-logistics';
 
         $this->setViewUiResponse($request);
@@ -1206,8 +1206,8 @@ class ModulesSalesController extends Controller {
 
     public function logistics_fulfilment(Request $request, Sdk $sdk)
     {
-        $this->data['page']['title'] .= " &rsaquo; Sales Logistics Fulfilment";
-        $this->data['header']['title'] .= ' &rsaquo; Sales Logistics Fulfilment';
+        $this->data['page']['title'] .= " &rsaquo; Logistics Fulfilment";
+        $this->data['header']['title'] .= ' &rsaquo; Logistics Fulfilment';
         $this->data['selectedSubMenu'] = 'sales-logistics';
 
         $this->setViewUiResponse($request);
