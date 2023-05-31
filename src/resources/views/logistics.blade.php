@@ -49,7 +49,7 @@
 					<div class="card-header">
 						<h3 class="card-title">Fulfilment</h3>
 						<div class="card-options">
-							<a href="{{ route('sales-logistics-fulfilmentr') }}" class="btn btn-danger btn-sm">Manage</a>
+							<a href="{{ route('sales-logistics-fulfilment') }}" class="btn btn-danger btn-sm">Manage</a>
 						</div>
 					</div>
 					<div class="card-body">
