@@ -79,7 +79,11 @@
         data: {
             productsCount: {{ $productsCount }},
             shippingRoutes: {!! json_encode(!empty($shippingRoutes) ? $shippingRoutes : []) !!},
-            shippingRoute: { index: '', name:'', description:'', prices: '', currency: '' }
+            shippingRoute: { index: '', name:'', description:'', prices: '', currency: '' },
+            routeName: '',
+            routeType: '',
+            routeCurrency: '',
+            routePrice: ''
         },
         mounted: function() {
             //console.log(this.productsCount)
@@ -116,6 +120,18 @@
             }
         },
         methods: {
+            updateRouteName: function (newValue) {
+                this.routeName = newValue;
+            },
+            updateRouteType: function (newValue) {
+                this.routeType = newValue;
+            },
+            updateRouteCurrency: function (newValue) {
+                this.routeCurrency = newValue;
+            },
+            updateRoutePrice: function (newValue) {
+                this.routePrice = newValue;
+            },
             clickAction: function (event) {
                 //console.log(event.target);
 

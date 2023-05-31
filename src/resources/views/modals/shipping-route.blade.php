@@ -11,11 +11,11 @@
 					<fieldset class="form-fieldset">
 						<div class="row">
 		                    <div class="form-group col-md-6">
-		                        <input class="form-control" id="name" type="text" name="name" maxlength="80" v-model="routeName" required>
+		                        <input class="form-control" id="name" type="text" name="name" maxlength="80" v-model="routeName" @input="updateRouteName(routeName)" required>
 		                        <label class="form-label" for="name">Route Title (e.g. InterCity)</label>
 		                    </div>
 		                    <div class="form-group col-md-6">
-		                        <select class="form-control" id="route_type" name="route_type" v-model="routeType" required>
+		                        <select class="form-control" id="route_type" name="route_type" v-model="routeType" @input="updateRouteType(routeType)" required>
 		                            <option value="Intra-State">Intra-State</option>
 									<option value="Inter-State">Inter-State</option>
 									<option value="Interational">Interational</option>
@@ -37,7 +37,7 @@
 		                        <label class="form-label" for="currency">Currency</label>
 		                    </div>
 		                    <div class="form-group col-md-6">
-		                        <input class="form-control" id="price" type="number" name="price" maxlength="10" min="0" v-model="routePrice" required>
+		                        <input class="form-control" id="price" type="number" name="price" maxlength="10" min="0" v-model="routePrice" @input="updateRoutePrice(routePrice)" required>
 		                        <label class="form-label" for="price">Unit Price</label>
 		                    </div>
 		                </div>
