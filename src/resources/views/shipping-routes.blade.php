@@ -80,14 +80,14 @@
             productsCount: {{ $productsCount }},
             shippingRoutes: {!! json_encode(!empty($shippingRoutes) ? $shippingRoutes : []) !!},
             shippingRoute: { index: '', name:'', description:'', prices: '', currency: '' },
-            routeName: '',
+            //routeName: '',
             // routeType: '',
             // routeCurrency: '',
             // routePrice: ''
         },
         mounted: function() {
             //console.log(this.productsCount)
-            console.log(this.shippingRoutes)
+            //console.log(this.shippingRoutes)
         },
         computed: {
             routeName: {
