@@ -80,7 +80,7 @@
             productsCount: {{ $productsCount }},
             shippingRoutes: {!! json_encode(!empty($shippingRoutes) ? $shippingRoutes : []) !!},
             shippingRoute: { index: '', name:'', description:'', prices: '', currency: '' },
-            routeName: '',
+            // routeName: '',
             // routeType: '',
             // routeCurrency: '',
             // routePrice: ''
@@ -175,10 +175,11 @@
                 $('#shipping-route-modal').modal('show');
             },
             editRoute: function(id,index,name) {
-                //console.log(index)
+                console.log(index)
                 let shippingRoute = typeof this.shippingRoutes[index] !== 'undefined' ? this.shippingRoutes[index] : null;
                 //console.log(shippingRoute)
                 this.shippingRoute = shippingRoute;
+                console.log(this.shippingRoute)
                 this.shippingRoute.index = index;
                 $('#shipping-route-modal').modal('show');
                 //console.log(shippingRoute)
@@ -195,7 +196,7 @@
                     showLoaderOnConfirm: true,
                     preConfirm: (delete_route) => {
                     this.deleting = true;
-                        return axios.delete("/msl/sales-shipping-route/" + id)
+                        return axios.delete("/msl/sales-product/" + id)
                             .then(function (response) {
                                 //console.log(response);
                                 context.visible = false;
