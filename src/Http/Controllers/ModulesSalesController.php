@@ -1224,7 +1224,7 @@ class ModulesSalesController extends Controller {
 
         $this->setViewUiResponse($request);
         $productCount = 0;
-        $query = $sdk->createProductResource()->addQueryArgument('limit', 1)->addQueryArgument('product_type', 'shipping')->send('get');
+        $query = $sdk->createProductResource()->addQueryArgument('product_type', 'shipping')->send('get'); //->addQueryArgument('limit', 1)
 
         if ($query->isSuccessful()) {
             $productCount = $query->meta['pagination']['total'] ?? 0;
