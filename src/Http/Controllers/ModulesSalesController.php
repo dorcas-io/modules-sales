@@ -555,7 +555,6 @@ class ModulesSalesController extends Controller {
                 $query = $sdk->createProductResource($id)->addMultipartParam('image', file_get_contents($file->getRealPath()), $file->getClientOriginalName())
                                                             ->send('post', ['images']);
 
-
                 # send the request
                 if (!$query->isSuccessful()) {
                     throw new \RuntimeException('Failed while uploading the product image. Please try again.');
