@@ -32,6 +32,12 @@ Route::group(['namespace' => 'Dorcas\ModulesSales\Http\Controllers', 'prefix' =>
     Route::post('/sales-variant-type', 'ModulesSalesController@variant_type_set')->name('sales-variant-type-set');
     Route::post('/sales-variant-type-remove', 'ModulesSalesController@variant_type_remove')->name('sales-variant-type-remove');
 
+    Route::get('/sales-logistics', 'ModulesSalesController@logistics')->name('sales-logistics');
+
+    Route::get('/sales-logistics-provider', 'ModulesSalesController@logistics_provider')->name('sales-logistics-provider');
+
+    Route::get('/sales-logistics-fulfilment', 'ModulesSalesController@logistics_fulfilment')->name('sales-logistics-fulfilment');
+
     Route::get('/sales-shipping-routes', 'ModulesSalesController@shipping_routes')->name('sales-shipping-routes');
     Route::post('/sales-shipping-routes', 'ModulesSalesController@shipping_routes_post')->name('sales-shipping-routes-post');
 

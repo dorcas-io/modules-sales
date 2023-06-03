@@ -79,13 +79,24 @@
         data: {
             productsCount: {{ $productsCount }},
             shippingRoutes: {!! json_encode(!empty($shippingRoutes) ? $shippingRoutes : []) !!},
-            shippingRoute: { index: '', name:'', description:'', prices: '', currency: '' }
+            shippingRoute: { index: '', name:'', description:'', prices: '', currency: '' },
         },
         mounted: function() {
             //console.log(this.productsCount)
             //console.log(this.shippingRoutes)
         },
         computed: {
+            routeName: function() {
+                let original = this.shippingRoute.name;
+                let ind = this.shippingRoute.name.indexOf("(");
+                return ind === -1 ? this.shippingRoute.name : this.shippingRoute.name.split(' (')[0];
+            },
+            routeType: function() {
+                let original = this.shippingRoute.name;
+                let ind = this.shippingRoute.name.indexOf("(");
+                let rtype = ind === -1 ? "Inter-State)" : this.shippingRoute.name.split(' (')[1];
+                return rtype.substring(0, rtype.length - 1);
+            },
             routeCurrency: function() {
                 let index = this.shippingRoute.index;
                 let shippingRoute = this.shippingRoute.index !== '' ? this.shippingRoute : null;
@@ -105,6 +116,18 @@
             }
         },
         methods: {
+            // updateRouteName: function (newValue) {
+            //     this.routeName = newValue;
+            // },
+            // updateRouteType: function (newValue) {
+            //     this.routeType = newValue;
+            // },
+            // updateRouteCurrency: function (newValue) {
+            //     this.routeCurrency = newValue;
+            // },
+            // updateRoutePrice: function (newValue) {
+            //     this.routePrice = newValue;
+            // },
             clickAction: function (event) {
                 //console.log(event.target);
 
@@ -138,12 +161,13 @@
             },
             editRoute: function(id,index,name) {
                 //console.log(index)
+                //console.log(this.shippingRoutes)
                 let shippingRoute = typeof this.shippingRoutes[index] !== 'undefined' ? this.shippingRoutes[index] : null;
                 //console.log(shippingRoute)
                 this.shippingRoute = shippingRoute;
                 this.shippingRoute.index = index;
                 $('#shipping-route-modal').modal('show');
-                console.log(shippingRoute)
+                //console.log(shippingRoute)
             },
             deleteRoute: function (id,index,name) {
                 var context = this;
@@ -157,7 +181,7 @@
                     showLoaderOnConfirm: true,
                     preConfirm: (delete_route) => {
                     this.deleting = true;
-                        return axios.delete("/msl/sales-shipping-route/" + id)
+                        return axios.delete("/msl/sales-product/" + id)
                             .then(function (response) {
                                 //console.log(response);
                                 context.visible = false;

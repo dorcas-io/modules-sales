@@ -1182,16 +1182,48 @@ class ModulesSalesController extends Controller {
 
     }
 
+
+    public function logistics(Request $request, Sdk $sdk)
+    {
+        $this->data['page']['title'] .= " &rsaquo; Logistics";
+        $this->data['header']['title'] .= ' &rsaquo; Logistics';
+        $this->data['selectedSubMenu'] = 'sales-logistics';
+
+        $this->setViewUiResponse($request);
+        return view('modules-sales::logistics', $this->data);
+    }
+
+    public function logistics_provider(Request $request, Sdk $sdk)
+    {
+        $this->data['page']['title'] .= " &rsaquo; Logistics Provider";
+        $this->data['header']['title'] .= ' &rsaquo; Logistics Provider';
+        $this->data['selectedSubMenu'] = 'sales-logistics';
+
+        $this->setViewUiResponse($request);
+        return view('modules-sales::logistics-provider', $this->data);
+    }
+
+    public function logistics_fulfilment(Request $request, Sdk $sdk)
+    {
+        $this->data['page']['title'] .= " &rsaquo; Logistics Fulfilment";
+        $this->data['header']['title'] .= ' &rsaquo; Logistics Fulfilment';
+        $this->data['selectedSubMenu'] = 'sales-logistics';
+
+        $this->setViewUiResponse($request);
+        return view('modules-sales::logistics-fulfilment', $this->data);
+    }
+
+
     public function shipping_routes(Request $request, Sdk $sdk)
     {
-        $this->data['page']['title'] .= ' &rsaquo; Shipping Routes';
-        $this->data['header']['title'] .= ' &rsaquo; Shipping Routes';
-        $this->data['selectedSubMenu'] = 'sales-shipping-routes';
+        $this->data['page']['title'] .= ' &rsaquo; Logistics &rsaquo; Manual Shipping';
+        $this->data['header']['title'] .= ' &rsaquo; <a href="' . route('sales-logistics') . '">Logistics</a> &rsaquo; Manual Shipping';
+        $this->data['selectedSubMenu'] = 'sales-logistics';
         $this->data['submenuAction'] = '';
 
         $this->setViewUiResponse($request);
         $productCount = 0;
-        $query = $sdk->createProductResource()->addQueryArgument('limit', 1)->addQueryArgument('product_type', 'shipping')->send('get');
+        $query = $sdk->createProductResource()->addQueryArgument('product_type', 'shipping')->send('get'); //->addQueryArgument('limit', 1)
 
         if ($query->isSuccessful()) {
             $productCount = $query->meta['pagination']['total'] ?? 0;
@@ -1226,8 +1258,9 @@ class ModulesSalesController extends Controller {
             $price = ['currency' => $request->currency, 'price' => $request->price];
             # create the price payload
             $productID = $request->product_id;
+            $productName = $request->name . " (" . $request->route_type . ")";
             $resource = empty($productID) ? $sdk->createProductResource() : $sdk->createProductResource($productID);
-            $resource = $resource->addBodyParam('name', $request->name)
+            $resource = $resource->addBodyParam('name', $productName)
                                     ->addBodyParam('description', $request->description)
                                     ->addBodyParam('prices', [$price])
                                     ->addBodyParam('product_type', $request->product_type);
@@ -1242,7 +1275,7 @@ class ModulesSalesController extends Controller {
                 $message = $response->errors[0]['title'] ?? '';
                 throw new \RuntimeException('Failed while '.$action.'ing the shipping route.'.$message);
             }
-            $response = (tabler_ui_html_response(['Successfully '.$action.'ed the Shipping Route: '. $request->name]))->setType(UiResponse::TYPE_SUCCESS);
+            $response = (tabler_ui_html_response(['Successfully '.$action.'ed the Shipping Route: '. $productName]))->setType(UiResponse::TYPE_SUCCESS);
         } catch (\Exception $e) {
             $response = (tabler_ui_html_response([$e->getMessage()]))->setType(UiResponse::TYPE_ERROR);
         }
