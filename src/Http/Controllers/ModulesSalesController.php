@@ -192,6 +192,7 @@ class ModulesSalesController extends Controller {
             $productCount = $query->meta['pagination']['total'] ?? 0;
         }
         $this->data['categories'] = $this->getProductCategories($sdk);
+
         $this->data['subdomain'] = get_dorcas_subdomain($sdk);
         # set the subdomain
         $this->data['productsCount'] = $productCount;
@@ -267,8 +268,11 @@ class ModulesSalesController extends Controller {
             'name' => 'required|string|max:80',
             'currency' => 'required|string|size:3',
             'price' => 'required|numeric',
-            'description' => 'nullable'
+            'description' => 'nullable',
+            'category' => 'required',
+            'image' => 'sometimes',
         ]);
+
         # validate the request
         try {
             $price = ['currency' => $request->currency, 'price' => $request->price];
@@ -279,12 +283,36 @@ class ModulesSalesController extends Controller {
                                     ->addBodyParam('prices', [$price]);
             # the resource
             $response = $resource->send('post');
+
+
             # send the request
             if (!$response->isSuccessful()) {
                 # it failed
                 $message = $response->errors[0]['title'] ?? '';
                 throw new \RuntimeException('Failed while adding the product. '.$message);
             }
+
+            $id = $response->getData()['id'];
+
+            $query = $sdk->createProductResource($id)->addBodyParam('id', $request->input('category'))
+                                        ->addBodyParam('category', $request->input('category'))
+                                        ->send('POST', ['categories']);
+
+            $file = $request->file('image');
+
+            $query = $sdk->createProductResource($id)->addMultipartParam('image', file_get_contents($file->getRealPath()), $file->getClientOriginalName())
+                ->send('post', ['images']);
+
+            # send the request
+            if (!$query->isSuccessful()) {
+                throw new \RuntimeException('Failed while uploading the product image. Please try again.');
+            }
+            $message = ['Successfully added new product image.'];
+
+//            # send the request
+//            if (!$query->isSuccessful()) {
+//                throw new \RuntimeException('Failed while adding the selected categories. Please try again.');
+//            }
             $response = (tabler_ui_html_response(['Successfully added product.']))->setType(UiResponse::TYPE_SUCCESS);
         } catch (\Exception $e) {
             $response = (tabler_ui_html_response([$e->getMessage()]))->setType(UiResponse::TYPE_ERROR);

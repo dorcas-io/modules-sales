@@ -6,7 +6,7 @@
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
-				<form action="" id="form-product-new" method="post">
+				<form action="" id="form-product-new" method="post" enctype="multipart/form-data">
 					{{ csrf_field() }}
 					<fieldset class="form-fieldset">
 						<div class="row">
@@ -22,6 +22,17 @@
 		                    </div>
 		                </div>
 						<div class="row">
+							<div class="form-group col-md-12">
+								 <select name="category" id="category" class="form-control">
+									 <option value="">Select Category</option>
+									 @foreach($categories as $index => $category)
+									 <option value="{{$category->id}}">{{$category->name}}</option>
+									 @endforeach
+								 </select>
+								<label class="form-label" for="category">Product Category</label>
+							</div>
+						</div>
+						<div class="row">
 		                    <div class="form-group col-md-6">
 		                        <input class="form-control" id="price" type="number" name="price" maxlength="10" min="0">
 		                        <label class="form-label" for="price">Unit Price</label>
@@ -30,6 +41,13 @@
 		                        <textarea class="form-control" id="description" name="description"></textarea>
 		                        <label class="form-label" for="description">Product Description</label>
 		                    </div>
+						</div>
+						<div class="row">
+							<div class="form-group col-md-12">
+								<input class="form-control" id="image" type="file" name="image" >
+								<label class="form-label" for="image">Upload product image</label>
+							</div>
+						</div>
 					</fieldset>
 				</form>
 
