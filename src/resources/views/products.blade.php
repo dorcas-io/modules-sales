@@ -1,6 +1,29 @@
 @extends('layouts.tabler')
 @section('body_content_header_extras')
+<style>
+    .file-upload {
+        position: relative;
+        display: inline-block;
+    }
 
+    .file-upload-label {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color:#467fcf;
+        color: #fff;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .file-upload-input {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+</style>
 @endsection
 
 @section('body_content_main')
