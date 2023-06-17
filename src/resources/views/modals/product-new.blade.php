@@ -49,7 +49,7 @@
 {{--								<label class="form-label" for="image">Upload product image</label>--}}
 								<div class="file-upload">
 									<label for="upload" class="file-upload-label">Choose a file</label>
-									<input type="file" id="upload" class="file-upload-input">
+									<input type="file" id="upload" class="file-upload-input" name="image">
 								</div>
 							</div>
 						</div>

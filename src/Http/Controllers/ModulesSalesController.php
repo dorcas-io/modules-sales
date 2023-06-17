@@ -298,10 +298,12 @@ class ModulesSalesController extends Controller {
                                         ->addBodyParam('category', $request->input('category'))
                                         ->send('POST', ['categories']);
 
-            $file = $request->file('image');
+            if($request->has('image')) {
+                $file = $request->file('image');
+                $query = $sdk->createProductResource($id)->addMultipartParam('image', file_get_contents($file->getRealPath()), $file->getClientOriginalName())
+                    ->send('post', ['images']);
+            }
 
-            $query = $sdk->createProductResource($id)->addMultipartParam('image', file_get_contents($file->getRealPath()), $file->getClientOriginalName())
-                ->send('post', ['images']);
 
             # send the request
             if (!$query->isSuccessful()) {
