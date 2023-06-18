@@ -382,7 +382,7 @@ class ModulesSalesController extends Controller {
        
 
         if (!empty($subdomain)) {
-            $this->data['header']['title'] .= " (<a target='_blank' href='$storeURL'> Online Store</a>)";
+            $this->data['header']['title'] .= " (<a target='_blank' href='$storeURL'>Online Store</a>)";
 
             // $this->data['subdomains'] = $subdomains = $this->getSubDomains($sdk);
             // dd( $this->data['subdomains']);
