@@ -24,7 +24,7 @@
 						<div class="row">
 							<div class="form-group col-md-12">
 								 <select name="category" id="category" class="form-control">
-									 @if($categories != null)
+									 @if(count($categories) < 0)
 										 @foreach($categories as $index => $category)
 										 <option value="{{$category['id']}}">{{$category['name']}}</option>
 										 @endforeach

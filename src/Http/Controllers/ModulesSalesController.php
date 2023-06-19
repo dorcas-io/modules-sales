@@ -191,8 +191,10 @@ class ModulesSalesController extends Controller {
         if ($query->isSuccessful()) {
             $productCount = $query->meta['pagination']['total'] ?? 0;
         }
-        $this->data['categories'] = $this->getProductCategories($sdk);
-        
+
+        $this->data['categories'] = !empty($this->getProductCategories($sdk)) ? $this->getProductCategories($sdk) : [];
+
+
         $this->data['subdomain'] = get_dorcas_subdomain($sdk);
         # set the subdomain
         $this->data['productsCount'] = $productCount;
@@ -362,10 +364,27 @@ class ModulesSalesController extends Controller {
        
         
         $this->data['subdomains'] = $subdomains = $this->getSubDomains($sdk);
+
+
+
+         // RE-DO STORE URL
+         $base_domain = new Uri(config('app.url'));
+         $base_domain_host = $base_domain->getHost();
+         
+         if (env("DORCAS_EDITION","business") === "business") {
+             $multiTenant = false;
+             $dorcas_store_url = "https://store.".$subdomain;
+         } elseif ( env("DORCAS_EDITION","business") === "community" || env("DORCAS_EDITION","business") === "enterprise" ) {
+             $multiTenant = true;
+             $parts = explode('.', str_replace("." . $base_domain_host, "", $subdomain) );
+             $dorcas_store_url = "https://" .  $parts[0] . ".store." . $base_domain_host;
+         }
+ 
+         $storeURL = $dorcas_store_url;
        
 
         if (!empty($subdomain)) {
-            $this->data['header']['title'] .= ' (Store: '.$subdomain.'/store)';
+            $this->data['header']['title'] .= " (<a target='_blank' href='$storeURL'>Online Store</a>)";
 
             // $this->data['subdomains'] = $subdomains = $this->getSubDomains($sdk);
             // dd( $this->data['subdomains']);
@@ -450,7 +469,7 @@ class ModulesSalesController extends Controller {
         ';
         if ($subdomains->count() > 0) {
             $this->data['submenuAction'] .= '
-                <a href="'.$subdomain . '/store" target="_blank" class="dropdown-item">View Store Online</a>
+                <a href="'.$storeURL . '" target="_blank" class="dropdown-item">View Store Online</a>
                 <!--<a href="'.$subdomain . '/store" target="_blank" class="dropdown-item">View Product Online</a>-->
             ';
         } else {
