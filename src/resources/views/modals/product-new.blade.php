@@ -26,7 +26,7 @@
 								 <select name="category" id="category" class="form-control">
 									 @if($categories != null)
 										 @foreach($categories as $index => $category)
-										 <option value="{{$category['id']}}">{{$category['name']}}</option>
+										 <option value="{{$category->id}}">{{$category->name}}</option>
 										 @endforeach
 									 @endif
 								 </select>
