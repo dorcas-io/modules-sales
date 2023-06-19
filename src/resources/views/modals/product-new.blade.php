@@ -24,10 +24,11 @@
 						<div class="row">
 							<div class="form-group col-md-12">
 								 <select name="category" id="category" class="form-control">
-									 <option value="">Select Category</option>
-									 @foreach($categories as $index => $category)
-									 <option value="{{$category->id}}">{{$category->name}}</option>
-									 @endforeach
+									 @if($categories != null)
+										 @foreach($categories as $index => $category)
+										 <option value="{{$category['id']}}">{{$category['name']}}</option>
+										 @endforeach
+									 @endif
 								 </select>
 								<label class="form-label" for="category">Product Category</label>
 							</div>

@@ -192,7 +192,7 @@ class ModulesSalesController extends Controller {
             $productCount = $query->meta['pagination']['total'] ?? 0;
         }
         $this->data['categories'] = $this->getProductCategories($sdk);
-
+        
         $this->data['subdomain'] = get_dorcas_subdomain($sdk);
         # set the subdomain
         $this->data['productsCount'] = $productCount;
