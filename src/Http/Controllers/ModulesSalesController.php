@@ -453,7 +453,7 @@ class ModulesSalesController extends Controller {
         }
 
 
-        $this->data['categories'] = $this->getProductCategories($sdk);
+        $this->data['categories'] = !empty($this->getProductCategories($sdk)) ? $this->getProductCategories($sdk) : [];
         $this->data['product'] = $product;
         $v = ($product->product_type=="variant") ? '[V]' : '';
         $this->data['page']['title'] .= ' &rsaquo; ' . $product->name . $v;
@@ -463,7 +463,7 @@ class ModulesSalesController extends Controller {
 
         $this->data['submenuAction'] .= '
             <div class="dropdown"><button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Actions</button>
-                <div class="dropdown-menu">
+            <div class="dropdown-menu">
         ';
         if ($subdomains->count() > 0) {
             $this->data['submenuAction'] .= '
