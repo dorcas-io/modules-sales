@@ -45,7 +45,7 @@
             
             <div class="col-sm-12">
 
-                <div style="display: flex;justify-content: flex-end;margin-bottom:3%;">
+                <div style="display: flex;justify-content: flex-end;margin-bottom:3%;"  v-if="productsCount > 0">
                     <a href=""  data-toggle="modal" data-target="#product-new-modal"   class="btn btn-primary btn-sm">Add Product</a>
                 </div>
 
