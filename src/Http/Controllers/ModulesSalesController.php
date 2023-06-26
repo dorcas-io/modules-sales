@@ -303,6 +303,8 @@ class ModulesSalesController extends Controller {
                 $file = $request->file('image');
                 $query = $sdk->createProductResource($id)->addMultipartParam('image', file_get_contents($file->getRealPath()), $file->getClientOriginalName())
                     ->send('post', ['images']);
+
+
             }
 
 
@@ -409,7 +411,7 @@ class ModulesSalesController extends Controller {
 
         if (!empty($subdomain)){
             $apiUrl =  $this->data['http_protocol'] . '/api/is_partner';
-            $res =  Http::get($apiUrl);
+            $res =  Http::withoutVerifying()->get($apiUrl);
             $data = json_decode($res);
 
             $this->data['parent_categories'] = $data->extra_data->marketplaceConfig->sales_categories ?? [];
