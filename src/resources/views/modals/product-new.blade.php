@@ -15,16 +15,26 @@
 		                        <label class="form-label" for="name">Product Name</label>
 		                    </div>
 		                    <div class="form-group col-md-6">
-		                        <select class="form-control" id="currency" name="currency">
-		                            <option value="NGN">NGN</option>
-		                        </select>
-		                        <label class="form-label" for="currency">Currency</label>
+		                        <textarea class="form-control" id="description" name="description"></textarea>
+		                        <label class="form-label" for="description">Product Description</label>
 		                    </div>
 		                </div>
 						<div class="row">
-							<div class="form-group col-md-12">
+		                    <div class="form-group col-md-6">
+		                        <input class="form-control" id="price" type="number" name="price" maxlength="10" min="0">
+		                        <label class="form-label" for="price">Unit Price</label>
+		                    </div>
+		                    <div class="form-group col-md-6">
+		                        <select class="form-control" id="currency" name="currency">
+		                            <option value="{{ env('SETTINGS_CURRENCY', 'NGN') }}">{{ env('SETTINGS_CURRENCY', 'NGN') }}</option>
+		                        </select>
+		                        <label class="form-label" for="currency">Currency</label>
+		                    </div>
+						</div>
+						<div class="row">
+							<div class="form-group col-md-6">
 								 <select name="category" id="category" class="form-control">
-									 @if(count($categories) < 0)
+									 @if(count($categories) > 0)
 										 @foreach($categories as $index => $category)
 										 <option value="{{$category->id}}">{{$category->name}}</option>
 										 @endforeach
@@ -32,15 +42,9 @@
 								 </select>
 								<label class="form-label" for="category">Product Category</label>
 							</div>
-						</div>
-						<div class="row">
 		                    <div class="form-group col-md-6">
-		                        <input class="form-control" id="price" type="number" name="price" maxlength="10" min="0">
-		                        <label class="form-label" for="price">Unit Price</label>
-		                    </div>
-		                    <div class="form-group col-md-6">
-		                        <textarea class="form-control" id="description" name="description"></textarea>
-		                        <label class="form-label" for="description">Product Description</label>
+		                        <input class="form-control" id="stock" type="number" value="1" name="stock" maxlength="10" min="0">
+		                        <label class="form-label" for="stock">Stock Available</label>
 		                    </div>
 						</div>
 						<div class="row">
@@ -49,7 +53,7 @@
 {{--								<input class="form-control" id="image" type="file" name="image"  >--}}
 								<label class="form-label" for="image">Upload product image</label>
 								<div class="file-upload">
-									<label for="upload" class="file-upload-label">Choose a file</label>
+									<label for="upload" class="file-upload-label">Choose a product image (optional)</label>
 									<input type="file" id="upload" class="file-upload-input" name="image">
 								</div>
 							</div>

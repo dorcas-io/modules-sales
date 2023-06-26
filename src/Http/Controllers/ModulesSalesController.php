@@ -4,7 +4,7 @@ namespace Dorcas\ModulesSales\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Dorcas\Contactform\Models\ModulesSales;
+use Dorcas\ModulesSales\Models\ModulesSales;
 use App\Dorcas\Hub\Utilities\UiResponse\UiResponse;
 use App\Http\Controllers\HomeController;
 use Hostville\Dorcas\Sdk;
@@ -272,6 +272,7 @@ class ModulesSalesController extends Controller {
             'description' => 'nullable',
             'category' => 'required',
             'image' => 'sometimes',
+            'stock' => 'required|numeric',
         ]);
 
         # validate the request
@@ -299,14 +300,21 @@ class ModulesSalesController extends Controller {
                                         ->addBodyParam('category', $request->input('category'))
                                         ->send('POST', ['categories']);
 
-            if($request->has('image')) {
+            if ($request->has('stock')) {
+
+                $query = $sdk->createProductResource($id)->addBodyParam('action', 'add')
+                                                        ->addBodyParam('quantity', $request->stock)
+                                                        ->addBodyParam('comment', 'Initial Creation Batch')
+                                                        ->send('post', ['stocks']);
+            }
+
+            if ($request->has('image')) {
                 $file = $request->file('image');
                 $query = $sdk->createProductResource($id)->addMultipartParam('image', file_get_contents($file->getRealPath()), $file->getClientOriginalName())
                     ->send('post', ['images']);
 
 
             }
-
 
             # send the request
             if (!$query->isSuccessful()) {
@@ -322,6 +330,22 @@ class ModulesSalesController extends Controller {
         } catch (\Exception $e) {
             $response = (tabler_ui_html_response([$e->getMessage()]))->setType(UiResponse::TYPE_ERROR);
         }
+
+        /* START INTERCEPT GETTING STARTED REDIRECTS */
+        $user = $request->user();
+        $company = $user->company(true, true);
+        $GettingStartedCacheKey = 'GettingStartedCache.' . $company->id . '.' . $user->id;
+        $applicableClient = 'create_product';
+        if ( Cache::has($GettingStartedCacheKey) ) {
+            $cache = Cache::get($GettingStartedCacheKey);
+            if ($cache['currentClient'] == $applicableClient) {
+                $cache['currentClient'] = '';
+                Cache::forever($GettingStartedCacheKey, $cache); // reset currentClient
+                return redirect(route('dashboard'))->with('UiResponse', $response);
+            }
+        }
+        /* END INTERCEPT GETTING STARTED REDIRECTS */
+
         return redirect(url()->current())->with('UiResponse', $response);
     }
 
@@ -456,7 +480,7 @@ class ModulesSalesController extends Controller {
         }
 
 
-        $this->data['categories'] = $this->getProductCategories($sdk);
+        $this->data['categories'] = !empty($this->getProductCategories($sdk)) ? $this->getProductCategories($sdk) : [];
         $this->data['product'] = $product;
         $v = ($product->product_type=="variant") ? '[V]' : '';
         $this->data['page']['title'] .= ' &rsaquo; ' . $product->name . $v;
@@ -466,7 +490,7 @@ class ModulesSalesController extends Controller {
 
         $this->data['submenuAction'] .= '
             <div class="dropdown"><button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Actions</button>
-                <div class="dropdown-menu">
+            <div class="dropdown-menu">
         ';
         if ($subdomains->count() > 0) {
             $this->data['submenuAction'] .= '
