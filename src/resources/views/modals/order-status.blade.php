@@ -16,6 +16,8 @@
                               <option value="pending">Pending</option>
                               <option value="delivered">Delivered</option>
                               <option value="completed">Completed</option>
+							  <option value="ready to ship">Ready to Ship</option>
+							  <option value="shipped">Shipped</option>
                             </select>
                           
                         </div>
