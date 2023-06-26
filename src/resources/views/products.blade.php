@@ -36,15 +36,19 @@
     <div class="col-md-9 col-xl-9">
        
         <div class="row row-cards row-deck" id="products-list">
-            {{-- <div v-if="productsCount > 0">
-             <button type="submit" onclick="masDeleteFunc()" class="btn btn-danger">
-                Bulk Delete
-              </button>
-            </div> --}}
+{{--            <div v-if="productsCount > 0">--}}
+{{--             <button type="submit" onclick="masDeleteFunc()" class="btn btn-danger">--}}
+{{--                Bulk Delete--}}
+{{--              </button>--}}
+{{--            </div>--}}
+
             
             <div class="col-sm-12">
-                
-                
+
+                <div style="display: flex;justify-content: flex-end;margin-bottom:3%;">
+                    <a href=""  data-toggle="modal" data-target="#product-new-modal"   class="btn btn-primary btn-sm">Add Product</a>
+                </div>
+
                 <div class="table-responsive">
                     <table class="table card-table table-vcenter text-nowrap bootstrap-table"
                            data-pagination="true"
