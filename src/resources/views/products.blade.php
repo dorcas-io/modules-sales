@@ -22,7 +22,29 @@
         opacity: 0;
         cursor: pointer;
     }
+    output{
+        width: 30%;
+        /*min-height: 150px;*/
+        display: flex;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 15px;
+        position: relative;
+        border-radius: 5px;
+    }
 
+    output .image{
+        /*height: 150px;*/
+        border-radius: 5px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        position: relative;
+    }
+
+    output .image img{
+        height: 100%;
+        width: 100%;
+    }
 </style>
 @endsection
 
@@ -36,15 +58,19 @@
     <div class="col-md-9 col-xl-9">
        
         <div class="row row-cards row-deck" id="products-list">
-            {{-- <div v-if="productsCount > 0">
-             <button type="submit" onclick="masDeleteFunc()" class="btn btn-danger">
-                Bulk Delete
-              </button>
-            </div> --}}
+{{--            <div v-if="productsCount > 0">--}}
+{{--             <button type="submit" onclick="masDeleteFunc()" class="btn btn-danger">--}}
+{{--                Bulk Delete--}}
+{{--              </button>--}}
+{{--            </div>--}}
+
             
             <div class="col-sm-12">
-                
-                
+
+                <div style="display: flex;justify-content: flex-end;margin-bottom:3%;"  v-if="productsCount > 0">
+                    <a href=""  data-toggle="modal" data-target="#product-new-modal"   class="btn btn-primary btn-sm">Add Product</a>
+                </div>
+
                 <div class="table-responsive">
                     <table class="table card-table table-vcenter text-nowrap bootstrap-table"
                            data-pagination="true"
@@ -309,7 +335,30 @@
         }
     }
 
- 
+
+ const inputFile = document.getElementById('upload');
+ const outputFile = document.getElementById("outputUpload")
+
+
+ let images = []
+ inputFile.addEventListener("change", () => {
+     const file = inputFile.files
+     images = [];
+     images.push(file[0])
+     displayImagesOnUpload()
+ })
+
+ function displayImagesOnUpload() {
+     let img = ""
+
+     images.forEach((image, index) => {
+         img += `<div class="image">
+                <img src="${URL.createObjectURL(image)}" alt="image">
+                <span onclick="deleteImage(${index})">&times;</span>
+              </div>`
+     })
+     outputFile.innerHTML = img
+ }
 
 
 </script>

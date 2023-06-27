@@ -20,6 +20,7 @@ Route::group(['namespace' => 'Dorcas\ModulesSales\Http\Controllers', 'prefix' =>
     Route::post('/sales-product/{id}/images', 'ModulesSalesController@product_addImage')->name('sales-product-single-images');
     Route::get('/sales-product/{id}/images', 'ModulesSalesController@product_redirect');
     Route::delete('/sales-product/{id}/images', 'ModulesSalesController@product_deleteImage');
+    Route::post('/sales-product/{id}/update/images', 'ModulesSalesController@product_updateImage')->name('sales-product-single-image-update');
     Route::post('/sales-product/{id}/stocks', 'ModulesSalesController@product_updateStocks')->name('sales-product-single-stocks');
     //Route::get('/sales-product/{id}/stocks', 'ModulesSalesController@product_redirect');
     Route::get('/sales-product/{id}/stocks', 'ModulesSalesController@product_stocks');

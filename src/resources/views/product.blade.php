@@ -4,6 +4,30 @@
 	#variant_quantity{
 		 display: none;
 	}
+    output{
+        width: 30%;
+        /*min-height: 150px;*/
+        display: flex;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 15px;
+        position: relative;
+        border-radius: 5px;
+    }
+
+    output .image{
+        /*height: 150px;*/
+        border-radius: 5px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        position: relative;
+    }
+
+    output .image img{
+        height: 100%;
+        width: 100%;
+    }
+
 </style>
 @endsection
 @section('body_content_main')
@@ -23,6 +47,12 @@
         @endif
 
         <div class="mb-4" style="display:flex; justify-content: flex-end">
+              <div>
+                  <a href="#" data-toggle="modal"
+                     data-target="#product-image-modal"
+                     class="btn btn-primary">Add Image</a>
+              </div>
+            &nbsp;
             <button class="btn btn-primary"
             v-on:click.prevent="addInventory">Inventory
            </button> &nbsp; 
@@ -65,6 +95,7 @@
                             </button>
                             
                         </div>
+
                         <button v-on:click.prevent="editProduct" 
                         class="btn btn-outline-primary btn-sm text-center">
                             <span class="fa fa-sliders"></span> Edit Product
@@ -169,6 +200,7 @@
                                         <tbody>
                                         @if (count($product->images['data']) > 0)
                                             @foreach ($product->images['data'] as $image)
+
                                                 <tr>
                                                     <td>Image #{{ $loop->iteration }}</td>
                                                     <td>
@@ -176,6 +208,7 @@
                                                     </td>
                                                     <td>{{ \Carbon\Carbon::parse($image['created_at'])->format('D jS M, Y') }}</td>
                                                     <td>
+                                                        <a href="#" class="btn btn-primary btn-sm" data-action="edit_image" data-id="{{ $image['id'] }}" data-index="{{ $loop->index }}" data-name="Image #{{ $loop->iteration }}">Edit</a>
                                                         <a href="#" class="btn btn-danger btn-sm" data-action="delete_image" data-id="{{ $image['id'] }}" data-index="{{ $loop->index }}" data-name="Image #{{ $loop->iteration }}">Delete</a>
                                                     </td>
                                                 </tr>
@@ -335,6 +368,7 @@
                 </div>
                 @include('modules-sales::modals.product-inventory')
                 @include('modules-sales::modals.product-image')
+                @include('modules-sales::modals.product-image-edit')
                 @include('modules-sales::modals.product-variant')
             </div>
         </div>
@@ -354,12 +388,14 @@
             defaultPhoto: "{{ cdn('images/avatar/avatar-9.png') }}",
             backgroundImage: "{{ cdn('images/gallery/imani-clovis-547617-unsplash.jpg') }}",
             productImage: { file: '' },
+            productImageUpdate: { file: '' },
             variantTypes: {!! json_encode($variantTypes ?: []) !!},
             // parentCategories : [],
             variantType: '',
             variant: { name:'', description:'', product_type:'', product_parent:'', prices: '', currency: '', product_variant_type: '', barcode: '' },
             variantProducts: {!! json_encode(!empty($variantProducts) ? $variantProducts : []) !!},
-            variantParent: {!! json_encode(!empty($variantParent) ? $variantParent : []) !!}
+            variantParent: {!! json_encode(!empty($variantParent) ? $variantParent : []) !!},
+            productImageId : {id:''}
         },
         computed: {
             productCategories: function () {
@@ -400,8 +436,26 @@
                     $("#image_message").css('color', 'green');
                 }
             },
+
+            productImageUpdateCheck: function() {
+                this.productImageUpdate.file = this.$refs.image.files[0];
+                $("#image_update_label").html(this.productImageUpdate.file.name);
+                if (this.productImageUpdate.file.size > (1024 * 100)) {
+                    $("#image_edit_submit").attr('disabled', true );
+                    $("#image_edit_message").html('Selected file size > 100KB. Choose another');
+                    $("#image_edit_message").css('color', 'red');
+                } else {
+                    $("#image_edit_submit").attr('disabled', false );
+                    $("#image_edit_message").html('Selected file OK');
+                    $("#image_edit_message").css('color', 'green');
+                }
+            },
             editProduct: function (index) {
                 $('#product-edit-modal').modal('show');
+            },
+            editProductImage: function (id,index,name) {
+                this.productImageId  =  {id: id}
+                $('#product-image-edit-modal').modal('show');
             },
             addBarCodeToProduct: function (index) {
                 $('#product-add-barcode-modal').modal('show');
@@ -436,6 +490,8 @@
                     this.deleteVariant(id,index,name);
                 } else if (action === 'edit_variant') {
                     this.editVariant(id,index,name);
+                } else if ( action === 'edit_image') {
+                    this.editProductImage(id,index,name);
                 } else {
                     return true;
                 }
@@ -775,6 +831,38 @@
         document.getElementById("variant_quantity").style.display = 'none'; 
        }
     }
+
+    // const input = document.getElementById('imageEdit');
+    // const output = document.getElementById("output")
+    //
+    // console.log(input)
+    // let imagesArray = []
+    // input.addEventListener("change", () => {
+    //     const file = input.files
+    // })
+    //
+    // input.addEventListener("change", () => {
+    //     const file = input.files
+    //     imagesArray = [];
+    //     imagesArray.push(file[0])
+    //     displayImages()
+    // })
+    //
+    // function displayImages() {
+    //     let images = ""
+    //
+    //     imagesArray.forEach((image, index) => {
+    //         images += `<div class="image">
+    //             <img src="${URL.createObjectURL(image)}" alt="image">
+    //             <span onclick="deleteImage(${index})">&times;</span>
+    //           </div>`
+    //     })
+    //     output.innerHTML = images
+    // }
+
+
+
+
 
 </script>
 @endsection

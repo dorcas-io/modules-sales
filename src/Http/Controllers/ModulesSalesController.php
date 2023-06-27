@@ -312,6 +312,8 @@ class ModulesSalesController extends Controller {
                 $file = $request->file('image');
                 $query = $sdk->createProductResource($id)->addMultipartParam('image', file_get_contents($file->getRealPath()), $file->getClientOriginalName())
                     ->send('post', ['images']);
+
+
             }
 
             # send the request
@@ -433,7 +435,7 @@ class ModulesSalesController extends Controller {
 
         if (!empty($subdomain)){
             $apiUrl =  $this->data['http_protocol'] . '/api/is_partner';
-            $res =  Http::get($apiUrl);
+            $res =  Http::withoutVerifying()->get($apiUrl);
             $data = json_decode($res);
 
             $this->data['parent_categories'] = $data->extra_data->marketplaceConfig->sales_categories ?? [];
@@ -632,6 +634,35 @@ class ModulesSalesController extends Controller {
                     throw new \RuntimeException('Failed while uploading the product image. Please try again.');
                 }
                 $message = ['Successfully added new product image.'];
+            }
+            $response = (tabler_ui_html_response($message))->setType(UiResponse::TYPE_SUCCESS);
+        } catch (\Exception $e) {
+            $response = (tabler_ui_html_response([$e->getMessage()]))->setType(UiResponse::TYPE_ERROR);
+        }
+        return redirect()->route('sales-products-single', [$id])->with('UiResponse', $response);
+    }
+
+
+    public function product_updateImage(Request $request, Sdk $sdk, string $id)
+    {
+        $this->validate($request, [
+            'image' => 'required_if:action,update_product_image|image',
+        ]);
+        # validate the request
+        try {
+            if ($request->action === 'update_product_image') {
+                # update the business information
+                $file = $request->file('image');
+
+                $query = $sdk->createProductResource($id)->addMultipartParam('image', file_get_contents($file->getRealPath()), $file->getClientOriginalName())
+                    ->addBodyParam('product_image_id' ,$request->product_image_id )
+                    ->send('post', ['images/update']);
+
+                # send the request
+                if (!$query->isSuccessful()) {
+                    throw new \RuntimeException('Failed while uploading the product image. Please try again.');
+                }
+                $message = ['Successfully updated  product image.'];
             }
             $response = (tabler_ui_html_response($message))->setType(UiResponse::TYPE_SUCCESS);
         } catch (\Exception $e) {

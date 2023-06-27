@@ -51,11 +51,12 @@
 							<div class="form-group col-md-12">
 {{--								<input type="file" name="image" accept="image/*"  id="image"  class="custom-file-input form-control" required>--}}
 {{--								<input class="form-control" id="image" type="file" name="image"  >--}}
-{{--								<label class="form-label" for="image">Upload product image</label>--}}
+								<label class="form-label" for="image">Upload product image</label>
 								<div class="file-upload">
 									<label for="upload" class="file-upload-label">Choose a product image (optional)</label>
-									<input type="file" id="upload" class="file-upload-input" name="image">
+									<input type="file" id="upload"  accept="image/*" class="file-upload-input" name="image">
 								</div>
+								<output id="outputUpload"></output>
 							</div>
 						</div>
 					</fieldset>
