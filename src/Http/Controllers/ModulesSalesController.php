@@ -331,20 +331,11 @@ class ModulesSalesController extends Controller {
             $response = (tabler_ui_html_response([$e->getMessage()]))->setType(UiResponse::TYPE_ERROR);
         }
 
-        /* START INTERCEPT GETTING STARTED REDIRECTS */
-        $user = $request->user();
-        $company = $user->company(true, true);
-        $GettingStartedCacheKey = 'GettingStartedCache.' . $company->id . '.' . $user->id;
-        $applicableClient = 'create_product';
-        if ( Cache::has($GettingStartedCacheKey) ) {
-            $cache = Cache::get($GettingStartedCacheKey);
-            if ($cache['currentClient'] == $applicableClient) {
-                $cache['currentClient'] = '';
-                Cache::forever($GettingStartedCacheKey, $cache); // reset currentClient
-                return redirect(route('dashboard'))->with('UiResponse', $response);
-            }
+
+        $gettingStartedRedirect = \Dorcas\ModulesDashboard\Http\Controllers\ModulesDashboardController::processGettingStartedRedirection($request, 'create_product', $response);
+        if ($gettingStartedRedirect) {
+            return redirect(route('dashboard'))->with('UiResponse', $response);
         }
-        /* END INTERCEPT GETTING STARTED REDIRECTS */
 
         return redirect(url()->current())->with('UiResponse', $response);
     }
