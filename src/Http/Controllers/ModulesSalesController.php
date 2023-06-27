@@ -1295,6 +1295,32 @@ class ModulesSalesController extends Controller {
         $this->data['selectedSubMenu'] = 'sales-logistics';
 
         $this->setViewUiResponse($request);
+
+        $company = $request->user()->company(true, true);
+
+        $logisticsSettings = \Dorcas\ModulesEcommerce\Http\Controllers\ModulesEcommerceStoreController::getLogisticsSettings((array) $company->extra_data);
+
+        $message = "";
+
+        $shippingOption = $logisticsSettings['logistics_shipping'];
+        
+        if ($shippingOption == "shipping_myself") {
+
+            $message .= "You have chosen to HANDLE SHIPPING YOURSELF.";
+            $message .= "<br/><br/>";
+            $message .= "You should use the <strong>Manual Shipping</strong> section to manage routes";
+
+        } elseif ($shippingOption == "shipping_provider") {
+
+            $message .= "You have chosen to HAVE A PROVIDER HANDLE YOUR SHIPPING";
+            $message .= "<br/><br/>";
+            $message .= "You should use the <strong>Provider Shipping</strong> section to manage settings";
+
+        }
+        
+        $this->data['shippingSelectionMessage'] = $message;
+
+
         return view('modules-sales::logistics', $this->data);
     }
 
