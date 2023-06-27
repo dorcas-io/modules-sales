@@ -23,6 +23,12 @@
         @endif
 
         <div class="mb-4" style="display:flex; justify-content: flex-end">
+              <div>
+                  <a href="#" data-toggle="modal"
+                     data-target="#product-image-modal"
+                     class="btn btn-primary">Add Image</a>
+              </div>
+            &nbsp;
             <button class="btn btn-primary"
             v-on:click.prevent="addInventory">Inventory
            </button> &nbsp; 
@@ -65,6 +71,7 @@
                             </button>
                             
                         </div>
+
                         <button v-on:click.prevent="editProduct" 
                         class="btn btn-outline-primary btn-sm text-center">
                             <span class="fa fa-sliders"></span> Edit Product
@@ -169,6 +176,7 @@
                                         <tbody>
                                         @if (count($product->images['data']) > 0)
                                             @foreach ($product->images['data'] as $image)
+
                                                 <tr>
                                                     <td>Image #{{ $loop->iteration }}</td>
                                                     <td>
@@ -176,6 +184,7 @@
                                                     </td>
                                                     <td>{{ \Carbon\Carbon::parse($image['created_at'])->format('D jS M, Y') }}</td>
                                                     <td>
+                                                        <a href="#" class="btn btn-primary btn-sm" data-action="edit_image" data-id="{{ $image['id'] }}" data-index="{{ $loop->index }}" data-name="Image #{{ $loop->iteration }}">Edit</a>
                                                         <a href="#" class="btn btn-danger btn-sm" data-action="delete_image" data-id="{{ $image['id'] }}" data-index="{{ $loop->index }}" data-name="Image #{{ $loop->iteration }}">Delete</a>
                                                     </td>
                                                 </tr>
@@ -335,6 +344,7 @@
                 </div>
                 @include('modules-sales::modals.product-inventory')
                 @include('modules-sales::modals.product-image')
+                @include('modules-sales::modals.product-image-edit')
                 @include('modules-sales::modals.product-variant')
             </div>
         </div>
@@ -359,7 +369,8 @@
             variantType: '',
             variant: { name:'', description:'', product_type:'', product_parent:'', prices: '', currency: '', product_variant_type: '', barcode: '' },
             variantProducts: {!! json_encode(!empty($variantProducts) ? $variantProducts : []) !!},
-            variantParent: {!! json_encode(!empty($variantParent) ? $variantParent : []) !!}
+            variantParent: {!! json_encode(!empty($variantParent) ? $variantParent : []) !!},
+            productImageId : {id:''}
         },
         computed: {
             productCategories: function () {
@@ -403,6 +414,10 @@
             editProduct: function (index) {
                 $('#product-edit-modal').modal('show');
             },
+            editProductImage: function (id,index,name) {
+                this.productImageId  =  {id: id}
+                $('#product-image-edit-modal').modal('show');
+            },
             addBarCodeToProduct: function (index) {
                 $('#product-add-barcode-modal').modal('show');
             },
@@ -436,6 +451,8 @@
                     this.deleteVariant(id,index,name);
                 } else if (action === 'edit_variant') {
                     this.editVariant(id,index,name);
+                } else if ( action === 'edit_image') {
+                    this.editProductImage(id,index,name);
                 } else {
                     return true;
                 }

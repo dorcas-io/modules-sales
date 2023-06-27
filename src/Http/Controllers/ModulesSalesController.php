@@ -642,6 +642,35 @@ class ModulesSalesController extends Controller {
         return redirect()->route('sales-products-single', [$id])->with('UiResponse', $response);
     }
 
+
+    public function product_updateImage(Request $request, Sdk $sdk, string $id)
+    {
+        $this->validate($request, [
+            'image' => 'required_if:action,update_product_image|image',
+        ]);
+        # validate the request
+        try {
+            if ($request->action === 'update_product_image') {
+                # update the business information
+                $file = $request->file('image');
+
+                $query = $sdk->createProductResource($id)->addMultipartParam('image', file_get_contents($file->getRealPath()), $file->getClientOriginalName())
+                    ->addBodyParam('product_image_id' ,$request->product_image_id )
+                    ->send('post', ['images/update']);
+
+                # send the request
+                if (!$query->isSuccessful()) {
+                    throw new \RuntimeException('Failed while uploading the product image. Please try again.');
+                }
+                $message = ['Successfully updated  product image.'];
+            }
+            $response = (tabler_ui_html_response($message))->setType(UiResponse::TYPE_SUCCESS);
+        } catch (\Exception $e) {
+            $response = (tabler_ui_html_response([$e->getMessage()]))->setType(UiResponse::TYPE_ERROR);
+        }
+        return redirect()->route('sales-products-single', [$id])->with('UiResponse', $response);
+    }
+
     /**
      * @param Request $request
      * @param Sdk     $sdk
