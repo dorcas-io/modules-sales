@@ -12,18 +12,20 @@
                         <div class="form-group row">
                             <div class="form-label">Product Image</div>
                             <div class="custom-file">
-                                <input type="file" name="image" accept="image/*" v-on:change="productImageCheck" id="image" ref="image" class="custom-file-input" required>
-                                <label id="image_label" class="custom-file-label">Select Image</label>
+                                <input type="file" name="image" accept="image/*" v-on:change="productImageUpdateCheck" id="imageEdit" ref="image" class="custom-file-input" required>
+                                <label id="image_update_label" class="custom-file-label">Select Image</label>
                                 <input type="hidden" v-model="productImageId.id" name="product_image_id"/>
+                                <output id="output"></output>
                             </div>
-                            <small id="image_message">Any attachment must not exceed 100KB in size</small>
+                            <small id="image_edit_message">Any attachment must not exceed 100KB in size</small>
+
                         </div>
                     </fieldset>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button id="image_submit" type="submit" form="form-product-image-update" class="btn btn-primary" name="action"
+                <button id="image_edit_submit" type="submit" form="form-product-image-update" class="btn btn-primary" name="action"
                         value="update_product_image">Upload Image</button>
             </div>
         </div>

@@ -16,6 +16,7 @@
 									<label id="image_label" class="custom-file-label">Select Image</label>
 								</div>
 							<small id="image_message">Any attachment must not exceed 100KB in size</small>
+
 						</div>
 					</fieldset>
 				</form>

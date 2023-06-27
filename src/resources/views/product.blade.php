@@ -4,6 +4,30 @@
 	#variant_quantity{
 		 display: none;
 	}
+    output{
+        width: 30%;
+        /*min-height: 150px;*/
+        display: flex;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 15px;
+        position: relative;
+        border-radius: 5px;
+    }
+
+    output .image{
+        /*height: 150px;*/
+        border-radius: 5px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        position: relative;
+    }
+
+    output .image img{
+        height: 100%;
+        width: 100%;
+    }
+
 </style>
 @endsection
 @section('body_content_main')
@@ -364,6 +388,7 @@
             defaultPhoto: "{{ cdn('images/avatar/avatar-9.png') }}",
             backgroundImage: "{{ cdn('images/gallery/imani-clovis-547617-unsplash.jpg') }}",
             productImage: { file: '' },
+            productImageUpdate: { file: '' },
             variantTypes: {!! json_encode($variantTypes ?: []) !!},
             // parentCategories : [],
             variantType: '',
@@ -409,6 +434,20 @@
                     $("#image_submit").attr('disabled', false );
                     $("#image_message").html('Selected file OK');
                     $("#image_message").css('color', 'green');
+                }
+            },
+
+            productImageUpdateCheck: function() {
+                this.productImageUpdate.file = this.$refs.image.files[0];
+                $("#image_update_label").html(this.productImageUpdate.file.name);
+                if (this.productImageUpdate.file.size > (1024 * 100)) {
+                    $("#image_edit_submit").attr('disabled', true );
+                    $("#image_edit_message").html('Selected file size > 100KB. Choose another');
+                    $("#image_edit_message").css('color', 'red');
+                } else {
+                    $("#image_edit_submit").attr('disabled', false );
+                    $("#image_edit_message").html('Selected file OK');
+                    $("#image_edit_message").css('color', 'green');
                 }
             },
             editProduct: function (index) {
@@ -792,6 +831,38 @@
         document.getElementById("variant_quantity").style.display = 'none'; 
        }
     }
+
+    // const input = document.getElementById('imageEdit');
+    // const output = document.getElementById("output")
+    //
+    // console.log(input)
+    // let imagesArray = []
+    // input.addEventListener("change", () => {
+    //     const file = input.files
+    // })
+    //
+    // input.addEventListener("change", () => {
+    //     const file = input.files
+    //     imagesArray = [];
+    //     imagesArray.push(file[0])
+    //     displayImages()
+    // })
+    //
+    // function displayImages() {
+    //     let images = ""
+    //
+    //     imagesArray.forEach((image, index) => {
+    //         images += `<div class="image">
+    //             <img src="${URL.createObjectURL(image)}" alt="image">
+    //             <span onclick="deleteImage(${index})">&times;</span>
+    //           </div>`
+    //     })
+    //     output.innerHTML = images
+    // }
+
+
+
+
 
 </script>
 @endsection
