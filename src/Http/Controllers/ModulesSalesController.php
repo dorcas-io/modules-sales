@@ -1294,7 +1294,7 @@ class ModulesSalesController extends Controller {
 
         $this->setViewUiResponse($request);
 
-        $company = $this->request->user()->company(true, true);
+        $company = $request->user()->company(true, true);
 
         $logisticsSettings = \Dorcas\ModulesEcommerce\Http\Controllers\ModulesEcommerceStoreController::getLogisticsSettings((array) $company->extra_data);
 
