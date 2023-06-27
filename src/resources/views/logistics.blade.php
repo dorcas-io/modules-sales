@@ -81,7 +81,8 @@
 					</div>
 					<div class="card-body">
 						<h3 class="card-title">Logistics</h3>
-						<p class="text-muted">{{ $shippingSelectionMessage }}</p>
+						<p class="text-muted">{!! $shippingSelectionMessage !!}</p>
+						<p></p>
 					</div>
 				</div>
 			</div>
