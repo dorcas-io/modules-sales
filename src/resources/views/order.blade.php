@@ -458,10 +458,11 @@
                         return swal("Oops!", message, "warning");
                     });
                 },
-					 updateOrderStatus: function () {
-                    var context = this;
+
+				updateOrderStatus: function () {
+                        var context = this;
                     context.updating = true;
-						  console.log(context.order.id)
+						  // console.log(context.order.id)
                     axios.put("/msl/sales-order-status/" + context.order.id, {
                         status: context.order.status,
                     }).then(function (response) {
