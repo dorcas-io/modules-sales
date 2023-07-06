@@ -336,29 +336,29 @@
     }
 
 
- const inputFile = document.getElementById('upload');
- const outputFile = document.getElementById("outputUpload")
+const inputFile = document.getElementById('upload');
+const outputFile = document.getElementById("outputUpload")
 
 
- let images = []
- inputFile.addEventListener("change", () => {
-     const file = inputFile.files
-     images = [];
-     images.push(file[0])
-     displayImagesOnUpload()
- })
+let images = []
+inputFile.addEventListener("change", () => {
+    const file = inputFile.files
+    images = [];
+    images.push(file[0])
+    displayImagesOnUpload()
+})
 
- function displayImagesOnUpload() {
-     let img = ""
+function displayImagesOnUpload() {
+    let img = ""
 
-     images.forEach((image, index) => {
-         img += `<div class="image">
-                <img src="${URL.createObjectURL(image)}" alt="image">
-                <span onclick="deleteImage(${index})">&times;</span>
-              </div>`
-     })
-     outputFile.innerHTML = img
- }
+    images.forEach((image, index) => {
+        img += `<div class="image">
+            <img src="${URL.createObjectURL(image)}" alt="image">
+            <span onclick="deleteImage(${index})">&times;</span>
+            </div>`
+    })
+    outputFile.innerHTML = img
+}
 
 
 </script>
