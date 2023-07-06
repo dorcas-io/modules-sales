@@ -191,7 +191,22 @@ class ModulesSalesController extends Controller {
         if ($query->isSuccessful()) {
             $productCount = $query->meta['pagination']['total'] ?? 0;
         }
-        
+
+        $checkCategories = !empty($this->getProductCategories($sdk)) ? $this->getProductCategories($sdk) : [];
+
+        // Enforce default Category
+        if (empty($checkCategories)) {
+
+            $category_name = 'Default';
+            $categoryResponse = $sdk->createProductCategoryResource()->addBodyParam('name', $category_name)->send('POST');
+            # send the request
+            if (!$categoryResponse->isSuccessful()) {
+                // do something here
+                //throw new \RuntimeException($response->errors[0]['title'] ?? 'Failed while creating the product category.');
+            }
+            Cache::forget('business.product-categories.'.$company->id);
+        }
+
         $this->data['categories'] = !empty($this->getProductCategories($sdk)) ? $this->getProductCategories($sdk) : [];
 
         $this->data['subdomain'] = get_dorcas_subdomain($sdk);
