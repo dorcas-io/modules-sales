@@ -46,22 +46,6 @@
             @endif
         @endif
 
-        <div class="mb-4" style="display:flex; justify-content: flex-end">
-              <div>
-                  <a href="#" data-toggle="modal"
-                     data-target="#product-image-modal"
-                     class="btn btn-primary">Add Image</a>
-              </div>
-            &nbsp;
-            <button class="btn btn-primary"
-            v-on:click.prevent="addInventory">Inventory
-           </button> &nbsp; 
-            <button class="btn btn-primary"
-            v-on:click.prevent="mapToParentCategory">Map Category
-           </button>
-        </div>
-       
-
         <div class="row">
 
             <div class="col-md-4">
@@ -89,16 +73,33 @@
                             </div>
                         </div>
                         <div>&nbsp;</div>
-                        <div class="mb-4">
-                            <button class="btn btn-primary"
-                            v-on:click.prevent="addBarCodeToProduct">Add Barcode
-                            </button>
-                            
-                        </div>
-
-                        <button v-on:click.prevent="editProduct" 
-                        class="btn btn-outline-primary btn-sm text-center">
+                        <button v-on:click.prevent="editProduct" class="btn btn-outline-primary btn-sm text-center">
                             <span class="fa fa-sliders"></span> Edit Product
+                        </button>
+                        
+                        <button class="btn btn-primary btn-sm" v-on:click.prevent="addBarCodeToProduct">
+                            Add Barcode
+                        </button>
+
+
+                        <!-- <div class="mb-4" style="display:flex; justify-content: flex-end">
+                            <div>
+                                <a href="#" data-toggle="modal" data-target="#product-image-modal" class="btn btn-primary">Add Image</a>
+                            </div>
+                            &nbsp;
+                            <button class="btn btn-primary" v-on:click.prevent="addInventory">Inventory</button>
+                            &nbsp; 
+                            <button class="btn btn-primary" v-on:click.prevent="mapToParentCategory">Map Category </button>
+                        </div> -->
+                        
+                        <a href="#" data-toggle="modal" data-target="#product-image-modal" class="btn btn-primary btn-sm">
+                            Add Add Product Images
+                        </a>
+                        <button class="btn btn-primary btn-sm" v-on:click.prevent="addInventory">
+                            Manage Stock
+                        </button>
+                        <button class="btn btn-primary btn-sm" v-on:click.prevent="mapToParentCategory">
+                            Map Marketplace Category
                         </button>
                     </div>
                     @include('modules-sales::modals.product-edit')
