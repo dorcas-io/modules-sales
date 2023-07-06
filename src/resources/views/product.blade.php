@@ -74,25 +74,24 @@
                         </div>
                         <div>&nbsp;</div>
                         <button v-on:click.prevent="editProduct" class="btn btn-outline-primary btn-sm text-center">
-                            <span class="fa fa-sliders"></span> Edit Product
+                            <span class="fa fa-pencil-square-o"></span> Edit Product
                         </button>
                         <div>&nbsp;</div>
-                        <button class="btn btn-outline-secondary btn-sm text-center" v-on:click.prevent="addBarCodeToProduct">
-                            <span class="fa fa-desktop"></span> Add Barcode
+                        <button class="btn btn-secondary btn-sm text-center" v-on:click.prevent="addBarCodeToProduct">
+                            <span class="fa fa-barcode"></span> Add Barcode
                         </button>
-                        <div>&nbsp;</div>
-                        <a href="#" data-toggle="modal" data-target="#product-image-modal" class="btn btn-primary btn-sm">
-                            <span class="fa fa-bar-chart"></span> Add Product Images
+                        <br/>
+                        <a href="#" data-toggle="modal" data-target="#product-image-modal" class="btn btn-success btn-sm">
+                            <span class="fa fa-picture-o"></span> Add Product Images
                         </a>
-                        <div>&nbsp;</div>
+                        <br/>
                         <button class="btn btn-outline-warning btn-sm" v-on:click.prevent="addInventory">
                             <span class="fa fa-tasks"></span> Manage Stock
                         </button>
-                        <div>&nbsp;</div>
-
+                        <br/>
                         @if ( env('DORCAS_EDITION', 'business') != "business" )
                         <button class="btn btn-primary btn-sm" v-on:click.prevent="mapToParentCategory">
-                            Map Marketplace Category
+                            <span class="fa fa-map-signs"></span> Map Marketplace Category
                         </button>
                         @endif
                     </div>
