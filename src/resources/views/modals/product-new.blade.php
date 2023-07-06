@@ -55,6 +55,7 @@
 								<div class="file-upload">
 									<label for="upload" class="file-upload-label">Choose a product image (optional)</label>
 									<input type="file" id="upload"  accept="image/*" class="file-upload-input" name="image">
+									<small class="text-muted">You can add more photos later on</small>
 								</div>
 								<output id="outputUpload"></output>
 							</div>
