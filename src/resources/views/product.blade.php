@@ -48,22 +48,6 @@
             @endif
         @endif
 
-        <div class="mb-4" style="display:flex; justify-content: flex-end">
-              <div>
-                  <a href="#" data-toggle="modal"
-                     data-target="#product-image-modal"
-                     class="btn btn-primary">Add Image</a>
-              </div>
-            &nbsp;
-            <button class="btn btn-primary"
-            v-on:click.prevent="addInventory">Inventory
-           </button> &nbsp; 
-            <button class="btn btn-primary"
-            v-on:click.prevent="mapToParentCategory">Map Category
-           </button>
-        </div>
-       
-
         <div class="row">
 
             <div class="col-md-4">
@@ -91,17 +75,27 @@
                             </div>
                         </div>
                         <div>&nbsp;</div>
-                        <div class="mb-4">
-                            <button class="btn btn-primary"
-                            v-on:click.prevent="addBarCodeToProduct">Add Barcode
-                            </button>
-                            
-                        </div>
-
-                        <button v-on:click.prevent="editProduct" 
-                        class="btn btn-outline-primary btn-sm text-center">
-                            <span class="fa fa-sliders"></span> Edit Product
+                        <button v-on:click.prevent="editProduct" class="btn btn-outline-primary btn-sm text-center">
+                            <span class="fa fa-pencil-square-o"></span> Edit Product
                         </button>
+                        <div>&nbsp;</div>
+                        <button class="btn btn-secondary btn-sm text-center" v-on:click.prevent="addBarCodeToProduct">
+                            <span class="fa fa-barcode"></span> Add Barcode
+                        </button>
+                        <br/>
+                        <a href="#" data-toggle="modal" data-target="#product-image-modal" class="btn btn-success btn-sm">
+                            <span class="fa fa-picture-o"></span> Add Product Images
+                        </a>
+                        <br/>
+                        <button class="btn btn-outline-warning btn-sm" v-on:click.prevent="addInventory">
+                            <span class="fa fa-tasks"></span> Manage Stock
+                        </button>
+                        <br/>
+                        @if ( env('DORCAS_EDITION', 'business') != "business" )
+                        <button class="btn btn-primary btn-sm" v-on:click.prevent="mapToParentCategory">
+                            <span class="fa fa-map-signs"></span> Map Marketplace Category
+                        </button>
+                        @endif
                     </div>
                     @include('modules-sales::modals.product-edit')
                     @include('modules-sales::modals.barcode-modal')
@@ -861,6 +855,7 @@
     }
 
 
+<<<<<<< HEAD
     const imageUpload = document.getElementById('imageUpload');
     const outputUpload = document.getElementById("outputProductImage")
 
@@ -883,6 +878,33 @@
         })
         outputUpload.innerHTML = images
     }
+=======
+/* ADDED IMAGE DISPLAY FROM ADD PRODUCT - TO BE FIXED LATER */    
+// const inputFile = document.getElementById('upload');
+// const outputFile = document.getElementById("outputUpload")
+
+
+// let images = []
+// inputFile.addEventListener("change", () => {
+//     const file = inputFile.files
+//     images = [];
+//     images.push(file[0])
+//     displayImagesOnUpload()
+// })
+
+// function displayImagesOnUpload() {
+//     let img = ""
+
+//     images.forEach((image, index) => {
+//         img += `<div class="image">
+//             <img src="${URL.createObjectURL(image)}" alt="image">
+//             <span onclick="deleteImage(${index})">&times;</span>
+//             </div>`
+//     })
+//     outputFile.innerHTML = img
+// }
+
+>>>>>>> master
 
 
 
