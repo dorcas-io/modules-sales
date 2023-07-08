@@ -1127,6 +1127,11 @@ class ModulesSalesController extends Controller {
      * @return \Illuminate\Http\JsonResponse
      */
     public function order_status_update(Request $request , Sdk $sdk , string $id){
+
+        $this->validate($request, [
+            'status' => 'required'
+        ]);
+        
         $response = $sdk->createOrderResource()
                                 ->addBodyParam('status', $request->status)
                                 ->send('post',['status/update', $id]);
