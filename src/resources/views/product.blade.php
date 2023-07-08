@@ -855,7 +855,7 @@
     }
 
 
-<<<<<<< HEAD
+
     const imageUpload = document.getElementById('imageUpload');
     const outputUpload = document.getElementById("outputProductImage")
 
@@ -878,35 +878,5 @@
         })
         outputUpload.innerHTML = images
     }
-=======
-/* ADDED IMAGE DISPLAY FROM ADD PRODUCT - TO BE FIXED LATER */    
-// const inputFile = document.getElementById('upload');
-// const outputFile = document.getElementById("outputUpload")
-
-
-// let images = []
-// inputFile.addEventListener("change", () => {
-//     const file = inputFile.files
-//     images = [];
-//     images.push(file[0])
-//     displayImagesOnUpload()
-// })
-
-// function displayImagesOnUpload() {
-//     let img = ""
-
-//     images.forEach((image, index) => {
-//         img += `<div class="image">
-//             <img src="${URL.createObjectURL(image)}" alt="image">
-//             <span onclick="deleteImage(${index})">&times;</span>
-//             </div>`
-//     })
-//     outputFile.innerHTML = img
-// }
-
->>>>>>> master
-
-
-
 </script>
 @endsection
