@@ -23,10 +23,12 @@
         position: relative;
     }
 
+
     output .image img{
-        height: 100%;
-        width: 100%;
+        height: 70%;
+        width: 70%;
     }
+
 
 </style>
 @endsection
@@ -821,46 +823,66 @@
     }
 
     function checkVaraiant(){
+
        let val = document.getElementById("product_variant_type").value
-     
-       
+
        if(val === 'Inventory'){
-            document.getElementById("variant_quantity").style.display = 'block'; 
-            
+            document.getElementById("variant_quantity").style.display = 'block';
        }else{
         document.getElementById("variant_quantity").style.display = 'none'; 
        }
     }
 
-    // const input = document.getElementById('imageEdit');
-    // const output = document.getElementById("output")
-    //
-    // console.log(input)
-    // let imagesArray = []
-    // input.addEventListener("change", () => {
-    //     const file = input.files
-    // })
-    //
-    // input.addEventListener("change", () => {
-    //     const file = input.files
-    //     imagesArray = [];
-    //     imagesArray.push(file[0])
-    //     displayImages()
-    // })
-    //
-    // function displayImages() {
-    //     let images = ""
-    //
-    //     imagesArray.forEach((image, index) => {
-    //         images += `<div class="image">
-    //             <img src="${URL.createObjectURL(image)}" alt="image">
-    //             <span onclick="deleteImage(${index})">&times;</span>
-    //           </div>`
-    //     })
-    //     output.innerHTML = images
-    // }
+    const input = document.getElementById('imageEdit');
+    const output = document.getElementById("output")
+
+    let imagesArray = []
+    input.addEventListener("change", () => {
+        const file = input.files
+    })
+
+    input.addEventListener("change", () => {
+        const file = input.files
+        imagesArray = [];
+        imagesArray.push(file[0])
+        displayImages()
+    })
+
+    function displayImages() {
+        let images = ""
+
+        imagesArray.forEach((image, index) => {
+            images += `<div class="image">
+                <img src="${URL.createObjectURL(image)}" alt="image">
+                <span onclick="deleteImage(${index})">&times;</span>
+              </div>`
+        })
+        output.innerHTML = images
+    }
 
 
+    const imageUpload = document.getElementById('imageUpload');
+    const outputUpload = document.getElementById("outputProductImage")
+
+    let imageUploadArray = []
+
+    imageUpload.addEventListener("change", () => {
+        const file = input.files
+        imageUploadArray = [];
+        imageUploadArray.push(file[0])
+        displayImageUpload()
+    })
+
+    function displayImageUpload() {
+        let images = ""
+        imageUploadArray.forEach((image, index) => {
+            images += `<div class="image">
+                <img src="${URL.createObjectURL(image)}" alt="image">
+                <span onclick="deleteImage(${index})">&times;</span>
+              </div>`
+        })
+        outputUpload.innerHTML = images
+    }
 
 
 

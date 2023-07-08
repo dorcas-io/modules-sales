@@ -10,13 +10,13 @@
 					{{ csrf_field() }}
 					<fieldset class="form-fieldset">
 						<div class="form-group row">
-							<div class="form-label">Product Image</div>
+							<div class="form-label">Product Image  	<small id="image_message">Any attachment must not exceed 100KB in size</small> </div>
 								<div class="custom-file">
-									<input type="file" name="image" accept="image/*" v-on:change="productImageCheck" id="image" ref="image" class="custom-file-input" required>
+									<input type="file" name="image" accept="image/*" v-on:change="productImageCheck" id="imageUpload" ref="image" class="custom-file-input" required>
 									<label id="image_label" class="custom-file-label">Select Image</label>
 								</div>
-							<small id="image_message">Any attachment must not exceed 100KB in size</small>
-
+							<br><br>
+							<output id="outputProductImage"></output>
 						</div>
 					</fieldset>
 				</form>
