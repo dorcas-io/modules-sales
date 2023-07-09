@@ -14,8 +14,8 @@
             <div class="row mt-3" v-show="categories.length > 0">
                 <product-category v-for="(category, index) in categories" class="m4 l4" :key="category.id"
                                   :index="index" :category="category"
-                               v-bind:show-delete="true" v-on:update="update"
-                               v-on:remove="decrement"></product-category>
+                                  v-bind:show-delete="true" v-on:update="update"
+                                  v-on:remove="decrement"></product-category>
             </div>
             <div class="col s12" v-if="categories.length  === 0">
                 @component('layouts.blocks.tabler.empty-fullpage')
