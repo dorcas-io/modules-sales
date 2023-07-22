@@ -39,12 +39,18 @@
 		                        <label class="form-label" for="price">Unit Price</label>
 		                    </div>
 		                </div>
-							 <div class="row" id="variant_quantity">
-								<div class="form-group col-md-12">
-									 <input class="form-control" id="quantity" type="number" name="quantity" maxlength="10" min="0" ><!-- v-if="typeof variant.prices !== 'undefined'" v-model="variant.prices.data[0].unit_price.raw"-->
-									 <label class="form-label" for="price">Quantity</label>
-								</div>
-						  </div>
+{{--							 <div class="row" id="variant_quantity">--}}
+{{--								<div class="form-group col-md-12">--}}
+{{--									 <input class="form-control" id="quantity" type="number" name="quantity" maxlength="10" min="0" ><!-- v-if="typeof variant.prices !== 'undefined'" v-model="variant.prices.data[0].unit_price.raw"-->--}}
+{{--									 <label class="form-label" for="price">Quantity</label>--}}
+{{--								</div>--}}
+{{--						  </div>--}}
+						<div class="row" >
+						<div class="form-group col-md-12">
+							<input class="form-control"  id="quantity" type="number" name="quantity" value="1"  maxlength="10" min="0">
+							<label class="form-label" for="quantity">Stock Available</label>
+						</div>
+						</div>
 						<div class="row">
 		                    <div class="form-group col-md-12">
 		                        <textarea class="form-control" id="description" name="description" v-model="variant.description"></textarea>

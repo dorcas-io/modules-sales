@@ -12,16 +12,15 @@
                     <div class="row">
                         <div class="form-group col-md-12">
                             <label class="form-label" for="status">Status</label>
-                            <select class="form-control" name="status" > 
-                              <option value="pending">Pending</option>
-                              <option value="delivered">Delivered</option>
-                              <option value="completed">Completed</option>
-							  <option value="ready to ship">Ready to Ship</option>
-							  <option value="shipped">Shipped</option>
+                            <select class="form-control" v-model="status" id="status" >
+								  <option value="pending">Pending</option>
+								  <option value="ready to ship">Ready to Ship</option>
+								  <option value="shipped">Shipped</option>
+								  <option value="delivered">Delivered</option>
+								  <option value="completed">Completed</option>
                             </select>
                         </div>
-                       
-                       
+
                     </div>
                 </form>
 

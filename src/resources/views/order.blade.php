@@ -368,7 +368,8 @@
                 transactions: [],
                 defaultPhoto: "{{ cdn('images/avatar/avatar-9.png') }}",
                 backgroundImage: "{{ cdn('images/gallery/ali-yahya-435967-unsplash.jpg') }}",
-                productImage: { file: '' }
+                productImage: { file: '' },
+				status:''
             },
             mounted: function () {
                 if (typeof this.order.due_at !== 'undefined' && this.order.due_at !== null) {
@@ -458,12 +459,15 @@
                         return swal("Oops!", message, "warning");
                     });
                 },
-					 updateOrderStatus: function () {
-                    var context = this;
-                    context.updating = true;
-						  console.log(context.order.id)
+
+				updateOrderStatus: function () {
+
+					var context = this;
+
+					context.updating = true;
+
                     axios.put("/msl/sales-order-status/" + context.order.id, {
-                        status: context.order.status,
+                        status: this.status,
                     }).then(function (response) {
                         //console.log(response);
                         context.updating = false;

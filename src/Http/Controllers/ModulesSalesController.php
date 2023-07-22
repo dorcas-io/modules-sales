@@ -1128,10 +1128,14 @@ class ModulesSalesController extends Controller {
      */
     public function order_status_update(Request $request , Sdk $sdk , string $id){
 
-        $response = $sdk->createOrderResource()->addBodyParam('status', $request->status)
-                              ->send('put',['/orders/status/', $id]);
- 
-
+        $this->validate($request, [
+            'status' => 'required'
+        ]);
+        
+        $response = $sdk->createOrderResource()
+                                ->addBodyParam('status', $request->status)
+                                ->send('post',['status/update', $id]);
+        
         if (!$response->isSuccessful()) {
             // do something here
             throw new \RuntimeException($response->errors[0]['title'] ?? 'Failed while updating the order.');
@@ -1277,12 +1281,27 @@ class ModulesSalesController extends Controller {
                                     ->addBodyParam('product_variant_type', $request->product_variant_type);
             # the resource
             $response = $resource->send('post');
+
+
+
             # send the request
             if (!$response->isSuccessful()) {
                 # it failed
                 $message = $response->errors[0]['title'] ?? '';
                 throw new \RuntimeException('Failed while adding the product variant. '.$message);
             }
+
+            $id = $response->getData()['id'];
+
+            if ($request->has('quantity')) {
+
+                $query = $sdk->createProductResource($id)->addBodyParam('action', 'add')
+                    ->addBodyParam('quantity', $request->quantity)
+                    ->addBodyParam('comment', 'Initial Creation Batch')
+                    ->send('post', ['stocks']);
+
+            }
+
             $response = (tabler_ui_html_response(['Successfully added Product Variant: '. $request->name .' ('. $request->product_variant .')']))->setType(UiResponse::TYPE_SUCCESS);
         } catch (\Exception $e) {
             $response = (tabler_ui_html_response([$e->getMessage()]))->setType(UiResponse::TYPE_ERROR);
