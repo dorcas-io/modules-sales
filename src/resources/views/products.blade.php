@@ -161,7 +161,7 @@
                     name: value
                 }).then(function (response) {
                     console.log(response);
-                    $('#product-new-modal').show();
+                    // $('#product-new-modal').show();
                     return swal("Success", "The product category was successfully created.", "success");
                 })
                     .catch(function (error) {
