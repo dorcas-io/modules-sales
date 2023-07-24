@@ -45,6 +45,7 @@
         height: 100%;
         width: 100%;
     }
+
 </style>
 @endsection
 
@@ -136,7 +137,62 @@
     //         }
     //     });
     // });
-    new Vue({
+    function addCategory() {
+
+        Swal.fire({
+            title: 'New Category',
+            text: "Enter the name for the category:",
+            input: "text",
+            inputAttributes: {
+                autocapitalize: 'off'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Save',
+            animation: "slide-from-top",
+            showLoaderOnConfirm: true,
+            inputPlaceholder: "e.g. Stationery",
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'You need to write something!'
+                }
+            },
+            preConfirm: (value) => {
+                return axios.post("/msl/sales-categories", {
+                    name: value
+                }).then(function (response) {
+                    console.log(response);
+                    $('#product-new-modal').show();
+                    return swal("Success", "The product category was successfully created.", "success");
+                })
+                    .catch(function (error) {
+                        console.log(error)
+                        var message = '';
+                        if (error.response) {
+                            // The request was made and the server responded with a status code
+                            // that falls out of the range of 2xx
+                            //var e = error.response.data.errors[0];
+                            //message = e.title;
+                            var e = error.response;
+                            message = e.data.message;
+                        } else if (error.request) {
+                            // The request was made but no response was received
+                            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+                            // http.ClientRequest in node.js
+                            message = 'The request was made but no response was received';
+                        } else {
+                            // Something happened in setting up the request that triggered an Error
+                            message = error.message;
+                        }
+                        return swal("Oops!", message, "warning");
+                    });
+            }
+
+        });
+        $('#product-new-modal').hide();
+    }
+
+
+    var vm = new Vue({
         el: '#products-list',
         data: {
             productsCount: {{ $productsCount }},
@@ -184,6 +240,9 @@
                 }
               
 
+            },
+            newCategory: function () {
+                addCategory();
             },
             deleteItem: function (id,index,name) {
                 /*console.log(attributes);

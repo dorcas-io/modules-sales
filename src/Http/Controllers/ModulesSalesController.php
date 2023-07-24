@@ -1135,7 +1135,9 @@ class ModulesSalesController extends Controller {
         $response = $sdk->createOrderResource()
                                 ->addBodyParam('status', $request->status)
                                 ->send('post',['status/update', $id]);
-        
+
+
+
         if (!$response->isSuccessful()) {
             // do something here
             throw new \RuntimeException($response->errors[0]['title'] ?? 'Failed while updating the order.');

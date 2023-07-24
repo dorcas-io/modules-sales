@@ -1,4 +1,4 @@
-<div class="modal fade" id="product-new-modal" tabindex="-1" role="dialog" aria-labelledby="product-new-modalLabel" aria-hidden="true">
+<div class="modal fade" id="product-new-modal" tabindex="-1" role="dialog" aria-labelledby="product-new-modalLabel" aria-hidden="true" >
 	<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -40,7 +40,8 @@
 										 @endforeach
 									 @endif
 								 </select>
-								<label class="form-label" for="category">Product Category</label>
+								<label class="form-label" for="category">Product Category <a href="#" v-on:click.prevent="newCategory">Create New Category ?</a></label>
+
 							</div>
 		                    <div class="form-group col-md-6">
 		                        <input class="form-control" id="stock" type="number" value="1" name="stock" maxlength="10" min="0">
