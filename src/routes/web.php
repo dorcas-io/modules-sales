@@ -64,11 +64,14 @@ Route::group(['namespace' => 'Dorcas\ModulesSales\Http\Controllers', 'prefix' =>
     Route::put('/sales-order/{id}/customers', 'ModulesSalesController@order_updateCustomerOrder');
     Route::delete('/sales-order/{id}/customers', 'ModulesSalesController@order_deleteCustomer');
 
-
     Route::post('/map-category','ModulesSalesController@mapCategory');
+
 });
+Route::group(['namespace' => 'Dorcas\ModulesSales\Http\Controllers', 'prefix' => 'msl'], function() {
+       // Route::get('/getToken','ModulesSalesController@getToken');
+        Route::post('/get-cost','ModulesSalesController@getEstimate');
 
-
+});
 /*
     Route::get('/categories', 'Categories@index')->name('apps.inventory.categories');
     

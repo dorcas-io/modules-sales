@@ -3,6 +3,9 @@
 namespace Dorcas\ModulesSales\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Logistics;
+use App\Interfaces\ShippingInterface;
+use Dorcas\ModulesSales\config\providers\logistics\KwikNgClass;
 use Illuminate\Http\Request;
 use Dorcas\ModulesSales\Models\ModulesSales;
 use App\Dorcas\Hub\Utilities\UiResponse\UiResponse;
@@ -27,7 +30,7 @@ use GuzzleHttp\Psr7\Uri;
 
 //use function PHPSTORM_META\elementType;
 
-class ModulesSalesController extends Controller {
+class ModulesSalesController extends Controller{
 
 
 
@@ -40,8 +43,11 @@ class ModulesSalesController extends Controller {
             'selectedMenu' => 'modules-sales',
             'submenuConfig' => 'navigation-menu.modules-sales.sub-menu',
             'submenuAction' => '',
-            'variant_inventory' =>  'Inventory'
+            'variant_inventory' =>  'Inventory',
+            'defaultShippingProvider' => env('DEFAULT_SHIPPING_PROVIDER','kwik'),
+
         ];
+
 
 
 
@@ -1143,6 +1149,43 @@ class ModulesSalesController extends Controller {
             throw new \RuntimeException($response->errors[0]['title'] ?? 'Failed while updating the order.');
         }
         $this->data = $response->getData();
+
+
+        if(strtolower($request->status) === 'ready to ship'){
+
+            $db = DB::connection('marketplace_mysql');
+
+            $orders = $db->table("orders")->where('core_order_id',$this->data['id'])->first();
+
+            if($orders){
+
+                if($orders->status !== 'Ready To Ship'){
+
+                    $defaultShippingProvider  = env('DEFAULT_SHIPPING_PROVIDER','kwik');
+
+                    switch($defaultShippingProvider){
+
+                        case 'kwik';
+
+                            $createTask =  (new \Dorcas\ModulesSales\config\providers\logistics\KwikNgClass)->createTask($orders);
+
+                                if(isset($createTask['success']) && $createTask['success']){
+                                    $db->table("orders")->where('core_order_id',$this->data['id'])
+                                        ->update(['request_payload' => json_encode($createTask['payload']->data) ,
+                                            'status' => 'Ready To Ship']);
+                                }
+
+                            break;
+
+                        default:
+
+                            break;
+                    }
+
+                }
+            }
+        }
+
         return response()->json($this->data);
 
     }
@@ -1535,6 +1578,69 @@ class ModulesSalesController extends Controller {
     }
 
 
+    //Only for testing //The endpoints does not need to be accessed
+
+    public function getToken(Request $request){
+
+        switch($this->data['defaultShippingProvider']){
+            case 'kwik':
+                 $token = (new \Dorcas\ModulesSales\config\providers\logistics\KwikNgClass)->getToken();
+                 return  $token;
+            default:
+                 return response()->json(['success' => false , 'message' => 'Please ensure you have a default shipping provider']);
+
+        }
+
+    }
+
+
+    public function getEstimate(Request $request){
+
+        $this->validate($request , [
+            'first_name'    => 'required',
+            'last_name'    => 'required',
+            'email'        => 'required',
+            'phone_number' => 'required',
+            'address'      => 'required',
+            'latitude'     => 'required',
+            'longitude'    => 'required',
+            'carted_items' => 'required'
+        ]);
+
+
+
+        switch($this->data['defaultShippingProvider']){
+
+            case 'kwik':
+
+                $cost =  (new \Dorcas\ModulesSales\config\providers\logistics\KwikNgClass)->getEstimatedFare($request);
+
+                if(isset($cost['success']) && $cost['success']){
+
+                     $response = ['success' => true,
+                        'data' => $cost['data'] ,
+                        'billBreakDown_estimatedPrice' =>  $cost['billBreakDown_estimatedPrice'],
+                        'message' => $cost['message']
+                    ];
+
+                }else{
+
+                    $response = ['success' => false , 'message' => $cost['message']];
+
+                }
+
+                break;
+            default:
+
+                $response = ['success' => false ,
+                    'message' => 'Please ensure you have a default shipping provider'];
+
+                break;
+        }
+
+
+        return response()->json($response);
+    }
 
 
 
