@@ -94,7 +94,7 @@
             routeType: function() {
                 let original = this.shippingRoute.name;
                 let ind = this.shippingRoute.name.indexOf("(");
-                let rtype = ind === -1 ? "Inter-State)" : this.shippingRoute.name.split(' (')[1];
+                let rtype = ind === -1 ? "Intra-State)" : this.shippingRoute.name.split(' (')[1];
                 return rtype.substring(0, rtype.length - 1);
             },
             routeCurrency: function() {
