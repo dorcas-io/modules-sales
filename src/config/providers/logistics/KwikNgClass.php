@@ -81,7 +81,6 @@ class KwikNgClass
 
             $prepareShippingData = $this->prepareShippingData($data, $cartedItem);
 
-
             Cache::put('parcel_amount', $prepareShippingData['parcel_amount']['amount'], 60 * 5);
 
             $getCost = $this->getCost($prepareShippingData);
@@ -245,7 +244,7 @@ class KwikNgClass
             ],
 
             'vehicle' => [
-                'vehicle_type' => $vehicleType->data[2]->vehicle_id,
+                'vehicle_type' => $vehicleType->data[2]->vehicle_id ?? 0,
             ],
             'token' => [
                 'access_token' => $this->accessToken,

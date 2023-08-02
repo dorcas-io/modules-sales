@@ -1130,7 +1130,7 @@ class ModulesSalesController extends Controller{
      * @param Sdk     $sdk
      * @param string  $id
      *
-     * @return \Illuminate\Http\JsonResponse
+//     * @return \Illuminate\Http\JsonResponse
      */
     public function order_status_update(Request $request , Sdk $sdk , string $id){
 
@@ -1168,13 +1168,17 @@ class ModulesSalesController extends Controller{
                         case 'kwik';
 
                             $createTask =  (new \Dorcas\ModulesSales\config\providers\logistics\KwikNgClass)->createTask($orders);
-
-                                if(isset($createTask['success']) && $createTask['success']){
-                                    $db->table("orders")->where('core_order_id',$this->data['id'])
-                                        ->update(['request_payload' => json_encode($createTask['payload']->data) ,
-                                            'status' => 'Ready To Ship']);
-                                }
-
+                            if(isset($createTask['success']) && $createTask['success']){
+                                $db->table("orders")->where('core_order_id',$this->data['id'])
+                                    ->update(['request_payload' => json_encode($createTask['payload']->data) ,
+                                        'status' => 'Ready To Ship']);
+                            }
+//                            else{
+//
+//                                $response = (tabler_ui_html_response([$createTask['message']]))->setType(UiResponse::TYPE_ERROR);
+//                                return  back()->with('UiResponse', $response);
+//
+//                            }
                             break;
 
                         default:
@@ -1185,6 +1189,7 @@ class ModulesSalesController extends Controller{
                 }
             }
         }
+
 
         return response()->json($this->data);
 

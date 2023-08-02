@@ -138,7 +138,7 @@
     //     });
     // });
     function addCategory() {
-
+        $('#product-new-modal').hide();
         Swal.fire({
             title: 'New Category',
             text: "Enter the name for the category:",
@@ -160,8 +160,16 @@
                 return axios.post("/msl/sales-categories", {
                     name: value
                 }).then(function (response) {
-                    console.log(response);
-                    // $('#product-new-modal').show();
+                    // console.log(response);
+                    setTimeout(function(){
+                        location.reload();
+                    },1000);
+
+                    // setTimeout(function(){
+                    //     $('#product-new-modal').show();
+                    // },2000);
+
+
                     return swal("Success", "The product category was successfully created.", "success");
                 })
                     .catch(function (error) {
@@ -188,7 +196,7 @@
             }
 
         });
-        $('#product-new-modal').hide();
+
     }
 
 

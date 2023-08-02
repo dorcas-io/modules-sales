@@ -469,8 +469,8 @@
                     axios.put("/msl/sales-order-status/" + context.order.id, {
                         status: this.status,
                     }).then(function (response) {
-                        //console.log(response);
-                        context.updating = false;
+                        console.log(response);
+                        // context.updating = false;
                         //Materialize.toast("Your changes were successfully saved.", 4000);
                         swal("Success", "Your changes were successfully saved.", "success");
                         $('#order-status-modal').modal('hide');
