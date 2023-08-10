@@ -65,10 +65,33 @@ class ModulesSalesController extends Controller{
         $this->data['page']['title'] .= " &rsaquo; Product Categories";
         $this->data['header']['title'] .= ' &rsaquo; Product Categories';
         $this->data['selectedSubMenu'] = 'sales-categories';
-        $this->data['submenuAction'] = '<a href="#" v-on:click.prevent="newField" class="btn btn-primary btn-block">Add Product Category</a>';
+//        $this->data['submenuAction'] = '<a href="#" v-on:click.prevent="newField" class="btn btn-primary btn-block">Add Product Category</a>';
+        $this->data['submenuAction'] = '<a href="#" data-toggle="modal" data-target="#product-new-category-modal" class="btn btn-primary btn-block">Add Product Category</a>';
 
         $this->setViewUiResponse($request);
+
         $this->data['categories'] = $this->getProductCategories($sdk);
+
+
+
+        $db = DB::connection('core_mysql');
+
+        $checkIfIsPartner = $db->table("users")->first();
+
+         if($checkIfIsPartner->is_partner){
+
+             $partners = $db->table("partners")->first();
+
+             $this->data['parent_categories'] = $partners->extra_data->marketplaceConfig->sales_categories ?? [] ;
+
+             $this->data['is_partner'] = true ;
+
+         }else{
+
+             $this->data['parent_categories'] =  [] ;
+             $this->data['is_partner'] = false ;
+         }
+
         return view('modules-sales::categories', $this->data);
     }
 
@@ -945,6 +968,8 @@ class ModulesSalesController extends Controller{
                                                 ->addBodyParam('currency', $request->currency)
                                                 ->addBodyParam('amount', $request->amount)
                                                 ->addBodyParam('customers', [$customerId]);
+
+
             if ($request->has('due_at')) {
                 $date = Carbon::createFromFormat('d F, Y', $request->due_at);
                 if (!empty($date)) {
@@ -1168,17 +1193,13 @@ class ModulesSalesController extends Controller{
                         case 'kwik';
 
                             $createTask =  (new \Dorcas\ModulesSales\config\providers\logistics\KwikNgClass)->createTask($orders);
+
                             if(isset($createTask['success']) && $createTask['success']){
                                 $db->table("orders")->where('core_order_id',$this->data['id'])
                                     ->update(['request_payload' => json_encode($createTask['payload']->data) ,
                                         'status' => 'Ready To Ship']);
                             }
-//                            else{
-//
-//                                $response = (tabler_ui_html_response([$createTask['message']]))->setType(UiResponse::TYPE_ERROR);
-//                                return  back()->with('UiResponse', $response);
-//
-//                            }
+
                             break;
 
                         default:
@@ -1599,20 +1620,15 @@ class ModulesSalesController extends Controller{
     }
 
 
+
     public function getEstimate(Request $request){
 
         $this->validate($request , [
-            'first_name'    => 'required',
-            'last_name'    => 'required',
-            'email'        => 'required',
-            'phone_number' => 'required',
-            'address'      => 'required',
-            'latitude'     => 'required',
-            'longitude'    => 'required',
-            'carted_items' => 'required'
+            'first_name'    => 'required', 'last_name'    => 'required',
+            'email'        => 'required', 'phone_number' => 'required',
+            'address'      => 'required', 'latitude'     => 'required',
+            'longitude'    => 'required', 'carted_items' => 'required'
         ]);
-
-
 
         switch($this->data['defaultShippingProvider']){
 
@@ -1629,20 +1645,15 @@ class ModulesSalesController extends Controller{
                     ];
 
                 }else{
-
                     $response = ['success' => false , 'message' => $cost['message']];
-
                 }
 
                 break;
             default:
-
                 $response = ['success' => false ,
                     'message' => 'Please ensure you have a default shipping provider'];
-
                 break;
         }
-
 
         return response()->json($response);
     }

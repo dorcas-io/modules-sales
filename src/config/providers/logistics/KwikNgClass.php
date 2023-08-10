@@ -81,17 +81,19 @@ class KwikNgClass
 
             $prepareShippingData = $this->prepareShippingData($data, $cartedItem);
 
-            Cache::put('parcel_amount', $prepareShippingData['parcel_amount']['amount'], 60 * 5);
+            Cache::put('parcel_amount_'.$data['email'], $prepareShippingData['parcel_amount']['amount'], 60 * 5);
 
             $getCost = $this->getCost($prepareShippingData);
 
             if(isset($getCost['success']) && $getCost['success']){
 
-                $getBillBreakDown = $this->billBreakdown($getCost);
+                $parcelAmount = Cache::get('parcel_amount_'.$data['email']);
 
-                Cache::put('kwik_priceEstimate_data',  $getCost['payload']->data, 60 * 5);
+                $getBillBreakDown = $this->billBreakdown($getCost, $parcelAmount);
 
-                Cache::put('kwik_billBreakDown_data',  $getBillBreakDown['payload']->data, 60 * 5);
+                Cache::put('kwik_priceEstimate_data_'.$data['email'], $getCost['payload']->data, 60 * 5);
+
+                Cache::put('kwik_billBreakDown_data_'.$data['email'], $getBillBreakDown['payload']->data, 60 * 5);
 
                 $getCostData[]  = [ 'billBreakdown' =>  $getBillBreakDown['payload']->data ,
                                     'estimatedPrice' =>  $getCost['payload']->data,
@@ -197,11 +199,11 @@ class KwikNgClass
     }
 
 
-    private  function billBreakdown($data){
+    private  function billBreakdown($data ,$parcelAmount){
 
         $formId  = Cache::get('kwik_form_id');
 
-        $billBreakDownCost  = $this->prepareCostData($data,$formId);
+        $billBreakDownCost  = $this->prepareCostData($data,$formId ,$parcelAmount);
 
         $response = $this->postData($this->baseUrl , '/get_bill_breakdown',$billBreakDownCost);
 
@@ -266,7 +268,7 @@ class KwikNgClass
 
 
 
-    private function prepareCostData($data , $formId){
+    private function prepareCostData($data , $formId ,$parcelAmount){
 
         $costData =  '{
                   "access_token": "'.$this->accessToken.'",
@@ -287,7 +289,7 @@ class KwikNgClass
                   "loaders_amount":"'.$data['payload']->data->loaders_amount.'",
                   "loaders_count":"'.$data['payload']->data->loaders_count.'",
                   "is_cod_job":"'.$data['payload']->data->is_cod_job.'",
-                  "parcel_amount":"'.Cache::get('parcel_amount').'",
+                  "parcel_amount":"'.$parcelAmount.'",
                   "delivery_charge_by_buyer": 0,
                   "delivery_instruction": "Hey,Please handover parcel with safety.\nThanks"
             }';
@@ -387,12 +389,12 @@ class KwikNgClass
         foreach($users  as $index => $user){
             $data[] =    [
                 'pickupDate'     => \Carbon\Carbon::now(),
-                'pickupAddress'  => isset($user->company->extra_data->locations) ? $user->company->extra_data['location']['address'] : 'Ikeja Lagos',
+                'pickupAddress'  => isset($user->company->extra_data->locations) ? $user->company->extra_data['location']['address'] : '',
                 'pickupSmeName'  => $user->firstname.' '.$user->lastname,
                 'pickupSmePhone' => $user->phone,
                 'pickupSmeEmail' => $user->email,
-                "latitude"       => isset($user->company->extra_data->locations) ? $user->company->extra_data['location']['latitude'] : '6.6018',
-                "longitude"      => isset($user->company->extra_data->locations) ? $user->company->extra_data['location']['longitude'] : '3.3515',
+                "latitude"       => isset($user->company->extra_data->locations) ? $user->company->extra_data['location']['latitude'] : 0 ,
+                "longitude"      => isset($user->company->extra_data->locations) ? $user->company->extra_data['location']['longitude'] : 0 ,
             ];
         }
 
