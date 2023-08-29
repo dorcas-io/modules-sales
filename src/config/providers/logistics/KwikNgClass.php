@@ -393,7 +393,7 @@ class KwikNgClass
                 'pickupSmeName'  => $user->firstname.' '.$user->lastname,
                 'pickupSmePhone' => $user->phone,
                 'pickupSmeEmail' => $user->email,
-                "latitude"       => isset($user->company->extra_data->locations) ? $user->company->extra_data['location']['latitude'] : 0 ,
+                "latitude"       => isset($user->company->extra_data->locations) ? $user->company->extra_data['location']['latitude'] : 0,
                 "longitude"      => isset($user->company->extra_data->locations) ? $user->company->extra_data['location']['longitude'] : 0 ,
             ];
         }

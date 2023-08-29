@@ -82,7 +82,9 @@ class ModulesSalesController extends Controller{
 
              $partners = $db->table("partners")->first();
 
-             $this->data['parent_categories'] = $partners->extra_data->marketplaceConfig->sales_categories ?? [] ;
+             $category = json_decode($partners->extra_data);
+
+             $this->data['parent_categories'] = $category->marketplaceConfig->sales_categories ?? [] ;
 
              $this->data['is_partner'] = true ;
 
@@ -99,7 +101,7 @@ class ModulesSalesController extends Controller{
      * @param Request $request
      * @param Sdk     $sdk
      *
-     * @return \Illuminate\Http\JsonResponse
+//     * @return \Illuminate\Http\JsonResponse
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function categories_create(Request $request, Sdk $sdk)
@@ -111,10 +113,31 @@ class ModulesSalesController extends Controller{
             // do something here
             throw new \RuntimeException($response->errors[0]['title'] ?? 'Failed while creating the product category.');
         }
+
+        if($request->has('parent_category')){
+            $MapCategoryResponse = $sdk->createCategoryMappingService()
+                ->addBodyParam('parent_category', $request->parent_category)
+                ->addBodyParam('business_category', $response->getData()['_id'])
+                ->send('POST');
+
+            if(!$MapCategoryResponse->isSuccessful()){
+                throw new \RuntimeException($response->errors[0]['title'] ?? 'Failed to map  category to parent category.');
+            }
+        }
+
         $company = $request->user()->company(true, true);
+
         Cache::forget('business.product-categories.'.$company->id);
         $this->data = $response->getData();
-        return response()->json($this->data);
+
+        if($request->expectsJson()){
+            return response()->json($this->data);
+        }else{
+        $response = (tabler_ui_html_response(['Successfully added category.']))->setType(UiResponse::TYPE_SUCCESS);
+
+        return back()->with('UiResponse', $response);
+        }
+
     }
     
     /**
@@ -1175,7 +1198,6 @@ class ModulesSalesController extends Controller{
         }
         $this->data = $response->getData();
 
-
         if(strtolower($request->status) === 'ready to ship'){
 
             $db = DB::connection('marketplace_mysql');
@@ -1553,8 +1575,8 @@ class ModulesSalesController extends Controller{
 
         $transactions = $query->getData();
         // dd($transactions[0]['order']['title']);
-       
-    
+
+
        if($query->isSuccessful() && $query->data !== '[]')
         {
             $data_array [] = array("Reference","Amount","Currency","Customer","Customer Email","Product Name","Quantity");
@@ -1636,6 +1658,8 @@ class ModulesSalesController extends Controller{
 
                 $cost =  (new \Dorcas\ModulesSales\config\providers\logistics\KwikNgClass)->getEstimatedFare($request);
 
+
+
                 if(isset($cost['success']) && $cost['success']){
 
                      $response = ['success' => true,
@@ -1657,7 +1681,5 @@ class ModulesSalesController extends Controller{
 
         return response()->json($response);
     }
-
-
 
 }

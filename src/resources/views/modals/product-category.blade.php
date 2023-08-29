@@ -29,13 +29,14 @@
 
                         </div>
                     </fieldset>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit"  class="btn btn-primary">Map Category</button>
+                    </div>
                 </form>
 
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="submit" name="save_product" value="1" form="form-product-new" class="btn btn-primary">Save Category</button>
-            </div>
+
         </div>
     </div>
 </div>
