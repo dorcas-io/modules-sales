@@ -81,9 +81,13 @@ class KwikNgClass
 
             $prepareShippingData = $this->prepareShippingData($data, $cartedItem);
 
+
+
             Cache::put('parcel_amount_'.$data['email'], $prepareShippingData['parcel_amount']['amount'], 60 * 5);
 
             $getCost = $this->getCost($prepareShippingData);
+
+
 
             if(isset($getCost['success']) && $getCost['success']){
 
@@ -360,7 +364,7 @@ class KwikNgClass
                  ];
 
              }
-         }catch (Exception $exception){
+         }catch (\Exception $exception){
 
              return [
                  'success' => false,
@@ -393,8 +397,8 @@ class KwikNgClass
                 'pickupSmeName'  => $user->firstname.' '.$user->lastname,
                 'pickupSmePhone' => $user->phone,
                 'pickupSmeEmail' => $user->email,
-                "latitude"       => isset($user->company->extra_data->locations) ? $user->company->extra_data['location']['latitude'] : 0,
-                "longitude"      => isset($user->company->extra_data->locations) ? $user->company->extra_data['location']['longitude'] : 0 ,
+                "latitude"       => isset($user->company->extra_data->locations) ? $user->company->extra_data['location']['latitude'] : '0',
+                "longitude"      => isset($user->company->extra_data->locations) ? $user->company->extra_data['location']['longitude'] : '0' ,
             ];
         }
 

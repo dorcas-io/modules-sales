@@ -24,7 +24,7 @@
                     @endslot
                     Add one or more categories to classify your inventory.
                     @slot('buttons')
-{{--                        <a href="#" v-on:click.prevent="newCategory" class="btn btn-primary btn-sm">Add Product Category</a>--}}
+                        <a href="#" v-on:click.prevent="newCategory" class="btn btn-primary btn-sm">Add Product Category</a>
                             <a href="#" data-toggle="modal" data-target="#product-new-category-modal" class="btn btn-primary btn-sm">Add Product Category</a>
 
                     @endslot
@@ -95,7 +95,8 @@
         var vm = new Vue({
             el: '#sales-categories',
             data: {
-                categories: {!! json_encode($categories ?: [])  !!}
+                categories: {!! json_encode($categories ?: [])  !!},
+                subCategories : [],
             },
             methods: {
                 decrement: function (index) {
@@ -108,6 +109,14 @@
                 update: function (index, category) {
                     console.log('Updating: ' + index);
                     this.categories.splice(index, 1, category);
+                },
+                fetchSubcategory : function (e){
+                    let category = e.target.value;
+                    axios.get("/msl/sales-sub-categories/"+category).then( (response) => {
+                        this.subCategories  = response.data;
+                    }).catch( (error) => {
+
+                    });
                 }
             }
         });
@@ -241,6 +250,7 @@ Vue.component('product-category', {
         }
     }
 });
+
 
 
     </script>

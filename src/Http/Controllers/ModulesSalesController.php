@@ -19,6 +19,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Auth\Access\AuthorizationException;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Reader\Exception;
@@ -84,7 +86,19 @@ class ModulesSalesController extends Controller{
 
              $category = json_decode($partners->extra_data);
 
-             $this->data['parent_categories'] = $category->marketplaceConfig->sales_categories ?? [] ;
+             $categories = $category->marketplaceConfig->sales_categories ?? [] ;
+
+
+             $modifiedArray = [];
+
+             foreach($categories as $cat){
+
+                 $parts = explode(',', $cat);
+                 $parts = array_map('trim', $parts);
+                 $modifiedArray[] = $parts[0];
+             }
+
+             $this->data['parent_categories'] = $modifiedArray;
 
              $this->data['is_partner'] = true ;
 
@@ -95,6 +109,64 @@ class ModulesSalesController extends Controller{
          }
 
         return view('modules-sales::categories', $this->data);
+    }
+
+
+
+    public function subCategories($parentCategory){
+
+        $db = DB::connection('core_mysql');
+
+        $checkIfIsPartner = $db->table("users")->first();
+
+        if($checkIfIsPartner->is_partner){
+
+            $partners = $db->table("partners")->first();
+
+            $category = json_decode($partners->extra_data);
+
+            $categories = $category->marketplaceConfig->sales_categories ?? [] ;
+
+
+            $modifiedArray = [];
+
+            foreach($categories as $cat){
+
+                $parts = explode(',', $cat);
+                $parts = array_map('trim', $parts);
+
+
+                if($parts[0] === $parentCategory){
+
+                    $existingSubCategories = [];
+
+                    if(count($parts)> 1){
+
+                        foreach($parts as $index => $part){
+                            $existingCat  = str_replace(['[', ']'], '', $part);
+                            if($index !== 0){
+                                $subCat = str_replace('"', '', $existingCat);
+                                $existingSubCategories[] = $subCat;
+                            }
+                        }
+
+                    }
+                    $sub_categories = $existingSubCategories;
+
+                    $this->data['parent_category'] = $category;
+
+
+                    break;
+
+                }else{
+                    $sub_categories = [];
+                    $this->data['parent_category'] = $category;
+                }
+            }
+
+        }
+
+        return response()->json($sub_categories);
     }
 
     /**
@@ -117,6 +189,7 @@ class ModulesSalesController extends Controller{
         if($request->has('parent_category')){
             $MapCategoryResponse = $sdk->createCategoryMappingService()
                 ->addBodyParam('parent_category', $request->parent_category)
+                ->addBodyParam('parent_sub_category', $request->parent_sub_category)
                 ->addBodyParam('business_category', $response->getData()['_id'])
                 ->send('POST');
 
@@ -192,6 +265,7 @@ class ModulesSalesController extends Controller{
 
     public function products_index(Request $request, Sdk $sdk)
     {
+
         $this->data['page']['title'] .= " &rsaquo; Products";
         $this->data['header']['title'] .= " &rsaquo; Products";
         $this->data['selectedSubMenu'] = 'sales-products';
@@ -1567,60 +1641,84 @@ class ModulesSalesController extends Controller{
     
     public function generateSalesReport(Request $request, Sdk $sdk)
     {
+
+
         $query = $sdk->createFinanceResource();
         $query = $query->addBodyParam('start_date', $request->start_date)
-                        ->addBodyParam('end_date', $request->end_date)
-                        ->send('post',['transactions/generate-report']);
-                       
-
-        $transactions = $query->getData();
-        // dd($transactions[0]['order']['title']);
+            ->addBodyParam('end_date', $request->end_date)
+            ->send('post',['trnx/generate-report']);
 
 
-       if($query->isSuccessful() && $query->data !== '[]')
-        {
-            $data_array [] = array("Reference","Amount","Currency","Customer","Customer Email","Product Name","Quantity");
-            foreach($transactions as $data)
-            {
-            
-                $data_array[] = array(
-                    'Reference'      => $data['reference'],
-                    'Amount'         => $data['amount'],
-                    'Currency'       => $data['currency'],
-                    'Customer'       => $data['customer']['firstname'].' '. $data['customer']['lastname'] ,
-                    'Customer Email' => $data['customer']['email'] ,
-                    'Product Name'   => $data['order']['title'],
-                    'Quantity'       => $data['order']['quantity'],
-                );
-            }
-      
-            ini_set('max_execution_time', 0);
-            ini_set('memory_limit', '4000M');
-            try {
-                $spreadSheet = new Spreadsheet();
-                $spreadSheet->getActiveSheet()->getDefaultColumnDimension()->setWidth(20);
-                foreach($transactions as $tran){
-                    $spreadSheet->getActiveSheet()->fromArray($data_array);
-                }
-                $fileName = $data['reference'].' Transaction Report';
-            
-                $Excel_writer = new Xls($spreadSheet);
-                header('Content-Type: application/vnd.ms-excel');
-                header('Content-Disposition: attachment;filename='.$fileName.'.xls');
-                header('Cache-Control: max-age=0');
-                ob_end_clean();
-                $Excel_writer->save('php://output');
-                exit();
-            } catch (Exception $e) {
-                return;
-            }
-          
-        }else{
-        
-            $response = (tabler_ui_html_response(['No data is available between the dates selected '. $request->parent_category]))->setType(UiResponse::TYPE_SUCCESS);
+        if($query->isSuccessful()) {
+            $transactions = $query->getData();
 
-            return back()->with('UiResponse', $response);
+            $fileName = 'Transaction_Report_' . date('YmdHis') . '.csv';
+
+            $contentType = 'application/octet-stream';
+
+            return new \Illuminate\Http\Response($transactions, 200, [
+                'Content-Type' => $contentType,
+                'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+            ]);
         }
+
+        $response = (tabler_ui_html_response(['No data is available between the dates selected ']))->setType(UiResponse::TYPE_SUCCESS);
+
+        return back()->with('UiResponse', $response);
+
+
+
+
+//        $query = $sdk->createFinanceResource();
+//        $query = $query->addBodyParam('start_date', $request->start_date)
+//                        ->addBodyParam('end_date', $request->end_date)
+//                        ->send('post',['transactions/generate-report']);
+
+//
+//       if($query->isSuccessful() && $query->data !== '[]')
+//        {
+//            $data_array [] = array("Reference","Amount","Currency","Customer","Customer Email","Product Name","Quantity");
+//            foreach($transactions as $data)
+//            {
+//
+//                $data_array[] = array(
+//                    'Reference'      => $data['reference'],
+//                    'Amount'         => $data['amount'],
+//                    'Currency'       => $data['currency'],
+//                    'Customer'       => $data['customer']['firstname'].' '. $data['customer']['lastname'] ,
+//                    'Customer Email' => $data['customer']['email'] ,
+//                    'Product Name'   => $data['order']['title'],
+//                    'Quantity'       => $data['order']['quantity'],
+//                );
+//            }
+//
+//            ini_set('max_execution_time', 0);
+//            ini_set('memory_limit', '4000M');
+//            try {
+//                $spreadSheet = new Spreadsheet();
+//                $spreadSheet->getActiveSheet()->getDefaultColumnDimension()->setWidth(20);
+//                foreach($transactions as $tran){
+//                    $spreadSheet->getActiveSheet()->fromArray($data_array);
+//                }
+//                $fileName = $data['reference'].' Transaction Report';
+//
+//                $Excel_writer = new Xls($spreadSheet);
+//                header('Content-Type: application/vnd.ms-excel');
+//                header('Content-Disposition: attachment;filename='.$fileName.'.xls');
+//                header('Cache-Control: max-age=0');
+//                ob_end_clean();
+//                $Excel_writer->save('php://output');
+//                exit();
+//            } catch (Exception $e) {
+//                return;
+//            }
+//
+//        }else{
+//
+//            $response = (tabler_ui_html_response(['No data is available between the dates selected '. $request->parent_category]))->setType(UiResponse::TYPE_SUCCESS);
+//
+//            return back()->with('UiResponse', $response);
+//        }
     
                       
     }

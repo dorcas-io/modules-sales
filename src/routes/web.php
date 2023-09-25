@@ -4,6 +4,7 @@ Route::group(['namespace' => 'Dorcas\ModulesSales\Http\Controllers', 'prefix' =>
 
 	//categories
 	Route::get('/sales-categories', 'ModulesSalesController@categories_index')->name('sales-categories');
+    Route::get('/sales-sub-categories/{category}', 'ModulesSalesController@subCategories')->name('sales-sub-categories');
 	Route::post('/sales-categories', 'ModulesSalesController@categories_create');
 	Route::delete('/sales-categories/{id}', 'ModulesSalesController@categories_delete');
 	Route::put('/sales-categories/{id}', 'ModulesSalesController@categories_update');
