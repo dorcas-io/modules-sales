@@ -6,6 +6,7 @@ namespace Dorcas\ModulesSales\config\providers\logistics;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use mysql_xdevapi\Exception;
 
 class KwikNgClass
@@ -383,22 +384,24 @@ class KwikNgClass
 
         $company = $db->table("companies")->where('uuid',$smeUuid)->first();
 
-
         if(!$company){
             return null;
         }
 
         $users = $db->table("users")->where('company_id',$company->id)->get();
 
+        $LocationData =  json_decode($company->extra_data);
+
         foreach($users  as $index => $user){
+
             $data[] =    [
                 'pickupDate'     => \Carbon\Carbon::now(),
-                'pickupAddress'  => isset($user->company->extra_data->locations) ? $user->company->extra_data['location']['address'] : '',
+                'pickupAddress'  => $LocationData->location->address ?? '',
                 'pickupSmeName'  => $user->firstname.' '.$user->lastname,
                 'pickupSmePhone' => $user->phone,
                 'pickupSmeEmail' => $user->email,
-                "latitude"       => isset($user->company->extra_data->locations) ? $user->company->extra_data['location']['latitude'] : '0',
-                "longitude"      => isset($user->company->extra_data->locations) ? $user->company->extra_data['location']['longitude'] : '0' ,
+                "latitude"       => $LocationData->location->latitude ?? 0,
+                "longitude"      => $LocationData->location->longitude ?? 0,
             ];
         }
 
