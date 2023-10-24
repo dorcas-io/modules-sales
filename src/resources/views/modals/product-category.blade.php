@@ -10,20 +10,43 @@
                     {{ csrf_field() }}
                     <fieldset class="form-fieldset">
                         <div class="row">
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-12">
+                                @if($is_partner)
+                                    <select name="parent_category" class="form-control" id="parent_category" v-on:change="fetchSubcategory" required>
+                                        @foreach($parent_categories as $index => $category)
+                                            <option value="{{ $category }}" >
+                                                {{ $category }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <label class="form-label" for="parent_category">Parent category</label>
+                                @endif
+                            </div>
+                            <div class="form-group col-md-12">
+                                    <select name="parent_sub_category" class="form-control" id="parent_sub_category" required>
+                                            <option v-for="(sub_cat,index) in subCategories" :key="index">
+                                                @{{ sub_cat }}
+                                            </option>
+
+                                    </select>
+                                    <label class="form-label" for="parent_sub_category">Parent Sub category</label>
+
+                            </div>
+                            <div class="form-group col-md-12">
                                 <input class="form-control" id="name" type="text" name="name" maxlength="80" required>
                                 <label class="form-label" for="name">Category Name</label>
                             </div>
 
                         </div>
                     </fieldset>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit"  class="btn btn-primary">Map Category</button>
+                    </div>
                 </form>
 
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="submit" name="save_product" value="1" form="form-product-new" class="btn btn-primary">Save Product</button>
-            </div>
+
         </div>
     </div>
 </div>

@@ -4,7 +4,6 @@
 @endsection
 
 @section('body_content_main')
-
 @include('layouts.blocks.tabler.alert')
 
 <div class="row">
@@ -76,7 +75,7 @@
                 </div>
               </div>
           </div>
-          @include('modules-sales::modals.shipping-route')
+{{--          @include('modules-sales::modals.shipping-route')--}}
       </div>
 
   </div>

@@ -3,6 +3,9 @@
 namespace Dorcas\ModulesSales\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Logistics;
+use App\Interfaces\ShippingInterface;
+use Dorcas\ModulesSales\config\providers\logistics\KwikNgClass;
 use Illuminate\Http\Request;
 use Dorcas\ModulesSales\Models\ModulesSales;
 use App\Dorcas\Hub\Utilities\UiResponse\UiResponse;
@@ -16,6 +19,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Auth\Access\AuthorizationException;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Reader\Exception;
@@ -27,7 +32,7 @@ use GuzzleHttp\Psr7\Uri;
 
 //use function PHPSTORM_META\elementType;
 
-class ModulesSalesController extends Controller {
+class ModulesSalesController extends Controller{
 
 
 
@@ -40,8 +45,11 @@ class ModulesSalesController extends Controller {
             'selectedMenu' => 'modules-sales',
             'submenuConfig' => 'navigation-menu.modules-sales.sub-menu',
             'submenuAction' => '',
-            'variant_inventory' =>  'Inventory'
+            'variant_inventory' =>  'Inventory',
+            'defaultShippingProvider' => env('DEFAULT_SHIPPING_PROVIDER','kwik'),
+
         ];
+
 
 
 
@@ -59,18 +67,113 @@ class ModulesSalesController extends Controller {
         $this->data['page']['title'] .= " &rsaquo; Product Categories";
         $this->data['header']['title'] .= ' &rsaquo; Product Categories';
         $this->data['selectedSubMenu'] = 'sales-categories';
-        $this->data['submenuAction'] = '<a href="#" v-on:click.prevent="newField" class="btn btn-primary btn-block">Add Product Category</a>';
+//        $this->data['submenuAction'] = '<a href="#" v-on:click.prevent="newField" class="btn btn-primary btn-block">Add Product Category</a>';
+        $this->data['submenuAction'] = '<a href="#" data-toggle="modal" data-target="#product-new-category-modal" class="btn btn-primary btn-block">Add Product Category</a>';
 
         $this->setViewUiResponse($request);
+
         $this->data['categories'] = $this->getProductCategories($sdk);
+
+
+
+        $db = DB::connection('core_mysql');
+
+        $checkIfIsPartner = $db->table("users")->first();
+
+         if($checkIfIsPartner->is_partner){
+
+             $partners = $db->table("partners")->first();
+
+             $category = json_decode($partners->extra_data);
+
+             $categories = $category->marketplaceConfig->sales_categories ?? [] ;
+
+
+             $modifiedArray = [];
+
+             foreach($categories as $cat){
+
+                 $parts = explode(',', $cat);
+                 $parts = array_map('trim', $parts);
+                 $modifiedArray[] = $parts[0];
+             }
+
+             $this->data['parent_categories'] = $modifiedArray;
+
+             $this->data['is_partner'] = true ;
+
+         }else{
+
+             $this->data['parent_categories'] =  [] ;
+             $this->data['is_partner'] = false ;
+         }
+
         return view('modules-sales::categories', $this->data);
+    }
+
+
+
+    public function subCategories($parentCategory){
+
+        $db = DB::connection('core_mysql');
+
+        $checkIfIsPartner = $db->table("users")->first();
+
+        if($checkIfIsPartner->is_partner){
+
+            $partners = $db->table("partners")->first();
+
+            $category = json_decode($partners->extra_data);
+
+            $categories = $category->marketplaceConfig->sales_categories ?? [] ;
+
+
+            $modifiedArray = [];
+
+            foreach($categories as $cat){
+
+                $parts = explode(',', $cat);
+                $parts = array_map('trim', $parts);
+
+
+                if($parts[0] === $parentCategory){
+
+                    $existingSubCategories = [];
+
+                    if(count($parts)> 1){
+
+                        foreach($parts as $index => $part){
+                            $existingCat  = str_replace(['[', ']'], '', $part);
+                            if($index !== 0){
+                                $subCat = str_replace('"', '', $existingCat);
+                                $existingSubCategories[] = $subCat;
+                            }
+                        }
+
+                    }
+                    $sub_categories = $existingSubCategories;
+
+                    $this->data['parent_category'] = $category;
+
+
+                    break;
+
+                }else{
+                    $sub_categories = [];
+                    $this->data['parent_category'] = $category;
+                }
+            }
+
+        }
+
+        return response()->json($sub_categories);
     }
 
     /**
      * @param Request $request
      * @param Sdk     $sdk
      *
-     * @return \Illuminate\Http\JsonResponse
+//     * @return \Illuminate\Http\JsonResponse
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function categories_create(Request $request, Sdk $sdk)
@@ -82,10 +185,32 @@ class ModulesSalesController extends Controller {
             // do something here
             throw new \RuntimeException($response->errors[0]['title'] ?? 'Failed while creating the product category.');
         }
+
+        if($request->has('parent_category')){
+            $MapCategoryResponse = $sdk->createCategoryMappingService()
+                ->addBodyParam('parent_category', $request->parent_category)
+                ->addBodyParam('parent_sub_category', $request->parent_sub_category)
+                ->addBodyParam('business_category', $response->getData()['_id'])
+                ->send('POST');
+
+            if(!$MapCategoryResponse->isSuccessful()){
+                throw new \RuntimeException($response->errors[0]['title'] ?? 'Failed to map  category to parent category.');
+            }
+        }
+
         $company = $request->user()->company(true, true);
+
         Cache::forget('business.product-categories.'.$company->id);
         $this->data = $response->getData();
-        return response()->json($this->data);
+
+        if($request->expectsJson()){
+            return response()->json($this->data);
+        }else{
+        $response = (tabler_ui_html_response(['Successfully added category.']))->setType(UiResponse::TYPE_SUCCESS);
+
+        return back()->with('UiResponse', $response);
+        }
+
     }
     
     /**
@@ -140,6 +265,7 @@ class ModulesSalesController extends Controller {
 
     public function products_index(Request $request, Sdk $sdk)
     {
+
         $this->data['page']['title'] .= " &rsaquo; Products";
         $this->data['header']['title'] .= " &rsaquo; Products";
         $this->data['selectedSubMenu'] = 'sales-products';
@@ -939,6 +1065,8 @@ class ModulesSalesController extends Controller {
                                                 ->addBodyParam('currency', $request->currency)
                                                 ->addBodyParam('amount', $request->amount)
                                                 ->addBodyParam('customers', [$customerId]);
+
+
             if ($request->has('due_at')) {
                 $date = Carbon::createFromFormat('d F, Y', $request->due_at);
                 if (!empty($date)) {
@@ -1124,7 +1252,7 @@ class ModulesSalesController extends Controller {
      * @param Sdk     $sdk
      * @param string  $id
      *
-     * @return \Illuminate\Http\JsonResponse
+//     * @return \Illuminate\Http\JsonResponse
      */
     public function order_status_update(Request $request , Sdk $sdk , string $id){
 
@@ -1143,6 +1271,43 @@ class ModulesSalesController extends Controller {
             throw new \RuntimeException($response->errors[0]['title'] ?? 'Failed while updating the order.');
         }
         $this->data = $response->getData();
+
+        if(strtolower($request->status) === 'ready to ship'){
+
+            $db = DB::connection('marketplace_mysql');
+
+            $orders = $db->table("orders")->where('core_order_id',$this->data['id'])->first();
+
+            if($orders){
+
+                if($orders->status !== 'Ready To Ship'){
+
+                    $defaultShippingProvider  = env('DEFAULT_SHIPPING_PROVIDER','kwik');
+
+                    switch($defaultShippingProvider){
+
+                        case 'kwik';
+
+                            $createTask =  (new \Dorcas\ModulesSales\config\providers\logistics\KwikNgClass)->createTask($orders);
+
+                            if(isset($createTask['success']) && $createTask['success']){
+                                $db->table("orders")->where('core_order_id',$this->data['id'])
+                                    ->update(['request_payload' => json_encode($createTask['payload']->data) ,
+                                        'status' => 'Ready To Ship']);
+                            }
+
+                            break;
+
+                        default:
+
+                            break;
+                    }
+
+                }
+            }
+        }
+
+
         return response()->json($this->data);
 
     }
@@ -1476,66 +1641,143 @@ class ModulesSalesController extends Controller {
     
     public function generateSalesReport(Request $request, Sdk $sdk)
     {
+
+
         $query = $sdk->createFinanceResource();
         $query = $query->addBodyParam('start_date', $request->start_date)
-                        ->addBodyParam('end_date', $request->end_date)
-                        ->send('post',['transactions/generate-report']);
-                       
+            ->addBodyParam('end_date', $request->end_date)
+            ->send('post',['trnx/generate-report']);
 
-        $transactions = $query->getData();
-        // dd($transactions[0]['order']['title']);
-       
-    
-       if($query->isSuccessful() && $query->data !== '[]')
-        {
-            $data_array [] = array("Reference","Amount","Currency","Customer","Customer Email","Product Name","Quantity");
-            foreach($transactions as $data)
-            {
-            
-                $data_array[] = array(
-                    'Reference'      => $data['reference'],
-                    'Amount'         => $data['amount'],
-                    'Currency'       => $data['currency'],
-                    'Customer'       => $data['customer']['firstname'].' '. $data['customer']['lastname'] ,
-                    'Customer Email' => $data['customer']['email'] ,
-                    'Product Name'   => $data['order']['title'],
-                    'Quantity'       => $data['order']['quantity'],
-                );
-            }
-      
-            ini_set('max_execution_time', 0);
-            ini_set('memory_limit', '4000M');
-            try {
-                $spreadSheet = new Spreadsheet();
-                $spreadSheet->getActiveSheet()->getDefaultColumnDimension()->setWidth(20);
-                foreach($transactions as $tran){
-                    $spreadSheet->getActiveSheet()->fromArray($data_array);
-                }
-                $fileName = $data['reference'].' Transaction Report';
-            
-                $Excel_writer = new Xls($spreadSheet);
-                header('Content-Type: application/vnd.ms-excel');
-                header('Content-Disposition: attachment;filename='.$fileName.'.xls');
-                header('Cache-Control: max-age=0');
-                ob_end_clean();
-                $Excel_writer->save('php://output');
-                exit();
-            } catch (Exception $e) {
-                return;
-            }
-          
-        }else{
-        
-            $response = (tabler_ui_html_response(['No data is available between the dates selected '. $request->parent_category]))->setType(UiResponse::TYPE_SUCCESS);
 
-            return back()->with('UiResponse', $response);
+        if($query->isSuccessful()) {
+            $transactions = $query->getData();
+
+            $fileName = 'Transaction_Report_' . date('YmdHis') . '.csv';
+
+            $contentType = 'application/octet-stream';
+
+            return new \Illuminate\Http\Response($transactions, 200, [
+                'Content-Type' => $contentType,
+                'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+            ]);
         }
+
+        $response = (tabler_ui_html_response(['No data is available between the dates selected ']))->setType(UiResponse::TYPE_SUCCESS);
+
+        return back()->with('UiResponse', $response);
+
+
+
+
+//        $query = $sdk->createFinanceResource();
+//        $query = $query->addBodyParam('start_date', $request->start_date)
+//                        ->addBodyParam('end_date', $request->end_date)
+//                        ->send('post',['transactions/generate-report']);
+
+//
+//       if($query->isSuccessful() && $query->data !== '[]')
+//        {
+//            $data_array [] = array("Reference","Amount","Currency","Customer","Customer Email","Product Name","Quantity");
+//            foreach($transactions as $data)
+//            {
+//
+//                $data_array[] = array(
+//                    'Reference'      => $data['reference'],
+//                    'Amount'         => $data['amount'],
+//                    'Currency'       => $data['currency'],
+//                    'Customer'       => $data['customer']['firstname'].' '. $data['customer']['lastname'] ,
+//                    'Customer Email' => $data['customer']['email'] ,
+//                    'Product Name'   => $data['order']['title'],
+//                    'Quantity'       => $data['order']['quantity'],
+//                );
+//            }
+//
+//            ini_set('max_execution_time', 0);
+//            ini_set('memory_limit', '4000M');
+//            try {
+//                $spreadSheet = new Spreadsheet();
+//                $spreadSheet->getActiveSheet()->getDefaultColumnDimension()->setWidth(20);
+//                foreach($transactions as $tran){
+//                    $spreadSheet->getActiveSheet()->fromArray($data_array);
+//                }
+//                $fileName = $data['reference'].' Transaction Report';
+//
+//                $Excel_writer = new Xls($spreadSheet);
+//                header('Content-Type: application/vnd.ms-excel');
+//                header('Content-Disposition: attachment;filename='.$fileName.'.xls');
+//                header('Cache-Control: max-age=0');
+//                ob_end_clean();
+//                $Excel_writer->save('php://output');
+//                exit();
+//            } catch (Exception $e) {
+//                return;
+//            }
+//
+//        }else{
+//
+//            $response = (tabler_ui_html_response(['No data is available between the dates selected '. $request->parent_category]))->setType(UiResponse::TYPE_SUCCESS);
+//
+//            return back()->with('UiResponse', $response);
+//        }
     
                       
     }
 
 
+    //Only for testing //The endpoints does not need to be accessed
+
+    public function getToken(Request $request){
+
+        switch($this->data['defaultShippingProvider']){
+            case 'kwik':
+                 $token = (new \Dorcas\ModulesSales\config\providers\logistics\KwikNgClass)->getToken();
+                 return  $token;
+            default:
+                 return response()->json(['success' => false , 'message' => 'Please ensure you have a default shipping provider']);
+
+        }
+
+    }
 
 
+
+    public function getEstimate(Request $request){
+
+        $this->validate($request , [
+            'first_name'    => 'required', 'last_name'    => 'required',
+            'email'        => 'required', 'phone_number' => 'required',
+            'address'      => 'required', 'latitude'     => 'required',
+            'longitude'    => 'required', 'carted_items' => 'required'
+        ]);
+
+        switch($this->data['defaultShippingProvider']){
+
+            case 'kwik':
+
+                $cost =  (new \Dorcas\ModulesSales\config\providers\logistics\KwikNgClass)->getEstimatedFare($request);
+
+
+
+                if(isset($cost['success']) && $cost['success']){
+
+                     $response = ['success' => true,
+                        'data' => $cost['data'] ,
+                        'billBreakDown_estimatedPrice' =>  $cost['billBreakDown_estimatedPrice'],
+                        'message' => $cost['message']
+                    ];
+
+                }else{
+                    $response = ['success' => false , 'message' => $cost['message']];
+                }
+
+                break;
+            default:
+                $response = ['success' => false ,
+                    'message' => 'Please ensure you have a default shipping provider'];
+                break;
+        }
+
+        return response()->json($response);
+    }
 
 }
