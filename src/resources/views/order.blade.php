@@ -78,6 +78,9 @@
 		                <p class="mb-4">
 		                    @{{ order.description }}
 		                </p>
+						<p class="mb-4">
+		                    Status: <strong>@{{ order.status }}</strong>
+		                </p>
 		                <div>&nbsp;</div>
 						
 						<!-- Moved to Order Row as Dynamic Action Button
@@ -86,7 +89,7 @@
 						</button>
 						-->
 						
-						<button v-on:click.prevent="updateShippingStatus" class="btn btn-success btn-sm text-center">
+						<button v-on:click.prevent="updateShippingStatus" class="btn btn-success text-center">
 							<span class="fa fa-truck"></span> {{ $logistics_status["label"] }} 
 						</button>
 
@@ -500,8 +503,18 @@
 									status: status_status,
 								}).then(function (response) {
 									console.log(response);
-									swal("Success", "Your order has been " + logisticsStatus.label + "", "success");
-									window.location = "/msl/sales-order/" + context.order.id;
+									// swal("Success", "Your order has been " + logisticsStatus.label + "", "success");
+									// window.location = "/msl/sales-order/" + context.order.id;
+									Swal.fire({
+										title: 'Success',
+										text: "Your order has been " + logisticsStatus.label + "",
+										type: "success",
+										confirmButtonText: 'OK',
+									}).then((result) => {
+										if (result.isConfirmed) {
+											window.location = "/msl/sales-order/" + context.order.id;
+										}
+									});
 
 								}).catch(function (error) {
 									var message = '';
