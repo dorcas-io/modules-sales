@@ -67,7 +67,6 @@ class ModulesSalesController extends Controller{
         $this->data['page']['title'] .= " &rsaquo; Product Categories";
         $this->data['header']['title'] .= ' &rsaquo; Product Categories';
         $this->data['selectedSubMenu'] = 'sales-categories';
-//        $this->data['submenuAction'] = '<a href="#" v-on:click.prevent="newField" class="btn btn-primary btn-block">Add Product Category</a>';
         $this->data['submenuAction'] = '<a href="#" data-toggle="modal" data-target="#product-new-category-modal" class="btn btn-primary btn-block">Add Product Category</a>';
 
         $this->setViewUiResponse($request);
@@ -463,10 +462,6 @@ class ModulesSalesController extends Controller{
             }
             $message = ['Successfully added new product image.'];
 
-//            # send the request
-//            if (!$query->isSuccessful()) {
-//                throw new \RuntimeException('Failed while adding the selected categories. Please try again.');
-//            }
             $response = (tabler_ui_html_response(['Successfully added product.']))->setType(UiResponse::TYPE_SUCCESS);
         } catch (\Exception $e) {
             $response = (tabler_ui_html_response([$e->getMessage()]))->setType(UiResponse::TYPE_ERROR);
@@ -755,8 +750,6 @@ class ModulesSalesController extends Controller{
             if ($request->action === 'add_product_image') {
                 # update the business information
                 $file = $request->file('image');
-//                dd(file_get_contents($file->getRealPath()));
-//                dd( $file->getClientOriginalName());
 
                 $query = $sdk->createProductResource($id)->addMultipartParam('image', file_get_contents($file->getRealPath()), $file->getClientOriginalName())
                                                             ->send('post', ['images']);
@@ -972,13 +965,10 @@ class ModulesSalesController extends Controller{
         
         if ($query->isSuccessful()) {
            
-            // $ordersCount = $query->meta['pagination']['total'] ?? 0;
             return back();
         }
        
         return back();
-        // $this->data['ordersCount'] = $ordersCount;
-        // return view('modules-sales::orders', $this->data);
     }
 
     /**
@@ -1198,6 +1188,115 @@ class ModulesSalesController extends Controller{
                 </div>
             </div>
         ';
+
+        //('pending','paid','processed','accepted','ready-to-ship','shipped','delivered','received','completed','cancelled','refunded'
+
+        $status_default = [
+            "button" => false,
+            "label" => "",
+            "description" => "",
+            "status" => ""
+        ];
+        $logistics_statuses = ['processed','accepted','ready-to-ship','shipped','delivered','received','completed','cancelled','refunded'];
+
+        
+        if ( !in_array($order->status, $logistics_statuses) ) {
+
+            $status = $status_default;
+
+        } elseif ($order->status == 'processed') {
+
+            $status = $status_default;
+            $status["action"] = true;
+            $status["label"] = "Accept Order";
+            $status["description"] = "This will confirm you are able to fulfil this order and will be shipping it soon";
+            $status["status"] = "accepted";
+
+        } else {
+
+            $status = $status_default;
+            $status["action"] = true;
+
+            switch($order->status) {
+
+                case "accepted":
+
+                    $status["label"] = "Mark As Ready To Ship";
+                    $status["description"] = "This will confirm order is ready to be shipped (and initiate a pickup request from a provider if configured)";
+                    $status["status"] = 'ready-to-ship';
+
+                    break;
+
+                case "ready-to-ship":
+
+                    $status["label"] = "Mark As Shipped";
+                    $status["description"] = "This will confirm you have shipped the order and the buyer to expext delivery";
+                    $status["status"] = 'shipped';
+
+                    break;
+
+                case "shipped":
+
+                    $status["label"] = "Mark As Delivered";
+                    $status["description"] = "This order has been shipped. It will be automatically updated as recieved once confirmed by the customer";
+                    $status["status"] = 'delivered';
+
+                    break;
+
+                case "delivered":
+
+                    $status["label"] = "";
+                    $status["description"] = "This order has updated as delivered. It will be automatically updated as recieved once confirmed by the customer";
+                    $status["status"] = 'received';
+                    $status["action"] = false;
+
+                    break;
+
+                case "received":
+
+                    $status["label"] = "";
+                    $status["description"] = "This order has updated as delivered. It will be automatically updated as completed shortly";
+                    $status["status"] = 'completed';
+                    $status["action"] = false;
+
+                    break;
+
+                case "completed":
+
+                    $status["label"] = "";
+                    $status["description"] = "This order has been completed.";
+                    $status["status"] = '';
+                    $status["action"] = false;
+
+                    break;
+
+                case "cancelled":
+
+                    $status["label"] = "";
+                    $status["description"] = "This order has been cancelled. A refund may be processed to the customer";
+                    $status["action"] = false;
+
+                    break;
+
+                case "refunded":
+
+                    $status["label"] = "";
+                    $status["description"] = "This order has been refunded to the customer";
+                    $status["action"] = false;
+
+                    break;
+
+                default:
+
+                break;
+
+
+            }
+
+        }
+
+        $this->data['logistics_status'] = $status;
+
         return view('modules-sales::order', $this->data);
     }
 

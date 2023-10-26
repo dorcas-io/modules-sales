@@ -79,15 +79,26 @@
 		                    @{{ order.description }}
 		                </p>
 		                <div>&nbsp;</div>
+						
+						<!-- Moved to Order Row as Dynamic Action Button
+						<button v-on:click.prevent="updateStatus" class="btn btn-outline-primary btn-sm text-center">
+							<span class="fa fa-sliders"></span> Update 
+						</button>
+						-->
+						
+						<button v-on:click.prevent="updateShippingStatus" class="btn btn-outline-primary btn-sm text-center">
+							<span class="fa fa-truck"></span> {{ $logistics_status["label"] }} 
+						</button>
+
+						<div>&nbsp;</div>
+
 		                <button v-on:click.prevent="editOrder" class="btn btn-outline-primary btn-sm text-center">
 		                    <span class="fa fa-sliders"></span> Edit Orders
 		                </button>
-							 <button v-on:click.prevent="updateStatus" class="btn btn-outline-primary btn-sm text-center">
-								<span class="fa fa-sliders"></span> Update Status
-						  </button>
+
 		            </div>
 		            @include('modules-sales::modals.order-edit')
-						@include('modules-sales::modals.order-status')
+					<!-- @include('modules-sales::modals.order-status') -->
 		        </div>
 
 		        <div class="card">
@@ -193,22 +204,22 @@
 				                                        <div class="tag">{{ !empty($customer['sale']) && $customer['sale']['is_paid'] ? 'Yes' : 'No' }}</div>
 				                                    </td>
 				                                    <td>
-				                                        <a class="btn btn-secondary btn-sm" data-action="view" target="_blank"
-																	 
-																	 {{-- (string) $dorcasUrlGenerator->getUrl --}}
-																	 {{-- {{ url('invoices/' . $order->id .'?customer_id='.$customer['id']) }} --}}
-				                                           href="{{ (string) $dorcasUrlGenerator->getUrl('invoices/' . $order->id ,['query' => ['customer' => $customer['id']]]) }}">View Invoice</a>
+				                                        <a class="btn btn-secondary btn-sm" data-action="view" target="_blank" href="{{ (string) $dorcasUrlGenerator->getUrl('invoices/' . $order->id ,['query' => ['customer' => $customer['id']]]) }}">View Invoice</a>
 				                                        @if (!empty($customer['customer_order']['data']) && !$customer['customer_order']['data']['is_paid'])
 				                                            <a class="btn btn-success btn-sm" href="#" data-action="mark-paid" data-id="{{ $customer['id'] }}" 
 				                                               data-name="{{ implode(' ', [$customer['firstname'], $customer['lastname']]) }}" data-index="{{ $loop->index }}">Mark Paid</a>
 				                                        @endif
+														<br/>
 				                                        @if (!empty($customer['customer_order']['data']) && !empty($customer['customer_order']['data']['transactions']['data']))
 				                                            <a class="btn btn-warning btn-sm" href="#" data-action="transactions"
 				                                               data-index="{{ $loop->index }}" data-id="{{ $customer['id'] }}" 
-				                                               data-name="{{ implode(' ', [$customer['firstname'], $customer['lastname']]) }}">TXNs</a>
+				                                               data-name="{{ implode(' ', [$customer['firstname'], $customer['lastname']]) }}">>View Payments</a>
 				                                        @endif
-				                                        <a class="btn btn-danger btn-sm" href="#" data-action="remove" data-id="{{ $customer['id'] }}" data-index="{{ $loop->index }}"
+														<br/>
+				                                        <!--
+														<a class="btn btn-danger btn-sm" href="#" data-action="remove" data-id="{{ $customer['id'] }}" data-index="{{ $loop->index }}"
 				                                           data-name="{{ implode(' ', [$customer['firstname'], $customer['lastname']]) }}">DELETE</a>
+														-->
 				                                    </td>
 				                                </tr>
 				                            @endforeach
@@ -267,7 +278,7 @@
 		                                    @slot('title')
 		                                        No Transactions
 		                                    @endslot
-		                                    Go to the Customers tab and check if an orange <strong>TXNs</strong> button is available for the customer. If available, click and then come back here to see the details of all payment transactions through your configured Payment gateway for that customer.
+		                                    Go to the Customers tab and check if an orange <strong>View Payments</strong> button is available for the customer. If available, click and then come back here to see the details of all payment transactions through your configured Payment gateway for that customer.
 		                                    @slot('buttons')
 		                                        <a class="btn btn-primary btn-sm" href="#" v-on:click.prevent="openTab('order_customers')">Go to Customers Tab</a>
 		                                    @endslot
@@ -369,7 +380,8 @@
                 defaultPhoto: "{{ cdn('images/avatar/avatar-9.png') }}",
                 backgroundImage: "{{ cdn('images/gallery/ali-yahya-435967-unsplash.jpg') }}",
                 productImage: { file: '' },
-				status:''
+				status:'',
+				logistics_status: {!! json_encode($logistics_status) !!},
             },
             mounted: function () {
                 if (typeof this.order.due_at !== 'undefined' && this.order.due_at !== null) {
@@ -459,7 +471,54 @@
                         return swal("Oops!", message, "warning");
                     });
                 },
+				updateShippingStatus: function () {
+					var context = this;
+					let logisticsStatus = this.logistics_status;
 
+					if (!logisticsStatus.action) {
+
+						Swal.fire(
+							"Shipping Information",
+							logisticsStatus.description,
+							'info'
+						);
+
+					} else {
+
+						let status_status = logisticsStatus.status;
+
+						swal({
+							title: logisticsStatus.label + "?",
+							text: logisticsStatus.description + "?",
+							type: "info",
+							showCancelButton: true,
+							confirmButtonText: "Checkout",
+							closeOnConfirm: false,
+							showLoaderOnConfirm: true
+						}, function() {
+
+							axios.put("/msl/sales-order-status/" + context.order.id, {
+								status: status_status,
+							}).then(function (response) {
+								console.log(response);
+								swal("Success", "Your order has been " + logisticsStatus.label + "", "success");
+								window.location = "/msl/sales-order/" + context.order.id;
+
+							}).catch(function (error) {
+								var message = '';
+								if (error.response) {
+									var e = error.response;
+									message = e.data.message;
+								} else if (error.request) {
+									message = 'The request was made but no response was received';
+								} else {
+									message = error.message;
+								}
+								return swal("Oops!", message, "warning");
+							});
+						});
+					}
+				},
 				updateOrderStatus: function () {
 
 					var context = this;
