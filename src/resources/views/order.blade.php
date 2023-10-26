@@ -86,7 +86,7 @@
 						</button>
 						-->
 						
-						<button v-on:click.prevent="updateShippingStatus" class="btn btn-outline-primary btn-sm text-center">
+						<button v-on:click.prevent="updateShippingStatus" class="btn btn-success btn-sm text-center">
 							<span class="fa fa-truck"></span> {{ $logistics_status["label"] }} 
 						</button>
 
@@ -213,7 +213,7 @@
 				                                        @if (!empty($customer['customer_order']['data']) && !empty($customer['customer_order']['data']['transactions']['data']))
 				                                            <a class="btn btn-warning btn-sm" href="#" data-action="transactions"
 				                                               data-index="{{ $loop->index }}" data-id="{{ $customer['id'] }}" 
-				                                               data-name="{{ implode(' ', [$customer['firstname'], $customer['lastname']]) }}">>View Payments</a>
+				                                               data-name="{{ implode(' ', [$customer['firstname'], $customer['lastname']]) }}">View Payments</a>
 				                                        @endif
 														<br/>
 				                                        <!--
@@ -487,35 +487,36 @@
 
 						let status_status = logisticsStatus.status;
 
-						swal({
+						Swal.fire({
 							title: logisticsStatus.label + "?",
 							text: logisticsStatus.description + "?",
 							type: "info",
 							showCancelButton: true,
-							confirmButtonText: "Checkout",
+							confirmButtonText: "Update Status",
 							closeOnConfirm: false,
-							showLoaderOnConfirm: true
-						}, function() {
+							showLoaderOnConfirm: true,
+							preConfirm: (update_shipping_status) => {
+								return axios.put("/msl/sales-order-status/" + context.order.id, {
+									status: status_status,
+								}).then(function (response) {
+									console.log(response);
+									swal("Success", "Your order has been " + logisticsStatus.label + "", "success");
+									window.location = "/msl/sales-order/" + context.order.id;
 
-							axios.put("/msl/sales-order-status/" + context.order.id, {
-								status: status_status,
-							}).then(function (response) {
-								console.log(response);
-								swal("Success", "Your order has been " + logisticsStatus.label + "", "success");
-								window.location = "/msl/sales-order/" + context.order.id;
-
-							}).catch(function (error) {
-								var message = '';
-								if (error.response) {
-									var e = error.response;
-									message = e.data.message;
-								} else if (error.request) {
-									message = 'The request was made but no response was received';
-								} else {
-									message = error.message;
-								}
-								return swal("Oops!", message, "warning");
-							});
+								}).catch(function (error) {
+									var message = '';
+									if (error.response) {
+										var e = error.response;
+										message = e.data.message;
+									} else if (error.request) {
+										message = 'The request was made but no response was received';
+									} else {
+										message = error.message;
+									}
+									return swal("Oops!", message, "warning");
+								});
+							},
+							allowOutsideClick: () => !Swal.isLoading()
 						});
 					}
 				},

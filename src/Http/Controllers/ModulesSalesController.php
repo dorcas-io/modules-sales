@@ -1361,21 +1361,45 @@ class ModulesSalesController extends Controller{
         
         $response = $sdk->createOrderResource()
                                 ->addBodyParam('status', $request->status)
-                                ->send('post',['status/update', $id]);
+                                ->send('post', ['status/update', $id]);
 
 
 
         if (!$response->isSuccessful()) {
-            // do something here
             throw new \RuntimeException($response->errors[0]['title'] ?? 'Failed while updating the order.');
         }
         $this->data = $response->getData();
 
-        if(strtolower($request->status) === 'ready to ship'){
+        if (strtolower($request->status) === 'ready to ship') {
 
-            $db = DB::connection('marketplace_mysql');
+            $orderCache = $tempOrder = Cache::get('cacheOrderManagement_' . $id);
 
-            $orders = $db->table("orders")->where('core_order_id',$this->data['id'])->first();
+            if (empty($orderCache)) {
+                throw new \Exception('Unable to retrieve Order Cache');
+            }
+
+            $provider = env('SETTINGS_ECOMMERCE_LOGISTICS_PROVIDER', 'kwik'); //$orderCache['logistics']['provider'];
+            $country = env('SETTINGS_COUNTRY', 'NG');
+    
+            $provider_config = ucfirst($provider). strtoupper($country) . '.php';
+            $provider_class = ucfirst($provider). strtoupper($country) . 'Class.php';
+
+            $provider_config_path = base_path('vendor/dorcas/modules-ecommerce/src/Config/Providers/Logistics/' . ucfirst($provider). '/' . $provider_config);
+            $config = require_once($provider_config_path);
+            $provider_class_path = base_path('vendor/dorcas/modules-ecommerce/src/Config/Providers/Logistics/' . ucfirst($provider). '/' . $provider_class);
+            require_once($provider_class_path);
+
+            $providerParams = [
+                "vendor_id" => env('KWIK_VENDOR_ID', 3152),
+            ];
+
+            $orderID = $id; // $orderCache["order"]["id"];
+    
+            $c = $config["class"];
+            $providerClass = new $c($providerParams, true);
+
+            $marketplaceDB = DB::connection('marketplace_mysql');
+            $orders = $marketplaceDB->table("orders")->where('core_order_id', $this->data['id'])->first();
 
             if($orders){
 
@@ -1387,12 +1411,20 @@ class ModulesSalesController extends Controller{
 
                         case 'kwik';
 
-                            $createTask =  (new \Dorcas\ModulesSales\config\providers\logistics\KwikNgClass)->createTask($orders);
+                            //$createTask =  (new \Dorcas\ModulesSales\config\providers\logistics\KwikNgClass)->createTask($orders);
+                            $createTask = $providerClass->createPickupTask($orderID);
 
-                            if(isset($createTask['success']) && $createTask['success']){
-                                $db->table("orders")->where('core_order_id',$this->data['id'])
-                                    ->update(['request_payload' => json_encode($createTask['payload']->data) ,
-                                        'status' => 'Ready To Ship']);
+                            dd($createTask);
+
+                            if ($createTask->status == 200) {
+                                $marketplaceDB->table("orders")
+                                ->where('core_order_id',$this->data['id'])
+                                ->update([
+                                    'request_payload' => json_encode($createTask),
+                                    'status' => 'Ready To Ship'
+                                ]);
+                            } else {
+                                throw new \Exception('Unable to Create Pickup Task');
                             }
 
                             break;
