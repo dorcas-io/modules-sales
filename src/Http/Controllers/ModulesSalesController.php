@@ -1203,6 +1203,10 @@ class ModulesSalesController extends Controller{
         if ( !in_array($order->status, $logistics_statuses) ) {
 
             $status = $status_default;
+            $status["action"] = true;
+            $status["label"] = "Accept Order";
+            $status["description"] = "This will confirm you are able to fulfil this order and will be shipping it soon";
+            $status["status"] = "accepted";
 
         } elseif ($order->status == 'processed') {
 
@@ -1372,7 +1376,7 @@ class ModulesSalesController extends Controller{
 
         if (strtolower($request->status) === 'ready-to-ship') {
 
-            $orderCache = $tempOrder = Cache::get('cacheOrderManagement_' . $id);
+            $orderCache = Cache::get('cacheOrderManagement_' . $id);
 
             if (empty($orderCache)) {
                 throw new \Exception('Unable to retrieve Order Cache');
@@ -1398,29 +1402,30 @@ class ModulesSalesController extends Controller{
             $c = $config["class"];
             $providerClass = new $c($providerParams, true);
 
-            $marketplaceDB = DB::connection('marketplace_mysql');
-            $orders = $marketplaceDB->table("orders")->where('core_order_id', $this->data['id'])->first();
+            //$marketplaceDB = DB::connection('marketplace_mysql');
+            //$orders = $marketplaceDB->table("orders")->where('core_order_id', $this->data['id'])->first();
+            $orders = true; //seems orders table not automatically created
 
             if($orders){
 
-                $defaultShippingProvider  = env('DEFAULT_SHIPPING_PROVIDER','kwik');
-
-                switch($defaultShippingProvider){
+                switch($provider){
 
                     case 'kwik';
 
                         //$createTask =  (new \Dorcas\ModulesSales\config\providers\logistics\KwikNgClass)->createTask($orders);
-                        $createTask = $providerClass->createPickupTask($orderID);
+                        $createTask = $providerClass->createPickupTask($orderID, true);
 
                         dd($createTask);
 
                         if ($createTask->status == 200) {
+                            /*
                             $marketplaceDB->table("orders")
                             ->where('core_order_id',$this->data['id'])
                             ->update([
                                 'request_payload' => json_encode($createTask),
                                 'status' => 'Ready To Ship'
                             ]);
+                            */
                         } else {
                             throw new \Exception('Unable to Create Pickup Task');
                         }

@@ -212,13 +212,13 @@
 				                                            <a class="btn btn-success btn-sm" href="#" data-action="mark-paid" data-id="{{ $customer['id'] }}" 
 				                                               data-name="{{ implode(' ', [$customer['firstname'], $customer['lastname']]) }}" data-index="{{ $loop->index }}">Mark Paid</a>
 				                                        @endif
-														<br/>
+														<br/><br/>
 				                                        @if (!empty($customer['customer_order']['data']) && !empty($customer['customer_order']['data']['transactions']['data']))
 				                                            <a class="btn btn-warning btn-sm" href="#" data-action="transactions"
 				                                               data-index="{{ $loop->index }}" data-id="{{ $customer['id'] }}" 
 				                                               data-name="{{ implode(' ', [$customer['firstname'], $customer['lastname']]) }}">View Payments</a>
 				                                        @endif
-														<br/>
+														
 				                                        <!--
 														<a class="btn btn-danger btn-sm" href="#" data-action="remove" data-id="{{ $customer['id'] }}" data-index="{{ $loop->index }}"
 				                                           data-name="{{ implode(' ', [$customer['firstname'], $customer['lastname']]) }}">DELETE</a>
@@ -490,6 +490,63 @@
 
 						let status_status = logisticsStatus.status;
 
+
+
+						// swal({
+						// 	title: "Continue Checkout?",
+						// 	text: "You are about to checkout the cart, do you want to continue?",
+						// 	type: "info",
+						// 	showCancelButton: true,
+						// 	confirmButtonText: "Checkout",
+						// 	closeOnConfirm: false,
+						// 	showLoaderOnConfirm: true
+						// }, function() {
+						// 	axios.post("/xhr/cart/checkout", context.checkout_form)
+						// 		.then(function (response) {
+
+						// 			context.checkoutCurrency = context.cart.currency;
+						// 			context.checkoutAmount = context.cart.total.formatted;
+
+						// 			context.cart = headerView.cart = [];
+									
+						// 			context.isOrderCompleted = true
+
+						// 			//console.log(response.data);
+
+						// 			// hide order button
+
+						// 			if (typeof response.data.payment_url !== 'undefined') {
+						// 				context.payment_url = response.data.payment_url;
+						// 			}
+
+						// 			if (typeof response.data.provider_payment_link !== 'undefined') {
+						// 				context.provider_payment_link = response.data.provider_payment_link;
+						// 			}
+
+
+						// 			return swal("Order Placed", "Your order has been submitted and an invoice sent via email. Please proceed to make payment", "success");
+						// 		}).catch(function (error) {
+						// 			var message = '';
+						// 			if (error.response) {
+						// 				// The request was made and the server responded with a status code
+						// 				// that falls out of the range of 2xx
+						// 				var e = error.response.data.errors[0];
+						// 				message = e.title;
+						// 			} else if (error.request) {
+						// 				// The request was made but no response was received
+						// 				// `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+						// 				// http.ClientRequest in node.js
+						// 				message = 'The request was made but no response was received';
+						// 			} else {
+						// 				// Something happened in setting up the request that triggered an Error
+						// 				message = error.message;
+						// 			}
+						// 			return swal("Checkout Failed", message, "warning");
+						// 		});
+						// });
+
+						
+
 						Swal.fire({
 							title: logisticsStatus.label + "?",
 							text: logisticsStatus.description + "?",
@@ -511,7 +568,7 @@
 										type: "success",
 										confirmButtonText: 'OK',
 									}).then((result) => {
-										if (result.isConfirmed) {
+										if (result) {
 											window.location = "/msl/sales-order/" + context.order.id;
 										}
 									});
