@@ -421,13 +421,6 @@
 	            },
 	            shippingStatus: function () {
 	                return logistics_status.meta.delivery.status.length > 0 ? logistics_status.meta.delivery.status : 'NA';
-	            },
-	            trackingStatus: function () {
-					let ts;
-					if (this.order.status == 'ready-to-ship') {
-						ts = ''
-					}
-	                return logistics_status.meta.delivery.status.length > 0 ? logistics_status.meta.delivery.status : 'NA';
 	            }
 				
             },
