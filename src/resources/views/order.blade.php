@@ -79,7 +79,20 @@
 		                    @{{ order.description }}
 		                </p>
 						<p class="mb-4">
-		                    Status: <strong>@{{ order.status }}</strong>
+		                    Order Status: <strong>@{{ order.status }}</strong>
+		                </p>
+						<p class="mb-4">
+		                    Shipping Status: <strong>@{{ shippingStatus }}</strong>
+		                </p>
+						<p class="mb-4">
+		                    Tracking Status:
+							@if (in_array($logistics_status["status"], ['ready-to-ship']))
+								<strong><a target="_blank" href='{{ $logistics_status["meta"]["delivery"]["track"]["pickup"] }}'>Track</a></strong>
+							@elseif (in_array($logistics_status["status"], ['shipped','delivered']))
+								<strong><a target="_blank" href='{{ $logistics_status["meta"]["delivery"]["track"]["delivery"] }}'>Track</a></strong>
+							@else
+								<em>NA</em>
+							@endif
 		                </p>
 		                <div>&nbsp;</div>
 						
@@ -405,7 +418,18 @@
 	            photo: function () {
 	                //return this.employee.photo.length > 0 ? this.employee.photo : this.defaultPhoto;
 	                return this.defaultPhoto;
+	            },
+	            shippingStatus: function () {
+	                return logistics_status.meta.delivery.status.length > 0 ? logistics_status.meta.delivery.status : 'NA';
+	            },
+	            trackingStatus: function () {
+					let ts;
+					if (this.order.status == 'ready-to-ship') {
+						ts = ''
+					}
+	                return logistics_status.meta.delivery.status.length > 0 ? logistics_status.meta.delivery.status : 'NA';
 	            }
+				
             },
             methods: {
             	openTab: function (tab) {
@@ -502,7 +526,7 @@
 								axios.put("/msl/sales-order-status/" + context.order.id, {
 									status: status_status,
 								}).then(function (response) {
-									console.log(response);
+									//console.log(response);
 									// swal("Success", "Your order has been " + logisticsStatus.label + "", "success");
 									// window.location = "/msl/sales-order/" + context.order.id;
 									return Swal.fire({
