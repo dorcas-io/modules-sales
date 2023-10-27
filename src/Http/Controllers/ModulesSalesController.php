@@ -1195,9 +1195,19 @@ class ModulesSalesController extends Controller{
             "button" => false,
             "label" => "",
             "description" => "",
-            "status" => ""
+            "status" => "",
+            "meta" => [
+                "delivery" => [
+                    "status" => "",
+                    "track" => [
+                        "pickup" => "",
+                        "delivery" => ""
+                    ]
+                ]
+            ]
         ];
         $logistics_statuses = ['processed','accepted','ready-to-ship','shipped','delivered','received','completed','cancelled','refunded'];
+        $delivery_statuses = ['ready-to-ship','shipped','delivered','received','completed'];
 
         
         if ( !in_array($order->status, $logistics_statuses) ) {
@@ -1237,6 +1247,7 @@ class ModulesSalesController extends Controller{
                     $status["description"] = "This will confirm you have shipped the order and the buyer to expext delivery";
                     $status["status"] = 'shipped';
 
+
                     break;
 
                 case "shipped":
@@ -1244,7 +1255,6 @@ class ModulesSalesController extends Controller{
                     $status["label"] = "Mark As Delivered";
                     $status["description"] = "This order has been shipped. It will be automatically updated as recieved once confirmed by the customer";
                     $status["status"] = 'delivered';
-
                     break;
 
                 case "delivered":
@@ -1298,6 +1308,22 @@ class ModulesSalesController extends Controller{
             }
 
         }
+
+        // determine links
+        $orderCache = Cache::get('cacheOrderManagement_' . $id);
+        $provider = env('SETTINGS_ECOMMERCE_LOGISTICS_PROVIDER', 'kwik');
+
+        switch($provider) {
+            case "kwik":
+                if ( !in_array($order->status, $logistics_statuses) ) {
+                    $d = (array) $orderCache["logistics"]["output"]["create_task_via_vendor"];
+                    $status["meta"]["delivery"]["status"] = $d["data"]["job_status_check_link"];
+                    $status["meta"]["delivery"]["track"]["pickup"] = $d["data"]["pickups"][0]["result_tracking_link"];
+                    $status["meta"]["delivery"]["track"]["delivery"] = $d["data"]["deliveries"][0]["result_tracking_link"];
+                }
+                break;
+        }
+
 
         $this->data['logistics_status'] = $status;
 
@@ -1395,6 +1421,9 @@ class ModulesSalesController extends Controller{
 
             $providerParams = [
                 "vendor_id" => env('KWIK_VENDOR_ID', 3152),
+                "order_key" => 'cacheOrderManagement_' . $id
+                // "vehicle_type" => $vehicle_type,
+                // "cod" => $cod,
             ];
 
             $orderID = $id; // $orderCache["order"]["id"];
@@ -1414,8 +1443,6 @@ class ModulesSalesController extends Controller{
 
                         //$createTask =  (new \Dorcas\ModulesSales\config\providers\logistics\KwikNgClass)->createTask($orders);
                         $createTask = $providerClass->createPickupTask($orderID, true);
-
-                        dd($createTask);
 
                         if ($createTask->status == 200) {
                             /*
