@@ -1202,7 +1202,8 @@ class ModulesSalesController extends Controller{
                     "track" => [
                         "pickup" => "",
                         "delivery" => ""
-                    ]
+                    ],
+                    "cancel" => ""
                 ]
             ]
         ];
@@ -1321,6 +1322,9 @@ class ModulesSalesController extends Controller{
                     $status["meta"]["delivery"]["track"]["pickup"] = ($d["pickups"][0])->result_tracking_link;
                     $status["meta"]["delivery"]["track"]["delivery"] = ($d["deliveries"][0])->result_tracking_link;
                 }
+                if ( $order->status == "ready-to-ship" ) {
+                    $status["meta"]["delivery"]["cancel"] = ($d["deliveries"][0])->result_tracking_link;
+                }
                 break;
         }
 
@@ -1381,7 +1385,7 @@ class ModulesSalesController extends Controller{
      * @param Sdk     $sdk
      * @param string  $id
      *
-//     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\JsonResponse
      */
     public function order_status_update(Request $request , Sdk $sdk , string $id){
 
@@ -1398,7 +1402,7 @@ class ModulesSalesController extends Controller{
         if (!$response->isSuccessful()) {
             throw new \RuntimeException($response->errors[0]['title'] ?? 'Failed while updating the order.');
         }
-        $this->data = $response->getData();
+        $status_response = $response->getData();
 
         if (strtolower($request->status) === 'ready-to-ship') {
 
@@ -1468,7 +1472,89 @@ class ModulesSalesController extends Controller{
         }
 
 
-        return response()->json($this->data);
+        return response()->json($status_response);
+
+    }
+
+
+    /**
+     * @param Request $request
+     * @param Sdk     $sdk
+     * @param string  $id
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function order_shipping_cancel(Request $request , Sdk $sdk , string $id){
+
+        $this->validate($request, [
+            're_order' => 'required'
+        ]);
+
+        $reOrder = (bool) $request->re_order;
+
+        $orderCache = Cache::get('cacheOrderManagement_' . $id);
+
+        if (empty($orderCache)) {
+            throw new \Exception('Unable to retrieve Order Cache');
+        }
+
+        $provider = env('SETTINGS_ECOMMERCE_LOGISTICS_PROVIDER', 'kwik'); //$orderCache['logistics']['provider'];
+        $country = env('SETTINGS_COUNTRY', 'NG');
+
+        $provider_config = ucfirst($provider). strtoupper($country) . '.php';
+        $provider_class = ucfirst($provider). strtoupper($country) . 'Class.php';
+
+        $provider_config_path = base_path('vendor/dorcas/modules-ecommerce/src/Config/Providers/Logistics/' . ucfirst($provider). '/' . $provider_config);
+        $config = require_once($provider_config_path);
+        $provider_class_path = base_path('vendor/dorcas/modules-ecommerce/src/Config/Providers/Logistics/' . ucfirst($provider). '/' . $provider_class);
+        require_once($provider_class_path);
+
+        $providerParams = [
+            "vendor_id" => env('KWIK_VENDOR_ID', 3152),
+            "order_key" => 'cacheOrderManagement_' . $id
+        ];
+
+        $orderID = $id;
+
+        $c = $config["class"];
+        $providerClass = new $c($providerParams, true);
+
+        $cancelTask = $providerClass->cancelPickupTask($orderID, $reOrder);
+
+        if ($cancelTask->status == 200) {
+
+            $cancel_response = $cancelTask->data;
+
+        } else {
+
+            throw new \Exception('Unable to Cancel Pickup Task');
+
+        }
+
+        if ($reOrder) {
+
+            $createTask = $providerClass->createPickupTask($orderID, true);
+
+            if ($createTask->status == 200) {
+
+                $cancel_response = $createTask->data;
+    
+            } else {
+
+                throw new \Exception('Unable to Re-Create Pickup Task');
+
+            }
+
+        } else {
+
+            // Revert Order Status to pre-shipping "accepted"
+            $request->merge(['status' => 'accepted']);
+            $this->order_status_update($request, $sdk, $id);
+
+            return response()->json($cancel_response);
+
+        }
+        
 
     }
 

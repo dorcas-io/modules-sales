@@ -83,7 +83,11 @@
 		                </p>
 						<p class="mb-4">
 		                    Shipping Status: <strong>@{{ shippingStatus }}</strong>
+							@if ( $logistics_status["meta"]["delivery"]["cancel"] == true )
+								<br/><strong><a  href="#!" v-on:click.prevent="cancelShippingStatus">Cancel Pickup Request</a></strong>
+							@endif
 		                </p>
+
 						<p class="mb-4">
 		                    Tracking Status:
 							@if (in_array($logistics_status["status"], ['ready-to-ship']))
@@ -550,44 +554,50 @@
 						});
 					}
 				},
-				updateOrderStatus: function () {
-
+				cancelShippingStatus: function () {
 					var context = this;
 
-					context.updating = true;
+					let status_status = logisticsStatus.status;
 
-                    axios.put("/msl/sales-order-status/" + context.order.id, {
-                        status: this.status,
-                    }).then(function (response) {
-                        console.log(response);
-                        // context.updating = false;
-                        //Materialize.toast("Your changes were successfully saved.", 4000);
-                        swal("Success", "Your changes were successfully saved.", "success");
-                        $('#order-status-modal').modal('hide');
-                        //window.location = "/msl/sales-order/"+context.order.id;
+					Swal.fire({
+						title: "Cancel Pickup Request?",
+						text: "You will have to mark the order Ready To Ship again at a later time",
+						type: "info",
+						showCancelButton: true,
+						confirmButtonText: "Cancel Pickup Request",
+						closeOnConfirm: false,
+						showLoaderOnConfirm: true,
+						preConfirm: (cancel_shipping) => {
+							axios.put("/msl/sales-cancel-shipping/" + context.order.id, {
+								re_order: false,
+							}).then(function (response) {
+								return Swal.fire({
+									title: 'Success',
+									text: "Your pickup request has been Cancelled",
+									type: "success",
+									confirmButtonText: 'OK',
+								}).then((result) => {
+									if (result) {
+										window.location = "/msl/sales-order/" + context.order.id;
+									}
+								});
 
-                    }).catch(function (error) {
-                        var message = '';
-                        if (error.response) {
-                            // The request was made and the server responded with a status code
-                            // that falls out of the range of 2xx
-                            //var e = error.response.data.errors[0];
-                            //message = e.title;
-			                            var e = error.response;
-			                            message = e.data.message;
-                        } else if (error.request) {
-                            // The request was made but no response was received
-                            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-                            // http.ClientRequest in node.js
-                            message = 'The request was made but no response was received';
-                        } else {
-                            // Something happened in setting up the request that triggered an Error
-                            message = error.message;
-                        }
-                        context.updating = false;
-                        return swal("Oops!", message, "warning");
-                    });
-                },
+							}).catch(function (error) {
+								var message = '';
+								if (error.response) {
+									var e = error.response;
+									message = e.data.message;
+								} else if (error.request) {
+									message = 'The request was made but no response was received';
+								} else {
+									message = error.message;
+								}
+								return swal("Oops!", message, "warning");
+							});
+						},
+						allowOutsideClick: () => !Swal.isLoading()
+					});
+				},
                 clickAction: function (event) {
                     /*console.log(event.target);
                     var target = event.target.tagName.toLowerCase() === 'i' ? event.target.parentNode : event.target;
