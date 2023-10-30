@@ -1335,6 +1335,7 @@ class ModulesSalesController extends Controller{
 
 
         $this->data['logistics_status'] = $status;
+        $this->data['order_cache'] = Cache::get('cacheOrderManagement_' . $id, []);
 
         return view('modules-sales::order', $this->data);
     }
@@ -1412,6 +1413,13 @@ class ModulesSalesController extends Controller{
         if (strtolower($request->status) === 'ready-to-ship') {
 
             $orderCache = Cache::get('cacheOrderManagement_' . $id);
+
+            // update data
+            $cachedOrder["logistics"]["meta"]["address_from"]["name"] = "Bolaji Olawoye";
+            $cachedOrder["logistics"]["meta"]["address_from"]["phone"] = "08185977165";
+            $cachedOrder["logistics"]["meta"]["address_from"]["email"] = "ifeoluwa.olawoye@gmail.com";
+            $cachedOrder["logistics"]["meta"]["vehicle_type"] = 0;
+            Cache::forever('cacheOrderManagement_' . $id, $cachedOrder);
 
             if (empty($orderCache)) {
                 throw new \Exception('Unable to retrieve Order Cache');

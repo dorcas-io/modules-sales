@@ -90,9 +90,9 @@
 
 						<p class="mb-4">
 		                    Tracking Status:
-							@if (in_array($logistics_status["status"], ['ready-to-ship']))
+							@if (in_array($order->status, ['ready-to-ship']))
 								<strong><a target="_blank" href='{{ $logistics_status["meta"]["delivery"]["track"]["pickup"] }}'>Track</a></strong>
-							@elseif (in_array($logistics_status["status"], ['shipped','delivered']))
+							@elseif (in_array($order->status, ['shipped','delivered']))
 								<strong><a target="_blank" href='{{ $logistics_status["meta"]["delivery"]["track"]["delivery"] }}'>Track</a></strong>
 							@else
 								<em>NA</em>
@@ -112,13 +112,17 @@
 
 						<div>&nbsp;</div>
 
+		                <button v-on:click.prevent="showLabel" class="btn btn-outline-success btn-sm text-center">
+		                    <span class="fa fa-truck"></span> Order Label
+		                </button>
+
 		                <button v-on:click.prevent="editOrder" class="btn btn-outline-primary btn-sm text-center">
 		                    <span class="fa fa-sliders"></span> Edit Orders
 		                </button>
 
 		            </div>
 		            @include('modules-sales::modals.order-edit')
-					<!-- @include('modules-sales::modals.order-status') -->
+					@include('modules-sales::modals.order-label')
 		        </div>
 
 		        <div class="card">
@@ -447,9 +451,9 @@
 	            },
 	            editOrder: function (index) {
 	                $('#order-edit-modal').modal('show');
-	            },   
-					updateStatus: function (index) {
-	                $('#order-status-modal').modal('show');
+	            },
+				showLabel: function (index) {
+	                $('#order-label-modal').modal('show');
 	            },           	
                 moment: function (dateString, format) {
                     return moment(dateString).format(format);
