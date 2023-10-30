@@ -1323,7 +1323,7 @@ class ModulesSalesController extends Controller{
                     $status["meta"]["delivery"]["track"]["delivery"] = ($d["deliveries"][0])->result_tracking_link;
                 }
                 if ( $order->status == "ready-to-ship" ) {
-                    $status["meta"]["delivery"]["cancel"] = ($d["deliveries"][0])->result_tracking_link;
+                    $status["meta"]["delivery"]["cancel"] = true;
                 }
                 break;
         }
@@ -1490,7 +1490,7 @@ class ModulesSalesController extends Controller{
             're_order' => 'required'
         ]);
 
-        $reOrder = (bool) $request->re_order;
+        $reOrder = $request->re_order === "true" ? true : false;
 
         $orderCache = Cache::get('cacheOrderManagement_' . $id);
 
@@ -1527,7 +1527,7 @@ class ModulesSalesController extends Controller{
 
         } else {
 
-            throw new \Exception('Unable to Cancel Pickup Task');
+            throw new \Exception('Unable to Cancel Pickup Task: ' . $cancelTask->message);
 
         }
 
@@ -1541,7 +1541,7 @@ class ModulesSalesController extends Controller{
     
             } else {
 
-                throw new \Exception('Unable to Re-Create Pickup Task');
+                throw new \Exception('Unable to Re-Create Pickup Task' . $createTask->message);
 
             }
 

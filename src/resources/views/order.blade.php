@@ -424,7 +424,7 @@
 	                return this.defaultPhoto;
 	            },
 	            shippingStatus: function () {
-	                return logistics_status.meta.delivery.status.length > 0 ? logistics_status.meta.delivery.status : 'NA';
+	                return this.logistics_status.meta.delivery.status.length > 0 ? this.logistics_status.meta.delivery.status : 'NA';
 	            }
 				
             },
@@ -557,7 +557,7 @@
 				cancelShippingStatus: function () {
 					var context = this;
 
-					let status_status = logisticsStatus.status;
+					//let status_status = logisticsStatus.status;
 
 					Swal.fire({
 						title: "Cancel Pickup Request?",
@@ -568,7 +568,7 @@
 						closeOnConfirm: false,
 						showLoaderOnConfirm: true,
 						preConfirm: (cancel_shipping) => {
-							axios.put("/msl/sales-cancel-shipping/" + context.order.id, {
+							axios.get("/msl/sales-cancel-shipping/" + context.order.id + "?re_order=false", {
 								re_order: false,
 							}).then(function (response) {
 								return Swal.fire({
