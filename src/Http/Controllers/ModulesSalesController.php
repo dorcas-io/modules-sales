@@ -1317,7 +1317,12 @@ class ModulesSalesController extends Controller{
         switch($provider) {
             case "kwik":
                 if ( in_array($order->status, $delivery_statuses) ) {
-                    $d = (array) ($orderCache["logistics"]["output"]["create_task_via_vendor"])->data;
+                    $d = $orderCache["logistics"]["output"]["create_task_via_vendor"];
+                    if (isset(($d)->data))  {
+                        $d = ($d)->data;
+                    }
+                    $d = (array) $d;
+                    
                     $status["meta"]["delivery"]["status"] = Http::get($d["job_status_check_link"])->body();
                     $status["meta"]["delivery"]["track"]["pickup"] = ($d["pickups"][0])->result_tracking_link;
                     $status["meta"]["delivery"]["track"]["delivery"] = ($d["deliveries"][0])->result_tracking_link;
