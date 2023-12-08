@@ -38,7 +38,7 @@
                     </div>
                     <div class="row">
                         <div class="form-group" v-bind:class="{'col-md-6': due_date !== null && due_date.length > 0}">
-                            <input type="text" class="custom-datepicker" name="due_at" id="due_at" v-model="due_date">
+                            <input type="text" class="custom-datepicker" name="due_at" id="due_at" v-model="due_date" required>
                             <label for="due_at">Due Date</label>
                         </div>
                         <div class="col-md-6 form-group" v-if="due_date !== null && due_date.length > 0">
@@ -270,85 +270,85 @@
     });
 
 
-{{--Vue.component('cart-item', {--}}
-{{--    template: '<div class="row">' +--}}
-{{--    '    <div class="form-group col-lg-5 col-md-12">' +--}}
-{{--    '        <select name="products[]" class="form-control" v-model="product" v-on:change="updatePrice">' +--}}
-{{--    '            <option value="" disabled>Select a Product</option>' +--}}
-{{--    '            <option v-for="product in products" :key="product.id" :value="product.id">' +--}}
-{{--    '                {{ product.name }}' +--}}
-{{--    '            </option>' +--}}
-{{--    '        </select>' +--}}
-{{--    '   </div>' +--}}
-{{--    '   <div class="form-group col-lg-3 col-md-6">' +--}}
-{{--    '        <input class="form-control" v-bind:id="quantity_id" name="quantities[]" type="number" min="1" v-model="quantity" v-on:keyup="syncCart" v-on:change="syncCart">' +--}}
-{{--    '        <label class="form-label" v-bind:for="quantity_id">Quantity</label>' +--}}
-{{--    '   </div>' +--}}
-{{--    '   <div class="form-group col-lg-3 col-md-3">' +--}}
-{{--    '        <input class="form-control" v-bind:id="unit_price_id" name="unit_prices[]" type="number" min="0" step="1" v-model="unit_price" v-on:keyup="syncCart" v-on:change="syncCart">' +--}}
-{{--    '        <label class="form-label" v-bind:for="unit_price_id">Unit Price</label>' +--}}
-{{--    '   </div>' +--}}
-{{--    '    <div class="form-group col-lg-1 col-md-3">' +--}}
-{{--    '        <button type="button" class="btn btn-icon btn-danger" v-on:click.prevent="removeItem"><i class="fe fe-trash"></i></button>' +--}}
-{{--    '    </div>'+--}}
-{{--    '</div>',--}}
-{{--    data: function () {--}}
-{{--        return {--}}
-{{--            products: this.$parent.products,--}}
-{{--            product: '',--}}
-{{--            quantity: 0,--}}
-{{--            itemIndex: this.index,--}}
-{{--            unit_price: 0,--}}
-{{--            currency: this.$parent.currency--}}
-{{--        }--}}
-{{--    },--}}
-{{--    props: {--}}
-{{--        quantity_id: {--}}
-{{--            type: String,--}}
-{{--            required: true--}}
-{{--        },--}}
-{{--        unit_price_id: {--}}
-{{--            type: String,--}}
-{{--            required: true--}}
-{{--        },--}}
-{{--        index: {--}}
-{{--            type: Number,--}}
-{{--            required: true--}}
-{{--        }--}}
-{{--    },--}}
-{{--    methods: {--}}
-{{--        updatePrice: function () {--}}
-{{--            console.log('checking for price...');--}}
-{{--            context = this;--}}
-{{--            var product = this.products.find(function (p) {--}}
-{{--                return p.id === context.product;--}}
-{{--            });--}}
-{{--            if (typeof product === 'undefined') {--}}
-{{--                return;--}}
-{{--            }--}}
-{{--            var price = typeof product.default_unit_price !== 'undefined' && typeof product.default_unit_price.raw !== 'undefined' ?--}}
-{{--                parseFloat(product.default_unit_price.raw) : 0;--}}
-{{--            // set the initial price--}}
-{{--            if (typeof product.prices !== 'undefined' && typeof product.prices.data !== 'undefined') {--}}
-{{--                for (var i = 0; i < product.prices.data.length; i++) {--}}
-{{--                    if (product.prices.data[i].currency !== this.currency) {--}}
-{{--                        continue;--}}
-{{--                    }--}}
-{{--                    price = parseFloat(product.prices.data[i].unit_price.raw);--}}
-{{--                    break;--}}
-{{--                }--}}
-{{--            }--}}
-{{--            this.unit_price = price;--}}
-{{--            this.syncCart();--}}
-{{--        },--}}
-{{--        removeItem: function () {--}}
-{{--            this.$emit('remove-item', this.itemIndex);--}}
-{{--        },--}}
-{{--        syncCart: function () {--}}
-{{--            this.$emit('sync-cart', this.itemIndex, this.quantity, this.unit_price, this.product);--}}
-{{--        }--}}
-{{--    }--}}
-{{--});--}}
+Vue.component('cart-item', {
+    template: '<div class="row">' +
+    '    <div class="form-group col-lg-5 col-md-12">' +
+    '        <select name="products[]" class="form-control" v-model="product" v-on:change="updatePrice">' +
+    '            <option value="" disabled>Select a Product</option>' +
+    '            <option v-for="product in products" :key="product.id" :value="product.id">' +
+    '                {{ product.name }}' +
+    '            </option>' +
+    '        </select>' +
+    '   </div>' +
+    '   <div class="form-group col-lg-3 col-md-6">' +
+    '        <input class="form-control" v-bind:id="quantity_id" name="quantities[]" type="number" min="1" v-model="quantity" v-on:keyup="syncCart" v-on:change="syncCart">' +
+    '        <label class="form-label" v-bind:for="quantity_id">Quantity</label>' +
+    '   </div>' +
+    '   <div class="form-group col-lg-3 col-md-3">' +
+    '        <input class="form-control" v-bind:id="unit_price_id" name="unit_prices[]" type="number" min="0" step="1" v-model="unit_price" v-on:keyup="syncCart" v-on:change="syncCart">' +
+    '        <label class="form-label" v-bind:for="unit_price_id">Unit Price</label>' +
+    '   </div>' +
+    '    <div class="form-group col-lg-1 col-md-3">' +
+    '        <button type="button" class="btn btn-icon btn-danger" v-on:click.prevent="removeItem"><i class="fe fe-trash"></i></button>' +
+    '    </div>'+
+    '</div>',
+    data: function () {
+        return {
+            products: this.$parent.products,
+            product: '',
+            quantity: 0,
+            itemIndex: this.index,
+            unit_price: 0,
+            currency: this.$parent.currency
+        }
+    },
+    props: {
+        quantity_id: {
+            type: String,
+            required: true
+        },
+        unit_price_id: {
+            type: String,
+            required: true
+        },
+        index: {
+            type: Number,
+            required: true
+        }
+    },
+    methods: {
+        updatePrice: function () {
+            console.log('checking for price...');
+            context = this;
+            var product = this.products.find(function (p) {
+                return p.id === context.product;
+            });
+            if (typeof product === 'undefined') {
+                return;
+            }
+            var price = typeof product.default_unit_price !== 'undefined' && typeof product.default_unit_price.raw !== 'undefined' ?
+                parseFloat(product.default_unit_price.raw) : 0;
+            // set the initial price
+            if (typeof product.prices !== 'undefined' && typeof product.prices.data !== 'undefined') {
+                for (var i = 0; i < product.prices.data.length; i++) {
+                    if (product.prices.data[i].currency !== this.currency) {
+                        continue;
+                    }
+                    price = parseFloat(product.prices.data[i].unit_price.raw);
+                    break;
+                }
+            }
+            this.unit_price = price;
+            this.syncCart();
+        },
+        removeItem: function () {
+            this.$emit('remove-item', this.itemIndex);
+        },
+        syncCart: function () {
+            this.$emit('sync-cart', this.itemIndex, this.quantity, this.unit_price, this.product);
+        }
+    }
+});
 
 </script>
 @endsection
