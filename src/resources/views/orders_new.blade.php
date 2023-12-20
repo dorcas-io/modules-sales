@@ -276,7 +276,7 @@ Vue.component('cart-item', {
     '        <select name="products[]" class="form-control" v-model="product" v-on:change="updatePrice">' +
     '            <option value="" disabled>Select a Product</option>' +
     '            <option v-for="product in products" :key="product.id" :value="product.id">' +
-    '                {{ product.name }}' +
+    '                @{{ product.name }}' +
     '            </option>' +
     '        </select>' +
     '   </div>' +
