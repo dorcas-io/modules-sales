@@ -298,11 +298,15 @@ class ModulesSalesController extends Controller{
         
         if (env("DORCAS_EDITION","business") === "business") {
             $multiTenant = false;
+            $subdomain = substr_count($subdomain, "hub.") > 0 ? str_replace("hub.", "", $subdomain) : $subdomain;
             $dorcas_store_url = "https://store.".$subdomain;
+
         } elseif ( env("DORCAS_EDITION","business") === "community" || env("DORCAS_EDITION","business") === "enterprise" ) {
             $multiTenant = true;
-            $parts = explode('.', str_replace("." . $base_domain_host, "", $subdomain) );
+            $sub_base = str_replace("hub", "", $base_domain_host); // domain is now hub.domain.com or hub.sub.domain.com NO longer domain.com or sub.domain.com
+            $parts = explode('.', str_replace($sub_base, "", $subdomain) );
             $dorcas_store_url = "https://" .  $parts[0] . ".store." . $base_domain_host;
+
         }
 
         $storeURL = $dorcas_store_url;
