@@ -78,16 +78,51 @@
 		                <p class="mb-4">
 		                    @{{ order.description }}
 		                </p>
+						<p class="mb-4">
+		                    Order Status: <strong>@{{ order.status }}</strong>
+		                </p>
+						<p class="mb-4">
+		                    Shipping Status: <strong>@{{ shippingStatus }}</strong>
+							@if ( $logistics_status["meta"]["delivery"]["cancel"] == true )
+								<br/><strong><a  href="#!" v-on:click.prevent="cancelShippingStatus">Cancel Pickup Request</a></strong>
+							@endif
+		                </p>
+
+						<p class="mb-4">
+		                    Tracking Status:
+							@if (in_array($order->status, ['ready-to-ship']))
+								<strong><a target="_blank" href='{{ $logistics_status["meta"]["delivery"]["track"]["pickup"] }}'>Track</a></strong>
+							@elseif (in_array($order->status, ['shipped','delivered']))
+								<strong><a target="_blank" href='{{ $logistics_status["meta"]["delivery"]["track"]["delivery"] }}'>Track</a></strong>
+							@else
+								<em>NA</em>
+							@endif
+		                </p>
 		                <div>&nbsp;</div>
+						
+						<!-- Moved to Order Row as Dynamic Action Button
+						<button v-on:click.prevent="updateStatus" class="btn btn-outline-primary btn-sm text-center">
+							<span class="fa fa-sliders"></span> Update 
+						</button>
+						-->
+						
+						<button v-on:click.prevent="updateShippingStatus" class="btn btn-success text-center">
+							<span class="fa fa-truck"></span> {{ $logistics_status["label"] }} 
+						</button>
+
+						<div>&nbsp;</div>
+
+		                <button v-on:click.prevent="showLabel" class="btn btn-outline-success btn-sm text-center">
+		                    <span class="fa fa-truck"></span> Order Label
+		                </button>
+
 		                <button v-on:click.prevent="editOrder" class="btn btn-outline-primary btn-sm text-center">
 		                    <span class="fa fa-sliders"></span> Edit Orders
 		                </button>
-							 <button v-on:click.prevent="updateStatus" class="btn btn-outline-primary btn-sm text-center">
-								<span class="fa fa-sliders"></span> Update Status
-						  </button>
+
 		            </div>
 		            @include('modules-sales::modals.order-edit')
-						@include('modules-sales::modals.order-status')
+					@include('modules-sales::modals.order-label')
 		        </div>
 
 		        <div class="card">
@@ -193,22 +228,22 @@
 				                                        <div class="tag">{{ !empty($customer['sale']) && $customer['sale']['is_paid'] ? 'Yes' : 'No' }}</div>
 				                                    </td>
 				                                    <td>
-				                                        <a class="btn btn-secondary btn-sm" data-action="view" target="_blank"
-																	 
-																	 {{-- (string) $dorcasUrlGenerator->getUrl --}}
-																	 {{-- {{ url('invoices/' . $order->id .'?customer_id='.$customer['id']) }} --}}
-				                                           href="{{ (string) $dorcasUrlGenerator->getUrl('invoices/' . $order->id ,['query' => ['customer' => $customer['id']]]) }}">View Invoice</a>
+				                                        <a class="btn btn-secondary btn-sm" data-action="view" target="_blank" href="{{ (string) $dorcasUrlGenerator->getUrl('invoices/' . $order->id ,['query' => ['customer' => $customer['id']]]) }}">View Invoice</a>
 				                                        @if (!empty($customer['customer_order']['data']) && !$customer['customer_order']['data']['is_paid'])
 				                                            <a class="btn btn-success btn-sm" href="#" data-action="mark-paid" data-id="{{ $customer['id'] }}" 
 				                                               data-name="{{ implode(' ', [$customer['firstname'], $customer['lastname']]) }}" data-index="{{ $loop->index }}">Mark Paid</a>
 				                                        @endif
+														<br/><br/>
 				                                        @if (!empty($customer['customer_order']['data']) && !empty($customer['customer_order']['data']['transactions']['data']))
 				                                            <a class="btn btn-warning btn-sm" href="#" data-action="transactions"
 				                                               data-index="{{ $loop->index }}" data-id="{{ $customer['id'] }}" 
-				                                               data-name="{{ implode(' ', [$customer['firstname'], $customer['lastname']]) }}">TXNs</a>
+				                                               data-name="{{ implode(' ', [$customer['firstname'], $customer['lastname']]) }}">View Payments</a>
 				                                        @endif
-				                                        <a class="btn btn-danger btn-sm" href="#" data-action="remove" data-id="{{ $customer['id'] }}" data-index="{{ $loop->index }}"
+														
+				                                        <!--
+														<a class="btn btn-danger btn-sm" href="#" data-action="remove" data-id="{{ $customer['id'] }}" data-index="{{ $loop->index }}"
 				                                           data-name="{{ implode(' ', [$customer['firstname'], $customer['lastname']]) }}">DELETE</a>
+														-->
 				                                    </td>
 				                                </tr>
 				                            @endforeach
@@ -267,7 +302,7 @@
 		                                    @slot('title')
 		                                        No Transactions
 		                                    @endslot
-		                                    Go to the Customers tab and check if an orange <strong>TXNs</strong> button is available for the customer. If available, click and then come back here to see the details of all payment transactions through your configured Payment gateway for that customer.
+		                                    Go to the Customers tab and check if an orange <strong>View Payments</strong> button is available for the customer. If available, click and then come back here to see the details of all payment transactions through your configured Payment gateway for that customer.
 		                                    @slot('buttons')
 		                                        <a class="btn btn-primary btn-sm" href="#" v-on:click.prevent="openTab('order_customers')">Go to Customers Tab</a>
 		                                    @endslot
@@ -369,7 +404,8 @@
                 defaultPhoto: "{{ cdn('images/avatar/avatar-9.png') }}",
                 backgroundImage: "{{ cdn('images/gallery/ali-yahya-435967-unsplash.jpg') }}",
                 productImage: { file: '' },
-				status:''
+				status:'',
+				logistics_status: {!! json_encode($logistics_status) !!},
             },
             mounted: function () {
                 if (typeof this.order.due_at !== 'undefined' && this.order.due_at !== null) {
@@ -390,7 +426,11 @@
 	            photo: function () {
 	                //return this.employee.photo.length > 0 ? this.employee.photo : this.defaultPhoto;
 	                return this.defaultPhoto;
+	            },
+	            shippingStatus: function () {
+	                return this.logistics_status.meta.delivery.status.length > 0 ? this.logistics_status.meta.delivery.status : 'NA';
 	            }
+				
             },
             methods: {
             	openTab: function (tab) {
@@ -411,9 +451,9 @@
 	            },
 	            editOrder: function (index) {
 	                $('#order-edit-modal').modal('show');
-	            },   
-					updateStatus: function (index) {
-	                $('#order-status-modal').modal('show');
+	            },
+				showLabel: function (index) {
+	                $('#order-label-modal').modal('show');
 	            },           	
                 moment: function (dateString, format) {
                     return moment(dateString).format(format);
@@ -459,45 +499,109 @@
                         return swal("Oops!", message, "warning");
                     });
                 },
+				updateShippingStatus: function () {
+					var context = this;
+					let logisticsStatus = this.logistics_status;
 
-				updateOrderStatus: function () {
+					if (!logisticsStatus.action) {
 
+						Swal.fire(
+							"Shipping Information",
+							logisticsStatus.description,
+							'info'
+						);
+
+					} else {
+
+						let status_status = logisticsStatus.status;
+
+						Swal.fire({
+							title: logisticsStatus.label + "?",
+							text: logisticsStatus.description + "?",
+							type: "info",
+							showCancelButton: true,
+							confirmButtonText: "Update Status",
+							closeOnConfirm: false,
+							showLoaderOnConfirm: true,
+							preConfirm: (update_shipping_status) => {
+								axios.put("/msl/sales-order-status/" + context.order.id, {
+									status: status_status,
+								}).then(function (response) {
+									//console.log(response);
+									// swal("Success", "Your order has been " + logisticsStatus.label + "", "success");
+									// window.location = "/msl/sales-order/" + context.order.id;
+									return Swal.fire({
+										title: 'Success',
+										text: "Your order has been " + logisticsStatus.label + "",
+										type: "success",
+										confirmButtonText: 'OK',
+									}).then((result) => {
+										if (result) {
+											window.location = "/msl/sales-order/" + context.order.id;
+										}
+									});
+
+								}).catch(function (error) {
+									var message = '';
+									if (error.response) {
+										var e = error.response;
+										message = e.data.message;
+									} else if (error.request) {
+										message = 'The request was made but no response was received';
+									} else {
+										message = error.message;
+									}
+									return swal("Oops!", message, "warning");
+								});
+							},
+							allowOutsideClick: () => !Swal.isLoading()
+						});
+					}
+				},
+				cancelShippingStatus: function () {
 					var context = this;
 
-					context.updating = true;
+					//let status_status = logisticsStatus.status;
 
-                    axios.put("/msl/sales-order-status/" + context.order.id, {
-                        status: this.status,
-                    }).then(function (response) {
-                        console.log(response);
-                        // context.updating = false;
-                        //Materialize.toast("Your changes were successfully saved.", 4000);
-                        swal("Success", "Your changes were successfully saved.", "success");
-                        $('#order-status-modal').modal('hide');
-                        //window.location = "/msl/sales-order/"+context.order.id;
+					Swal.fire({
+						title: "Cancel Pickup Request?",
+						text: "You will have to mark the order Ready To Ship again at a later time",
+						type: "info",
+						showCancelButton: true,
+						confirmButtonText: "Cancel Pickup Request",
+						closeOnConfirm: false,
+						showLoaderOnConfirm: true,
+						preConfirm: (cancel_shipping) => {
+							axios.get("/msl/sales-cancel-shipping/" + context.order.id + "?re_order=false", {
+								re_order: false,
+							}).then(function (response) {
+								return Swal.fire({
+									title: 'Success',
+									text: "Your pickup request has been Cancelled",
+									type: "success",
+									confirmButtonText: 'OK',
+								}).then((result) => {
+									if (result) {
+										window.location = "/msl/sales-order/" + context.order.id;
+									}
+								});
 
-                    }).catch(function (error) {
-                        var message = '';
-                        if (error.response) {
-                            // The request was made and the server responded with a status code
-                            // that falls out of the range of 2xx
-                            //var e = error.response.data.errors[0];
-                            //message = e.title;
-			                            var e = error.response;
-			                            message = e.data.message;
-                        } else if (error.request) {
-                            // The request was made but no response was received
-                            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-                            // http.ClientRequest in node.js
-                            message = 'The request was made but no response was received';
-                        } else {
-                            // Something happened in setting up the request that triggered an Error
-                            message = error.message;
-                        }
-                        context.updating = false;
-                        return swal("Oops!", message, "warning");
-                    });
-                },
+							}).catch(function (error) {
+								var message = '';
+								if (error.response) {
+									var e = error.response;
+									message = e.data.message;
+								} else if (error.request) {
+									message = 'The request was made but no response was received';
+								} else {
+									message = error.message;
+								}
+								return swal("Oops!", message, "warning");
+							});
+						},
+						allowOutsideClick: () => !Swal.isLoading()
+					});
+				},
                 clickAction: function (event) {
                     /*console.log(event.target);
                     var target = event.target.tagName.toLowerCase() === 'i' ? event.target.parentNode : event.target;

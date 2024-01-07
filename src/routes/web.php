@@ -61,6 +61,7 @@ Route::group(['namespace' => 'Dorcas\ModulesSales\Http\Controllers', 'prefix' =>
     Route::get('/sales-order/{id}', 'ModulesSalesController@order_index')->name('sales-orders-single');
     Route::put('/sales-order/{id}', 'ModulesSalesController@order_update');
     Route::put('/sales-order-status/{id}', 'ModulesSalesController@order_status_update');
+    Route::get('/sales-cancel-shipping/{id}', 'ModulesSalesController@order_shipping_cancel');
     Route::delete('/sales-order/{id}', 'ModulesSalesController@order_delete');
     Route::put('/sales-order/{id}/customers', 'ModulesSalesController@order_updateCustomerOrder');
     Route::delete('/sales-order/{id}/customers', 'ModulesSalesController@order_deleteCustomer');

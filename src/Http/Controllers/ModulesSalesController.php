@@ -67,7 +67,6 @@ class ModulesSalesController extends Controller{
         $this->data['page']['title'] .= " &rsaquo; Product Categories";
         $this->data['header']['title'] .= ' &rsaquo; Product Categories';
         $this->data['selectedSubMenu'] = 'sales-categories';
-//        $this->data['submenuAction'] = '<a href="#" v-on:click.prevent="newField" class="btn btn-primary btn-block">Add Product Category</a>';
         $this->data['submenuAction'] = '<a href="#" data-toggle="modal" data-target="#product-new-category-modal" class="btn btn-primary btn-block">Add Product Category</a>';
 
         $this->setViewUiResponse($request);
@@ -299,11 +298,15 @@ class ModulesSalesController extends Controller{
         
         if (env("DORCAS_EDITION","business") === "business") {
             $multiTenant = false;
+            $subdomain = substr_count($subdomain, "hub.") > 0 ? str_replace("hub.", "", $subdomain) : $subdomain;
             $dorcas_store_url = "https://store.".$subdomain;
+
         } elseif ( env("DORCAS_EDITION","business") === "community" || env("DORCAS_EDITION","business") === "enterprise" ) {
             $multiTenant = true;
-            $parts = explode('.', str_replace("." . $base_domain_host, "", $subdomain) );
+            $sub_base = str_replace("hub", "", $base_domain_host); // domain is now hub.domain.com or hub.sub.domain.com NO longer domain.com or sub.domain.com
+            $parts = explode('.', str_replace($sub_base, "", $subdomain) );
             $dorcas_store_url = "https://" .  $parts[0] . ".store." . $base_domain_host;
+
         }
 
         $storeURL = $dorcas_store_url;
@@ -463,10 +466,6 @@ class ModulesSalesController extends Controller{
             }
             $message = ['Successfully added new product image.'];
 
-//            # send the request
-//            if (!$query->isSuccessful()) {
-//                throw new \RuntimeException('Failed while adding the selected categories. Please try again.');
-//            }
             $response = (tabler_ui_html_response(['Successfully added product.']))->setType(UiResponse::TYPE_SUCCESS);
         } catch (\Exception $e) {
             $response = (tabler_ui_html_response([$e->getMessage()]))->setType(UiResponse::TYPE_ERROR);
@@ -755,8 +754,6 @@ class ModulesSalesController extends Controller{
             if ($request->action === 'add_product_image') {
                 # update the business information
                 $file = $request->file('image');
-//                dd(file_get_contents($file->getRealPath()));
-//                dd( $file->getClientOriginalName());
 
                 $query = $sdk->createProductResource($id)->addMultipartParam('image', file_get_contents($file->getRealPath()), $file->getClientOriginalName())
                                                             ->send('post', ['images']);
@@ -972,13 +969,10 @@ class ModulesSalesController extends Controller{
         
         if ($query->isSuccessful()) {
            
-            // $ordersCount = $query->meta['pagination']['total'] ?? 0;
             return back();
         }
        
         return back();
-        // $this->data['ordersCount'] = $ordersCount;
-        // return view('modules-sales::orders', $this->data);
     }
 
     /**
@@ -1198,6 +1192,155 @@ class ModulesSalesController extends Controller{
                 </div>
             </div>
         ';
+
+        //('pending','paid','processed','accepted','ready-to-ship','shipped','delivered','received','completed','cancelled','refunded'
+
+        $status_default = [
+            "button" => false,
+            "label" => "",
+            "description" => "",
+            "status" => "",
+            "meta" => [
+                "delivery" => [
+                    "status" => "",
+                    "track" => [
+                        "pickup" => "",
+                        "delivery" => ""
+                    ],
+                    "cancel" => ""
+                ]
+            ]
+        ];
+        $logistics_statuses = ['processed','accepted','ready-to-ship','shipped','delivered','received','completed','cancelled','refunded'];
+        $delivery_statuses = ['ready-to-ship','shipped','delivered','received','completed'];
+
+        
+        if ( !in_array($order->status, $logistics_statuses) ) {
+
+            $status = $status_default;
+            $status["action"] = true;
+            $status["label"] = "Accept Order";
+            $status["description"] = "This will confirm you are able to fulfil this order and will be shipping it soon";
+            $status["status"] = "accepted";
+
+        } elseif ($order->status == 'processed') {
+
+            $status = $status_default;
+            $status["action"] = true;
+            $status["label"] = "Accept Order";
+            $status["description"] = "This will confirm you are able to fulfil this order and will be shipping it soon";
+            $status["status"] = "accepted";
+
+        } else {
+
+            $status = $status_default;
+            $status["action"] = true;
+
+            switch($order->status) {
+
+                case "accepted":
+
+                    $status["label"] = "Mark As Ready To Ship";
+                    $status["description"] = "This will confirm order is ready to be shipped (and initiate a pickup request from a provider if configured)";
+                    $status["status"] = 'ready-to-ship';
+
+                    break;
+
+                case "ready-to-ship":
+
+                    $status["label"] = "Mark As Shipped";
+                    $status["description"] = "This will confirm you have shipped the order and the buyer to expext delivery";
+                    $status["status"] = 'shipped';
+
+
+                    break;
+
+                case "shipped":
+
+                    $status["label"] = "Mark As Delivered";
+                    $status["description"] = "This order has been shipped. It will be automatically updated as recieved once confirmed by the customer";
+                    $status["status"] = 'delivered';
+                    break;
+
+                case "delivered":
+
+                    $status["label"] = "";
+                    $status["description"] = "This order has updated as delivered. It will be automatically updated as recieved once confirmed by the customer";
+                    $status["status"] = 'received';
+                    $status["action"] = false;
+
+                    break;
+
+                case "received":
+
+                    $status["label"] = "";
+                    $status["description"] = "This order has updated as delivered. It will be automatically updated as completed shortly";
+                    $status["status"] = 'completed';
+                    $status["action"] = false;
+
+                    break;
+
+                case "completed":
+
+                    $status["label"] = "";
+                    $status["description"] = "This order has been completed.";
+                    $status["status"] = '';
+                    $status["action"] = false;
+
+                    break;
+
+                case "cancelled":
+
+                    $status["label"] = "";
+                    $status["description"] = "This order has been cancelled. A refund may be processed to the customer";
+                    $status["action"] = false;
+
+                    break;
+
+                case "refunded":
+
+                    $status["label"] = "";
+                    $status["description"] = "This order has been refunded to the customer";
+                    $status["action"] = false;
+
+                    break;
+
+                default:
+
+                break;
+
+
+            }
+
+        }
+
+        // determine links
+        $orderCache = Cache::get('cacheOrderManagement_' . $id);
+        $provider = env('SETTINGS_ECOMMERCE_LOGISTICS_PROVIDER', 'kwik');
+
+        switch($provider) {
+            case "kwik":
+                if ( in_array($order->status, $delivery_statuses) ) {
+                    $d = $orderCache["logistics"]["output"]["create_task_via_vendor"];
+                    if (isset(($d)->data))  {
+                        $d = ($d)->data;
+                    }
+                    $d = (array) $d;
+                    
+                    $status["meta"]["delivery"]["status"] = Http::get($d["job_status_check_link"])->body();
+                    $status["meta"]["delivery"]["track"]["pickup"] = ($d["pickups"][0])->result_tracking_link;
+                    $status["meta"]["delivery"]["track"]["delivery"] = ($d["deliveries"][0])->result_tracking_link;
+                }
+                if ( $order->status == "ready-to-ship" ) {
+                    $status["meta"]["delivery"]["cancel"] = true;
+                }
+                break;
+        }
+
+
+        $this->data['logistics_status'] = $status;
+        $this->data['order_cache'] = Cache::get('cacheOrderManagement_' . $id, []);
+
         return view('modules-sales::order', $this->data);
     }
 
@@ -1252,7 +1395,7 @@ class ModulesSalesController extends Controller{
      * @param Sdk     $sdk
      * @param string  $id
      *
-//     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\JsonResponse
      */
     public function order_status_update(Request $request , Sdk $sdk , string $id){
 
@@ -1262,53 +1405,173 @@ class ModulesSalesController extends Controller{
         
         $response = $sdk->createOrderResource()
                                 ->addBodyParam('status', $request->status)
-                                ->send('post',['status/update', $id]);
+                                ->send('post', ['status/update', $id]);
 
 
 
         if (!$response->isSuccessful()) {
-            // do something here
             throw new \RuntimeException($response->errors[0]['title'] ?? 'Failed while updating the order.');
         }
-        $this->data = $response->getData();
+        $status_response = $response->getData();
 
-        if(strtolower($request->status) === 'ready to ship'){
+        if (strtolower($request->status) === 'ready-to-ship') {
 
-            $db = DB::connection('marketplace_mysql');
+            $orderCache = Cache::get('cacheOrderManagement_' . $id);
 
-            $orders = $db->table("orders")->where('core_order_id',$this->data['id'])->first();
+            // update data
+            $cachedOrder["logistics"]["meta"]["address_from"]["name"] = "Bolaji Olawoye";
+            $cachedOrder["logistics"]["meta"]["address_from"]["phone"] = "08185977165";
+            $cachedOrder["logistics"]["meta"]["address_from"]["email"] = "ifeoluwa.olawoye@gmail.com";
+            $cachedOrder["logistics"]["meta"]["vehicle_type"] = 0;
+            Cache::forever('cacheOrderManagement_' . $id, $cachedOrder);
+
+            if (empty($orderCache)) {
+                throw new \Exception('Unable to retrieve Order Cache');
+            }
+
+            $provider = env('SETTINGS_ECOMMERCE_LOGISTICS_PROVIDER', 'kwik'); //$orderCache['logistics']['provider'];
+            $country = env('SETTINGS_COUNTRY', 'NG');
+    
+            $provider_config = ucfirst($provider). strtoupper($country) . '.php';
+            $provider_class = ucfirst($provider). strtoupper($country) . 'Class.php';
+
+            $provider_config_path = base_path('vendor/dorcas/modules-ecommerce/src/Config/Providers/Logistics/' . ucfirst($provider). '/' . $provider_config);
+            $config = require_once($provider_config_path);
+            $provider_class_path = base_path('vendor/dorcas/modules-ecommerce/src/Config/Providers/Logistics/' . ucfirst($provider). '/' . $provider_class);
+            require_once($provider_class_path);
+
+            $providerParams = [
+                "vendor_id" => env('KWIK_VENDOR_ID', 3152),
+                "order_key" => 'cacheOrderManagement_' . $id
+                // "vehicle_type" => $vehicle_type,
+                // "cod" => $cod,
+            ];
+
+            $orderID = $id; // $orderCache["order"]["id"];
+    
+            $c = $config["class"];
+            $providerClass = new $c($providerParams, true);
+
+            //$marketplaceDB = DB::connection('marketplace_mysql');
+            //$orders = $marketplaceDB->table("orders")->where('core_order_id', $this->data['id'])->first();
+            $orders = true; //seems orders table not automatically created
 
             if($orders){
 
-                if($orders->status !== 'Ready To Ship'){
+                switch($provider){
 
-                    $defaultShippingProvider  = env('DEFAULT_SHIPPING_PROVIDER','kwik');
+                    case 'kwik';
 
-                    switch($defaultShippingProvider){
+                        //$createTask =  (new \Dorcas\ModulesSales\config\providers\logistics\KwikNgClass)->createTask($orders);
+                        $createTask = $providerClass->createPickupTask($orderID, true);
 
-                        case 'kwik';
+                        if ($createTask->status == 200) {
+                            /*
+                            $marketplaceDB->table("orders")
+                            ->where('core_order_id',$this->data['id'])
+                            ->update([
+                                'request_payload' => json_encode($createTask),
+                                'status' => 'Ready To Ship'
+                            ]);
+                            */
+                        } else {
+                            throw new \Exception('Unable to Create Pickup Task');
+                        }
 
-                            $createTask =  (new \Dorcas\ModulesSales\config\providers\logistics\KwikNgClass)->createTask($orders);
+                        break;
 
-                            if(isset($createTask['success']) && $createTask['success']){
-                                $db->table("orders")->where('core_order_id',$this->data['id'])
-                                    ->update(['request_payload' => json_encode($createTask['payload']->data) ,
-                                        'status' => 'Ready To Ship']);
-                            }
+                    default:
 
-                            break;
-
-                        default:
-
-                            break;
-                    }
-
+                        break;
                 }
+
             }
         }
 
 
-        return response()->json($this->data);
+        return response()->json($status_response);
+
+    }
+
+
+    /**
+     * @param Request $request
+     * @param Sdk     $sdk
+     * @param string  $id
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function order_shipping_cancel(Request $request , Sdk $sdk , string $id){
+
+        $this->validate($request, [
+            're_order' => 'required'
+        ]);
+
+        $reOrder = $request->re_order === "true" ? true : false;
+
+        $orderCache = Cache::get('cacheOrderManagement_' . $id);
+
+        if (empty($orderCache)) {
+            throw new \Exception('Unable to retrieve Order Cache');
+        }
+
+        $provider = env('SETTINGS_ECOMMERCE_LOGISTICS_PROVIDER', 'kwik'); //$orderCache['logistics']['provider'];
+        $country = env('SETTINGS_COUNTRY', 'NG');
+
+        $provider_config = ucfirst($provider). strtoupper($country) . '.php';
+        $provider_class = ucfirst($provider). strtoupper($country) . 'Class.php';
+
+        $provider_config_path = base_path('vendor/dorcas/modules-ecommerce/src/Config/Providers/Logistics/' . ucfirst($provider). '/' . $provider_config);
+        $config = require_once($provider_config_path);
+        $provider_class_path = base_path('vendor/dorcas/modules-ecommerce/src/Config/Providers/Logistics/' . ucfirst($provider). '/' . $provider_class);
+        require_once($provider_class_path);
+
+        $providerParams = [
+            "vendor_id" => env('KWIK_VENDOR_ID', 3152),
+            "order_key" => 'cacheOrderManagement_' . $id
+        ];
+
+        $orderID = $id;
+
+        $c = $config["class"];
+        $providerClass = new $c($providerParams, true);
+
+        $cancelTask = $providerClass->cancelPickupTask($orderID, $reOrder);
+
+        if ($cancelTask->status == 200) {
+
+            $cancel_response = $cancelTask->data;
+
+        } else {
+
+            throw new \Exception('Unable to Cancel Pickup Task: ' . $cancelTask->message);
+
+        }
+
+        if ($reOrder) {
+
+            $createTask = $providerClass->createPickupTask($orderID, true);
+
+            if ($createTask->status == 200) {
+
+                $cancel_response = $createTask->data;
+    
+            } else {
+
+                throw new \Exception('Unable to Re-Create Pickup Task' . $createTask->message);
+
+            }
+
+        } else {
+
+            // Revert Order Status to pre-shipping "accepted"
+            $request->merge(['status' => 'accepted']);
+            $this->order_status_update($request, $sdk, $id);
+
+            return response()->json($cancel_response);
+
+        }
+        
 
     }
 
