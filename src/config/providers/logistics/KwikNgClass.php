@@ -83,7 +83,6 @@ class KwikNgClass
             $prepareShippingData = $this->prepareShippingData($data, $cartedItem);
 
 
-
             Cache::put('parcel_amount_'.$data['email'], $prepareShippingData['parcel_amount']['amount'], 60 * 5);
 
             $getCost = $this->getCost($prepareShippingData);
@@ -309,7 +308,7 @@ class KwikNgClass
 
     private function vehicleType($token,$vendorId){
 
-         $url = $this->baseUrl.'/getVehicle?access_token='.$token.'&is_vendor='.$vendorId.'&size=1';
+         $url = $this->baseUrl.'/getVehicle?access_token='.$token.'&is_vendor='.$vendorId.'&size=0';
 
         $response = Http::withHeaders(['accept' =>'application/json','content-type' => 'application/json'])->get($url);
 
