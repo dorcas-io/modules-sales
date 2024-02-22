@@ -82,7 +82,6 @@ class KwikNgClass
 
             $prepareShippingData = $this->prepareShippingData($data, $cartedItem);
 
-
             Cache::put('parcel_amount_'.$data['email'], $prepareShippingData['parcel_amount']['amount'], 60 * 5);
 
             $getCost = $this->getCost($prepareShippingData);

@@ -67,6 +67,9 @@ Route::group(['namespace' => 'Dorcas\ModulesSales\Http\Controllers', 'prefix' =>
 
     Route::post('/map-category','ModulesSalesController@mapCategory');
 
+    Route::post('/sales-product/{id}/discount', 'ModulesSalesController@product_addDiscount')->name('sales-product-add-discount');
+    Route::post('/sales-product/{id}/remove-discount', 'ModulesSalesController@product_removeDiscount')->name('sales-product-remove-discount');
+
 });
 Route::group(['namespace' => 'Dorcas\ModulesSales\Http\Controllers', 'prefix' => 'msl'], function() {
        // Route::get('/getToken','ModulesSalesController@getToken');
