@@ -648,6 +648,7 @@ class ModulesSalesController extends Controller{
             </div>
         ';
 
+
         return view('modules-sales::product', $this->data );
     }
 
@@ -826,6 +827,67 @@ class ModulesSalesController extends Controller{
         }
         return redirect()->route('sales-products-single', [$id])->with('UiResponse', $response);
     }
+
+
+    /**
+     * @param Request $request
+     * @param Sdk     $sdk
+     * @param string  $id
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function product_addDiscount(Request $request, Sdk $sdk, string $id)
+    {
+        try {
+            $query = $sdk->createProductResource($id)
+                ->addBodyParam('discount_value', $request->discount_value)
+                ->send('post', ['discount']);
+
+            # send the request
+            if (!$query->isSuccessful()) {
+                # it failed
+                $message = $query->errors[0]['title'] ?? '';
+                throw new \RuntimeException('Failed while updating product discount. '.$message);
+            }
+            $response = (tabler_ui_html_response(['Successfully updated product discount.']))->setType(UiResponse::TYPE_SUCCESS);
+        } catch (\Exception $e) {
+            $response = (tabler_ui_html_response([$e->getMessage()]))->setType(UiResponse::TYPE_ERROR);
+        }
+        return redirect()->route('sales-products-single', [$id])->with('UiResponse', $response);
+    }
+
+    /**
+     * @param Request $request
+     * @param Sdk     $sdk
+     * @param string  $id
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function product_removeDiscount(Request $request, Sdk $sdk, string $id)
+    {
+
+        $isDiscount = isset($request->isDiscount) && $request->isDiscount === 'on' ? 1 : 0;
+
+
+        try {
+            $query = $sdk->createProductResource($id)
+                ->addBodyParam('discount_value', $request->discount_value)
+                ->addBodyParam('has_discount', $isDiscount)
+                ->send('post', ['discount-remove']);
+
+            # send the request
+            if (!$query->isSuccessful()) {
+                # it failed
+                $message = $query->errors[0]['title'] ?? '';
+                throw new \RuntimeException('Failed while updating product discount. '.$message);
+            }
+            $response = (tabler_ui_html_response(['Successfully updated product discount.']))->setType(UiResponse::TYPE_SUCCESS);
+        } catch (\Exception $e) {
+            $response = (tabler_ui_html_response([$e->getMessage()]))->setType(UiResponse::TYPE_ERROR);
+        }
+        return redirect()->route('sales-products-single', [$id])->with('UiResponse', $response);
+    }
+
 
 
     /**

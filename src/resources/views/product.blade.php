@@ -29,6 +29,48 @@
         width: 70%;
     }
 
+    input[type="checkbox"] {
+        display: none;
+    }
+
+    .custom-checkbox {
+        width: 20px;
+        height: 20px;
+        background-color: #fff;
+        border: 2px solid #999;
+        border-radius: 4px;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+
+    input[type="checkbox"]:checked + .custom-checkbox {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+
+    .custom-checkbox::after {
+        content: "\2713";
+        font-size: 16px;
+        color: #fff;
+        display: block;
+        text-align: center;
+        line-height: 20px;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+
+    input[type="checkbox"]:checked + .custom-checkbox::after {
+        opacity: 1;
+    }
+
+    #inputBox {
+        display: none;
+    }
+
+
 
 </style>
 @endsection
@@ -95,6 +137,16 @@
                         <button class="btn btn-primary btn-sm" v-on:click.prevent="mapToParentCategory">
                             <span class="fa fa-map-signs"></span> Map Marketplace Category
                         </button>
+                        @endif
+                        <br/>
+                        @if((int) $product->has_discount === 0)
+                        <button class="btn btn-outline-primary btn-sm" v-on:click.prevent="addDiscount">
+                            <span class="fa fa-tasks"></span> Add Discount
+                        </button>
+                        @else
+                            <button class="btn btn-outline-danger btn-sm" v-on:click.prevent="removeDiscount">
+                                <span class="fa fa-tasks"></span> Inc / Reduce / Remove Discount
+                            </button>
                         @endif
                     </div>
                     @include('modules-sales::modals.product-edit')
@@ -366,6 +418,8 @@
                 @include('modules-sales::modals.product-image')
                 @include('modules-sales::modals.product-image-edit')
                 @include('modules-sales::modals.product-variant')
+                @include('modules-sales::modals.product-discount')
+                @include('modules-sales::modals.product-discount-remove')
             </div>
         </div>
     </div>
@@ -462,6 +516,12 @@
             addInventory : function(index){
                 $('#product-inventory-modal').modal('show');
             },
+            addDiscount : function(index){
+                $('#product-discount-modal').modal('show');
+            },
+            removeDiscount : function(index){
+                $('#product-discount-remove-modal').modal('show');
+            },
             clickAction: function (event) {
                 console.log(event)
                 //console.log(event.target);
@@ -550,6 +610,12 @@
                 $('#product-variant-modal').modal('show');
             },
             editVariant: function (id,index,name) {
+                let variant = typeof this.variantProducts[index] !== 'undefined' ? this.variantProducts[index] : null;
+                this.variant = variant;
+                //console.log(variant)
+                $('#product-variant-modal').modal('show');
+            },
+            addDiscountValue: function (id,value) {
                 let variant = typeof this.variantProducts[index] !== 'undefined' ? this.variantProducts[index] : null;
                 this.variant = variant;
                 //console.log(variant)
