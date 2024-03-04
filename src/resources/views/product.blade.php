@@ -132,12 +132,12 @@
                         <button class="btn btn-outline-warning btn-sm" v-on:click.prevent="addInventory">
                             <span class="fa fa-tasks"></span> Manage Stock
                         </button>
-                        <br/>
-                        @if ( env('DORCAS_EDITION', 'business') != "business" )
-                        <button class="btn btn-primary btn-sm" v-on:click.prevent="mapToParentCategory">
-                            <span class="fa fa-map-signs"></span> Map Marketplace Category
-                        </button>
-                        @endif
+{{--                        <br/>--}}
+{{--                        @if ( env('DORCAS_EDITION', 'business') != "business" )--}}
+{{--                        <button class="btn btn-primary btn-sm" v-on:click.prevent="mapToParentCategory">--}}
+{{--                            <span class="fa fa-map-signs"></span> Map Marketplace Category--}}
+{{--                        </button>--}}
+{{--                        @endif--}}
                         <br/>
                         @if((int) $product->has_discount === 0)
                         <button class="btn btn-outline-primary btn-sm" v-on:click.prevent="addDiscount">
