@@ -13,6 +13,7 @@
                             <div class="form-group col-md-12">
                                 @if($is_partner)
                                     <select name="parent_category" class="form-control" id="parent_category" v-on:change="fetchSubcategory" required>
+                                        <option value=""> ---- Select Parent Category ---- </option>
                                         @foreach($parent_categories as $index => $category)
                                             <option value="{{ $category }}" >
                                                 {{ $category }}
@@ -23,7 +24,7 @@
                                 @endif
                             </div>
                             <div class="form-group col-md-12">
-                                    <select name="parent_sub_category" class="form-control" id="parent_sub_category" required>
+                                    <select name="parent_sub_category" class="form-control" id="parent_sub_category" >
                                             <option v-for="(sub_cat,index) in subCategories" :key="index">
                                                 @{{ sub_cat }}
                                             </option>
