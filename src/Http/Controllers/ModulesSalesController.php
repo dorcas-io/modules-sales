@@ -177,6 +177,10 @@ class ModulesSalesController extends Controller{
      */
     public function categories_create(Request $request, Sdk $sdk)
     {
+        $this->validate($request, [
+            'parent_category' => 'required|string',
+            'name' => 'required|string',
+        ]);
         $name = $request->input('name', null);
         $response = $sdk->createProductCategoryResource()->addBodyParam('name', $name)->send('POST');
         # send the request
